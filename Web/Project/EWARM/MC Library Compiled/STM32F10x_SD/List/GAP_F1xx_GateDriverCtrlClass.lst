@@ -1,0 +1,306 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       13/Sep/2018  23:24:33
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GAP_F1xx_GateDriverCtrlClass.c
+#    Command line =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GAP_F1xx_GateDriverCtrlClass.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D MC_LIBRARY_SINGLE -lcN
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\List" -o
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\Obj" --debug --endian=little --cpu=Cortex-M3 -e
+#        --fpu=None --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\ -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\inc\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\common\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F10x_StdPeriph_Driver\inc\
+#        -Oh --use_c++_inline -I "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\List\GAP_F1xx_GateDriverCtrlClass.lst
+#    Object file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\Obj\GAP_F1xx_GateDriverCtrlClass.o
+#
+###############################################################################
+
+D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GAP_F1xx_GateDriverCtrlClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    GAP_GateDriverCtrlClass.c
+      4            * @author  IMS Systems Lab and Technical Marketing - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of GAP class      
+      8            ******************************************************************************
+      9            * <br>
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "GateDriverCtrlClass.h"
+     23          #include "GateDriverCtrlPrivate.h"
+     24          #include "GAP_GateDriverCtrlClass.h"
+     25          #include "GAP_GateDriverCtrlPrivate.h"
+     26          #include "MCLibraryConf.h"
+     27          #include "MC_type.h"
+     28          
+     29          #define DCLASS_PARAMS ((_DCGAP_GDC)(((_CGDC) this)->DerivedClass))->pDParams_str
+     30          #define DCLASS_VARS  &(((_DCGAP_GDC)(((_CGDC) this)->DerivedClass))->DVars_str)
+     31          #define CLASS_VARS   &(((_CGDC)this)->Vars_str)
+     32          #define CLASS_PARAMS  (((_CGDC)this)->pParams_str)
+     33          
+     34          /** @addtogroup STM32F10x_PMSM_MC_Library
+     35            * @{
+     36            */
+     37            
+     38          /** @addtogroup GateDriverCtrl_GAP
+     39            * @{
+     40            */
+     41          
+     42          /** @defgroup GAP_class_private_methods GAP class private methods
+     43          * @{
+     44          */
+     45          
+     46          /**
+     47          * @brief  It initializes SPI and GPIO required by GAP driver
+     48          * @param  this: related object of class CGDC
+     49          * @retval none
+     50          */
+     51          void GAP_Init(CGDC this)
+     52          {
+     53            GPIO_InitTypeDef GPIO_InitStructure;
+     54            SPI_InitTypeDef   SPI_InitStructure;
+     55            pDParams_t pDParams = DCLASS_PARAMS;
+     56            SPI_TypeDef*  SPIx = pDParams->SPIx;
+     57            
+     58            // Enable GPIOA-GPIOF clock to be removed at the end because is done inside PWMC Classes*/
+     59            RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | 
+     60                                   RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | 
+     61                                     RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | 
+     62                                       RCC_APB2Periph_GPIOF, ENABLE);
+     63            
+     64            /* Peripheral clocks enabling ----------------------------------------------*/
+     65            if (SPIx == SPI1)
+     66            {
+     67              /* Enable SPI1 clock */
+     68              RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+     69            }
+     70            else if (SPIx == SPI2)
+     71            {
+     72              /* Enable SPI2 clock */
+     73              RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+     74            }
+     75            else if (SPIx == SPI3)
+     76            {
+     77              /* Enable SPI3 clock */
+     78              RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+     79            }
+     80            else
+     81            {
+     82              /* Runtime error */
+     83            }
+     84            
+     85            /* GPIOs configurations ----------------------------------------------------*/
+     86            GPIO_StructInit(&GPIO_InitStructure);
+     87            
+     88            /****** SPI alternate function remapping ******/  
+     89            if((pDParams->wSPIRemapping) != GPIO_NoRemap_SPI)
+     90            {   
+     91              GPIO_PinRemapConfig(pDParams->wSPIRemapping, ENABLE);  
+     92            }
+     93            
+     94            /****** Configure SPI SCK GPIO as AF ****/
+     95            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+     96            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+     97            GPIO_InitStructure.GPIO_Pin = pDParams->hSCKPin;  
+     98            GPIO_Init(pDParams->hSCKPort, &GPIO_InitStructure);
+     99            GPIO_PinLockConfig(pDParams->hSCKPort, pDParams->hSCKPin);
+    100            
+    101            /****** Configure SPI MISO GPIO as AF ****/
+    102            GPIO_InitStructure.GPIO_Pin = pDParams->hMISOPin;  
+    103            GPIO_Init(pDParams->hMISOPort, &GPIO_InitStructure);
+    104            GPIO_PinLockConfig(pDParams->hMISOPort, pDParams->hMISOPin);
+    105            
+    106            /****** Configure SPI MOSI GPIO as AF ****/
+    107            GPIO_InitStructure.GPIO_Pin = pDParams->hMOSIPin;  
+    108            GPIO_Init(pDParams->hMOSIPort, &GPIO_InitStructure);
+    109            GPIO_PinLockConfig(pDParams->hMOSIPort, pDParams->hMOSIPin);
+    110            
+    111            /****** Configure NCS GPIO as Out PP ****/
+    112            GAP_CS_Deactivate(this);
+    113            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    114            GPIO_InitStructure.GPIO_Pin = pDParams->hNCSPin;  
+    115            GPIO_Init(pDParams->hNCSPort, &GPIO_InitStructure);
+    116            GPIO_PinLockConfig(pDParams->hNCSPort, pDParams->hNCSPin);
+    117            
+    118            /****** Configure NSD GPIO as Out PP ****/
+    119            GAP_SD_Deactivate(this);
+    120            GPIO_InitStructure.GPIO_Pin = pDParams->hNSDPin;  
+    121            GPIO_Init(pDParams->hNSDPort, &GPIO_InitStructure);
+    122            GPIO_PinLockConfig(pDParams->hNSDPort, pDParams->hNSDPin);
+    123            
+    124            /* SPI Config --------------------------------------------------------------*/
+    125            SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    126            SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+    127            SPI_InitStructure.SPI_DataSize = SPI_DataSize_16b;
+    128            SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    129            SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
+    130            SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+    131            SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
+    132            SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    133            SPI_InitStructure.SPI_CRCPolynomial = 7;
+    134            SPI_Init(SPIx, &SPI_InitStructure);
+    135            
+    136            /* Enable SPI */
+    137            SPI_Cmd(SPIx, ENABLE);
+    138          }
+    139          
+    140          /**
+    141          * @brief  This function sends a 16bit value through the configured SPI and 
+    142          *         returns the 16-bit value received during communication.
+    143          * @param  this: related object of class CGDC
+    144          * @param  value: Value to be sent through SPI
+    145          * @retval uint16_t Received 16bit value
+    146          */
+    147          uint16_t GAP_SPI_Send(CGDC this, uint16_t value)
+    148          {
+    149            pDParams_t pDParams = DCLASS_PARAMS;
+    150            SPI_TypeDef*  SPIx = pDParams->SPIx;
+    151            /* Wait for SPI Tx buffer empty */
+    152            while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_TXE) == RESET);
+    153            /* Send SPI data */
+    154            SPI_I2S_SendData(SPIx, value);
+    155            /* Wait for SPIz data reception */
+    156            while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_RXNE) == RESET);
+    157            /* Read SPIz received data */
+    158            return SPI_I2S_ReceiveData(SPIx);
+    159          }
+    160          
+    161          /**
+    162          * @brief  Deactivate SD pin
+    163          * @param  this: related object of class CGDC
+    164          * @retval none
+    165          */
+    166          void GAP_SD_Deactivate(CGDC this)
+    167          {
+    168            pDParams_t pDParams = DCLASS_PARAMS;
+    169            pDParams->hNSDPort->BSRR = pDParams->hNSDPin;
+    170          }
+    171          
+    172          /**
+    173          * @brief  Activate SD pin
+    174          * @param  this: related object of class CGDC
+    175          * @retval none
+    176          */
+    177          void GAP_SD_Activate(CGDC this)
+    178          {
+    179            pDParams_t pDParams = DCLASS_PARAMS;
+    180            pDParams->hNSDPort->BRR = pDParams->hNSDPin;
+    181          }
+    182          
+    183          /**
+    184          * @brief  Deactivate CS pin
+    185          * @param  this: related object of class CGDC
+    186          * @retval none
+    187          */
+    188          void GAP_CS_Deactivate(CGDC this)
+    189          {
+    190            pDParams_t pDParams = DCLASS_PARAMS;
+    191            pDParams->hNCSPort->BSRR = pDParams->hNCSPin;
+    192          }
+    193          
+    194          /**
+    195          * @brief  Activate CS pin
+    196          * @param  this: related object of class CGDC
+    197          * @retval none
+    198          */
+    199          void GAP_CS_Activate(CGDC this)
+    200          {
+    201            pDParams_t pDParams = DCLASS_PARAMS;
+    202            pDParams->hNCSPort->BRR = pDParams->hNCSPin;
+    203          }
+    204          /**
+    205            * @}
+    206            */
+    207            
+    208          /**
+    209            * @}
+    210            */
+    211          
+    212          /**
+    213            * @}
+    214            */
+    215          
+    216          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   GAP_CS_Activate
+       0   GAP_CS_Deactivate
+      40   GAP_Init
+        40   -> GPIO_Init
+        40   -> GPIO_PinLockConfig
+        40   -> GPIO_PinRemapConfig
+        40   -> GPIO_StructInit
+        40   -> RCC_APB1PeriphClockCmd
+        40   -> RCC_APB2PeriphClockCmd
+        40   -> SPI_Cmd
+        40   -> SPI_Init
+       0   GAP_SD_Activate
+       0   GAP_SD_Deactivate
+      16   GAP_SPI_Send
+        16   -> SPI_I2S_GetFlagStatus
+         0   -> SPI_I2S_ReceiveData
+        16   -> SPI_I2S_SendData
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       4  ??DataTable0_1
+       4  ??DataTable0_2
+       8  ?Subroutine0
+       8  ?Subroutine1
+       6  GAP_CS_Activate
+       6  GAP_CS_Deactivate
+     320  GAP_Init
+       8  GAP_SD_Activate
+       8  GAP_SD_Deactivate
+      52  GAP_SPI_Send
+
+ 
+ 428 bytes in section .text
+ 
+ 428 bytes of CODE memory
+
+Errors: none
+Warnings: none

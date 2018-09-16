@@ -1,0 +1,13 @@
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\bin\armproc.dll" 
+
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\bin\armsim2.dll" 
+
+"D:\STM32\IAR_projects\stm32f103_demo_new\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\stm32f10x.h" 
+
+--plugin "C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\bin\armbat.dll" 
+
+--device_macro "C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\config\debugger\ST\STM32F1xx_XL.dmac" 
+
+
+
+

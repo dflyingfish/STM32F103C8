@@ -1,0 +1,228 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:34
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\TemperatureSensorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\TemperatureSensorClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\TemperatureSensorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\TemperatureSensorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\TemperatureSensorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    TemperatureSensorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of PI Regulator class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "TemperatureSensorClass.h"
+     30          #include "TemperatureSensorPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #define BCLASS_PARAMS ((_CTSNS)this)->pParams_str
+     35          #define BCLASS_VARS   ((_CTSNS)this)->Vars_str
+     36          
+     37          #ifdef MC_CLASS_DYNAMIC
+     38          #include "stdlib.h" /* Used for dynamic allocation */
+     39          #else
+     40          _CTSNS_t TSNSpool[MAX_TSNS_NUM];
+     41          unsigned char TSNS_Allocated = 0u;
+     42          #endif
+     43          
+     44          /**
+     45          * @brief  Creates an object of the class TemperatureSensor
+     46          * @param  pTempSensorParams pointer to an TempSensor parameters structure
+     47          * @retval CTSNS new instance of TempSensor object
+     48          */
+     49            CTSNS TSNS_NewObject(pTempSensorParams_t pTempSensorParams)
+     50            {
+     51              _CTSNS _oTSNS;
+     52              
+     53          #ifdef MC_CLASS_DYNAMIC
+     54              _oTSNS = (_CTSNS)calloc(1u,sizeof(_CTSNS_t));
+     55          #else
+     56              if (TSNS_Allocated  < MAX_TSNS_NUM)
+     57              {
+     58                _oTSNS = &TSNSpool[TSNS_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oTSNS = MC_NULL;
+     63              }
+     64          #endif
+     65              
+     66              _oTSNS->pParams_str = (pParams_t)pTempSensorParams;
+     67              
+     68              return ((CTSNS)_oTSNS);
+     69            }
+     70            
+     71          /**
+     72            * @brief  It initializes temperature sensing conversions. It must be called 
+     73            *         only after current sensor initialization (PWMC_Init)
+     74            * @param  this related object of class CTSNS
+     75            * @param  oPWMnCurrentSensor CPWMC object to be used for regular conversions
+     76            * @retval none
+     77            */
+     78            void TSNS_Init(CTSNS this, CPWMC oPWMnCurrentSensor)
+     79            { 
+     80              (((_CTSNS)this)->Methods_str.pTSNS_Init)(this, oPWMnCurrentSensor);
+     81            }
+     82            
+     83            
+     84          /**
+     85            * @brief  It clears FW variable containing average temperature measurement 
+     86            *         value
+     87            * @param  this related object of class CTSNS
+     88            * @retval none
+     89            */
+     90            void TSNS_Clear(CTSNS this)
+     91            {
+     92              (((_CTSNS)this)->Methods_str.pTSNS_Clear)(this);
+     93            }
+     94            
+     95          /**
+     96            * @brief  It clock the temperature sensing. It performes ADC conversion and 
+     97            *         updates the average
+     98            * @param  this related object of class CTSNS
+     99            * @retval uint16_t Fault code error
+    100            */
+    101            uint16_t TSNS_CalcAvTemp(CTSNS this)
+    102            {
+    103              return((((_CTSNS)this)->Methods_str.pTSNS_CalcAvTemp)(this));
+    104            }
+    105             
+    106          /**
+    107            * @brief  It return latest averaged temperature measurement expressed in 
+    108            *         u16Celsius
+    109            * @param  this related object of class CTSNS
+    110            * @retval uint16_t Latest averaged temperature measurement in u16Celsius
+    111            */
+    112            uint16_t TSNS_GetAvTemp_d(CTSNS this)
+    113            {
+    114              return(BCLASS_VARS.hAvTemp_d);
+    115            }
+    116            
+    117          /**
+    118            * @brief  It returns latest averaged temperature measurement expressed in 
+    119            *         Celsius degrees
+    120            * @param  this related object of class CTSNS
+    121            * @retval uint16_t Latest averaged temperature measurement in Celsius degrees
+    122            */
+    123            int16_t TSNS_GetAvTemp_C(CTSNS this)
+    124            {
+    125              return((((_CTSNS)this)->Methods_str.pTSNS_GetAvTemp_C)(this));
+    126            }
+    127            
+    128          /**
+    129            * @brief  It returns MC_OVER_TEMP or MC_NO_ERROR depending on
+    130            *         temperature sensor output and protection threshold values
+    131            * @param  this related object of class CTSNS
+    132            * @retval uint16_t Fault code error
+    133            */
+    134            uint16_t TSNS_CheckTemp(CTSNS this)
+    135            {
+    136              return(BCLASS_VARS.hFaultState);
+    137            }
+    138            
+    139          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   TSNS_CalcAvTemp
+         0   -- Indirect call
+       0   TSNS_CheckTemp
+       0   TSNS_Clear
+         0   -- Indirect call
+       0   TSNS_GetAvTemp_C
+         0   -- Indirect call
+       0   TSNS_GetAvTemp_d
+       0   TSNS_Init
+         0   -- Indirect call
+       0   TSNS_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      32  TSNS_Allocated
+          TSNSpool
+       4  TSNS_CalcAvTemp
+       4  TSNS_CheckTemp
+       4  TSNS_Clear
+       4  TSNS_GetAvTemp_C
+       4  TSNS_GetAvTemp_d
+       4  TSNS_Init
+      22  TSNS_NewObject
+
+ 
+ 32 bytes in section .bss
+ 50 bytes in section .text
+ 
+ 50 bytes of CODE memory
+ 32 bytes of DATA memory
+
+Errors: none
+Warnings: none

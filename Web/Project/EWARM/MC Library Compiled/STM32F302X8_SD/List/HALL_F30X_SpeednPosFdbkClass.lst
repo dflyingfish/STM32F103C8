@@ -1,0 +1,1105 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:30
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\HALL_F30X_SpeednPosFdbkClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\HALL_F30X_SpeednPosFdbkClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\HALL_F30X_SpeednPosFdbkClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\HALL_F30X_SpeednPosFdbkClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\HALL_F30X_SpeednPosFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    HALL_SpeednPosFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private implementation of HALL_SpeednPosFdbk IRQ      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "SpeednPosFdbkClass.h"
+     30          #include "SpeednPosFdbkPrivate.h"
+     31          #include "HALL_F30X_SpeednPosFdbkClass.h"
+     32          #include "HALL_F30X_SpeednPosFdbkPrivate.h"
+     33          #include "MCIRQHandlerPrivate.h"
+     34          #include "MCLibraryConf.h"
+     35          #include "MCLibraryISRPriorityConf.h"
+     36          #include "MC_type.h"
+     37          
+     38          /* Private Typedef -----------------------------------------------------------*/
+     39          /* Private Defines -----------------------------------------------------------*/
+     40          #define DCLASS_PARAM ((_DCHALL_SPD)(((_CSPD) this)->DerivedClass))->pDParams_str
+     41          #define DCLASS_VARS  &(((_DCHALL_SPD)(((_CSPD) this)->DerivedClass))->DVars_str)
+     42          #define  CLASS_VARS  &(((_CSPD)this)->Vars_str)
+     43          #define  CLASS_PARAM (((_CSPD)this)->pParams_str)
+     44          
+     45          /* Lower threshold to reques a decrease of clock prescaler */
+     46          #define LOW_RES_THRESHOLD   ((u16)0x5500u)
+     47          
+     48          #define HALL_COUNTER_RESET  ((u16) 0u)
+     49          
+     50          #define S16_120_PHASE_SHIFT (s16)(65536/3)
+     51          #define S16_60_PHASE_SHIFT  (s16)(65536/6)
+     52          
+     53          #define STATE_0 (u8)0
+     54          #define STATE_1 (u8)1
+     55          #define STATE_2 (u8)2
+     56          #define STATE_3 (u8)3
+     57          #define STATE_4 (u8)4
+     58          #define STATE_5 (u8)5
+     59          #define STATE_6 (u8)6
+     60          #define STATE_7 (u8)7
+     61          
+     62          #define NEGATIVE          (s8)-1
+     63          #define POSITIVE          (s8)1
+     64          #define HALL_ERROR        (s8)127
+     65          
+     66          /* With digit-per-PWM unit (here 2*PI rad = 0xFFFF): */
+     67          #define HALL_MAX_PSEUDO_SPEED        ((s16)-32768)
+     68          
+     69          #define CCER_CC1E_Set               ((u16)0x0001)
+     70          #define CCER_CC1E_Reset             ((u16)0xFFFE)
+     71          
+     72          #define HALL_MTPA
+     73          
+     74          #ifdef MC_CLASS_DYNAMIC
+     75          	#include "stdlib.h" /* Used for dynamic allocation */
+     76          #else
+     77          	_DCHALL_SPD_t HALL_SPDpool[MAX_HALL_SPD_NUM];
+     78          	unsigned char HALL_SPD_Allocated = 0u;
+     79          #endif
+     80          
+     81          static void HALL_IRQHandler(void *this, unsigned char flag);
+     82          static void HALL_Init(CSPD this);
+     83          static void HALL_Clear(CSPD this);
+     84          static int16_t HALL_CalcElAngle(CSPD this, void *pInputVars_str);
+     85          static bool HALL_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *hMecSpeed01Hz);
+     86          static int16_t HALL_CalcAvrgElSpeedDpp(CSPD this);
+     87          static void HALL_Init_Electrical_Angle(CSPD this);
+     88          static void HALL_SetMecAngle(CSPD this, int16_t hMecAngle);
+     89          static uint16_t F30X_GPIOPin2Source(uint16_t GPIO_Pin);
+     90          
+     91          /**
+     92            * @brief  Creates an object of the class HALL_F30X
+     93            * @param  pSpeednPosFdbkParams pointer to an SpeednPosFdbk parameters structure
+     94            * @param  pHALL_F30XParams pointer to an HALL_F30X parameters structure
+     95            * @retval CHALL_F30X_SPD new instance of HALL_F30X object
+     96            */
+     97          CHALL_F30X_SPD HALL_F30X_NewObject(pSpeednPosFdbkParams_t pSpeednPosFdbkParams,
+     98                                             pHALL_F30XParams_t pHALLParams)
+     99          {
+    100            _CSPD _oSpeednPosFdbk;
+    101            _DCHALL_SPD _oHALL;
+    102            
+    103            _oSpeednPosFdbk = (_CSPD)SPD_NewObject(pSpeednPosFdbkParams);
+    104            
+    105          #ifdef MC_CLASS_DYNAMIC
+    106            _oHALL = (_DCHALL_SPD)calloc(1u,sizeof(_DCHALL_SPD_t));
+    107          #else
+    108            if (HALL_SPD_Allocated  < MAX_HALL_SPD_NUM)
+    109            {
+    110              _oHALL = &HALL_SPDpool[HALL_SPD_Allocated++];
+    111            }
+    112            else
+    113            {
+    114              _oHALL = MC_NULL;
+    115            }
+    116          #endif
+    117            
+    118            _oHALL->pDParams_str = pHALLParams;
+    119            _oSpeednPosFdbk->DerivedClass = (void*)_oHALL;
+    120            
+    121            _oSpeednPosFdbk->Methods_str.pIRQ_Handler = &HALL_IRQHandler;
+    122            Set_IRQ_Handler(pHALLParams->IRQnb, (_CMCIRQ)_oSpeednPosFdbk);
+    123            
+    124            _oSpeednPosFdbk->Methods_str.pSPD_Init = &HALL_Init;
+    125            _oSpeednPosFdbk->Methods_str.pSPD_Clear = &HALL_Clear;
+    126            _oSpeednPosFdbk->Methods_str.pSPD_CalcAngle = &HALL_CalcElAngle;
+    127            _oSpeednPosFdbk->Methods_str.pSPD_CalcAvrgMecSpeed01Hz = 
+    128              &HALL_CalcAvrgMecSpeed01Hz;
+    129            _oSpeednPosFdbk->Methods_str.pSPD_SetMecAngle = &HALL_SetMecAngle;
+    130            
+    131            return ((CHALL_F30X_SPD)_oSpeednPosFdbk);
+    132          }
+    133          
+    134          /** @addtogroup STM32F10x_PMSM_MC_Library
+    135            * @{
+    136            */
+    137            
+    138          /** @addtogroup SpeednPosFdbk_HALL
+    139            * @{
+    140            */
+    141          
+    142          /** @defgroup HALL_class_private_methods HALL class private methods
+    143          * @{
+    144          */
+    145          
+    146          /**
+    147            * @brief  It initializes the hardware peripherals (TIMx, GPIO and NVIC) 
+    148                      required for the speed position sensor management using HALL 
+    149                      sensors.
+    150            * @param  this related object of class CSPD
+    151            * @retval none
+    152            */
+    153          static void HALL_Init(CSPD this)
+    154          {
+    155            TIM_TimeBaseInitTypeDef TIM_HALLTimeBaseInitStructure;
+    156            TIM_ICInitTypeDef TIM_HALLICInitStructure;
+    157            NVIC_InitTypeDef NVIC_InitHALLStructure;
+    158            GPIO_InitTypeDef GPIO_InitStructure;
+    159            pDVars_t pDVars_str = DCLASS_VARS;
+    160            pDParams_t pDParams_str = DCLASS_PARAM;
+    161            pParams_t pParams_str = CLASS_PARAM;
+    162            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    163            uint16_t hMinReliableElSpeed01Hz = pParams_str->hMinReliableMecSpeed01Hz *
+    164              pParams_str->bElToMecRatio;
+    165            uint16_t hMaxReliableElSpeed01Hz = pParams_str->hMaxReliableMecSpeed01Hz *
+    166              pParams_str->bElToMecRatio;
+    167            uint8_t bSpeedBufferSize;
+    168            uint8_t bIndex;
+    169          
+    170            /* Adjustment factor: minimum measurable speed is x time less than the minimum
+    171            reliable speed */
+    172            hMinReliableElSpeed01Hz /= 4u;
+    173            
+    174            /* Adjustment factor: maximum measurable speed is x time greather than the
+    175            maximum reliable speed */
+    176            hMaxReliableElSpeed01Hz *= 2u;
+    177            
+    178            /* SW Init */
+    179            if (hMinReliableElSpeed01Hz == 0u)
+    180            {
+    181              /* Set fixed to 150 ms */
+    182              pDVars_str->hHallTimeout = 150u; 
+    183              
+    184              /* Set fixed to 164*/
+    185              pDVars_str->hHALLMaxRatio = 164u;
+    186              
+    187              pDVars_str->wMaxPeriod = 10000000u;
+    188            }
+    189            else
+    190            {
+    191              /* Set accordingly the min reliable speed */
+    192              pDVars_str->hHallTimeout = 10000u / (6u * hMinReliableElSpeed01Hz);
+    193              pDVars_str->hHALLMaxRatio = (uint16_t)((pDVars_str->hHallTimeout * 
+    194                                         (pDParams_str->wTIMClockFreq/1000uL)) / 65536uL);   
+    195              pDVars_str->wMaxPeriod = ((10u * pDParams_str->wTIMClockFreq) / 6u)
+    196                / hMinReliableElSpeed01Hz;
+    197            }
+    198          
+    199            pDVars_str->hSatSpeed = hMaxReliableElSpeed01Hz;
+    200            
+    201            pDVars_str->wPseudoFreqConv = ((pDParams_str->wTIMClockFreq / 6u) 
+    202                               / (pParams_str->hMeasurementFrequency)) * 65536u;
+    203              
+    204            pDVars_str->wSpeedOverflow = ((10u * pDParams_str->wTIMClockFreq) / 6u) 
+    205                               / hMaxReliableElSpeed01Hz;
+    206              
+    207            pDVars_str->hOvfDuration = (uint16_t)(pDParams_str->wTIMClockFreq / 65536u);
+    208            
+    209            pDVars_str->hPWMNbrPSamplingFreq = (pParams_str ->hMeasurementFrequency / 
+    210                          pDParams_str->hSpeedSamplingFreqHz) - 1u;
+    211            
+    212            /* Reset speed reliability */
+    213            pDVars_str->SensorIsReliable = TRUE;
+    214            
+    215            /* HW Init */
+    216          
+    217            /* TIMx clock enable */  
+    218            RCC_APB1PeriphClockCmd(pDParams_str->RCC_APB1Periph_TIMx, ENABLE);
+    219            
+    220            /* Enable GPIOA-GPIOF clock */
+    221            RCC_AHBPeriphClockCmd( RCC_AHBPeriph_GPIOA | 
+    222                                   RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_GPIOC | 
+    223                                     RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOE | 
+    224                                       RCC_AHBPeriph_GPIOF, ENABLE);
+    225          
+    226            /****** TIMx alternate function remapping ******/  
+    227            GPIO_PinAFConfig(pDParams_str->hH1Port, F30X_GPIOPin2Source(pDParams_str->hH1Pin), pDParams_str->bH1AF);
+    228            GPIO_PinAFConfig(pDParams_str->hH2Port, F30X_GPIOPin2Source(pDParams_str->hH2Pin), pDParams_str->bH2AF);
+    229            GPIO_PinAFConfig(pDParams_str->hH3Port, F30X_GPIOPin2Source(pDParams_str->hH3Pin), pDParams_str->bH3AF);  
+    230            
+    231            GPIO_StructInit(&GPIO_InitStructure);
+    232          
+    233            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    234            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    235            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    236            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    237            
+    238            GPIO_InitStructure.GPIO_Pin = pDParams_str->hH1Pin;
+    239            GPIO_Init(pDParams_str->hH1Port, &GPIO_InitStructure);
+    240            GPIO_InitStructure.GPIO_Pin = pDParams_str->hH2Pin;
+    241            GPIO_Init(pDParams_str->hH2Port, &GPIO_InitStructure);
+    242            GPIO_InitStructure.GPIO_Pin = pDParams_str->hH3Pin;
+    243            GPIO_Init(pDParams_str->hH3Port, &GPIO_InitStructure);
+    244            
+    245            /* Timer configuration in Clear on capture mode */
+    246            TIM_DeInit(TIMx);
+    247            
+    248            TIM_TimeBaseStructInit(&TIM_HALLTimeBaseInitStructure);
+    249            /* Set full 16-bit working range */
+    250            TIM_HALLTimeBaseInitStructure.TIM_Period = U16_MAX;
+    251            TIM_HALLTimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    252            TIM_TimeBaseInit(TIMx,&TIM_HALLTimeBaseInitStructure);
+    253            
+    254            TIM_ICStructInit(&TIM_HALLICInitStructure);
+    255            TIM_HALLICInitStructure.TIM_Channel = TIM_Channel_1;
+    256            TIM_HALLICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling;
+    257            TIM_HALLICInitStructure.TIM_ICFilter = pDParams_str->hInpCaptFilter;
+    258            
+    259            TIM_ICInit(TIMx,&TIM_HALLICInitStructure);
+    260            
+    261            /* Force input capture from TRC */
+    262            /* Disable the Channel 1: Reset the CC1E Bit */
+    263            TIMx->CCER &= CCER_CC1E_Reset;
+    264            TIMx->CCMR1 |= 0x03u; /* CCS1 = 0b11; */
+    265            TIMx->CCER |= CCER_CC1E_Set;
+    266            
+    267            /* Force the TIMx prescaler with immediate access (no need of an update event) 
+    268            */ 
+    269            TIM_PrescalerConfig(TIMx, (u16) pDVars_str->hHALLMaxRatio, 
+    270                                TIM_PSCReloadMode_Immediate);
+    271            TIM_InternalClockConfig(TIMx);
+    272            
+    273            /* Enables the XOR of channel 1, channel2 and channel3 */
+    274            TIM_SelectHallSensor(TIMx, ENABLE);
+    275            
+    276            TIM_SelectInputTrigger(TIMx, TIM_TS_TI1F_ED);
+    277            TIM_SelectSlaveMode(TIMx,TIM_SlaveMode_Reset);
+    278            
+    279            /* Source of Update event is only counter overflow/underflow */
+    280            TIM_UpdateRequestConfig(TIMx, TIM_UpdateSource_Regular);
+    281            
+    282            /* Enable the TIMx IRQChannel*/
+    283            NVIC_InitHALLStructure.NVIC_IRQChannel =  pDParams_str->TIMx_IRQChannel;  
+    284            NVIC_InitHALLStructure.NVIC_IRQChannelPreemptionPriority = 
+    285              TIMx_PRE_EMPTION_PRIORITY;
+    286            NVIC_InitHALLStructure.NVIC_IRQChannelSubPriority = TIMx_SUB_PRIORITY;
+    287            NVIC_InitHALLStructure.NVIC_IRQChannelCmd = ENABLE;
+    288            
+    289            NVIC_Init(&NVIC_InitHALLStructure);
+    290            
+    291            /* Clear the TIMx's pending flags */
+    292            TIMx->SR = 0u;
+    293            
+    294            /* Selected input capture and Update (overflow) events generate interrupt */
+    295            TIM_ITConfig(TIMx, TIM_IT_CC1, ENABLE);
+    296            TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
+    297            
+    298            TIM_SetCounter(TIMx, HALL_COUNTER_RESET);
+    299            TIM_Cmd(TIMx, ENABLE);
+    300            
+    301            /* Erase speed buffer */
+    302            bSpeedBufferSize = pDParams_str->bSpeedBufferSize;
+    303            
+    304            for (bIndex = 0u; bIndex < bSpeedBufferSize; bIndex++)
+    305            {
+    306              pDVars_str->SensorPeriod[bIndex].wPeriod = U32_MAX;
+    307              pDVars_str->SensorPeriod[bIndex].bDirection = POSITIVE;
+    308            }
+    309          }
+    310          
+    311          /**
+    312          * @brief  Clear software FIFO where are "pushed" latest speed information
+    313          *         This function must be called before starting the motor to initialize
+    314          *	        the speed measurement process.
+    315          * @param  this related object of class CSPD
+    316          * @retval none
+    317          */
+    318          static void HALL_Clear(CSPD this)
+    319          {
+    320            pVars_t pVars_str = CLASS_VARS;
+    321            pDVars_t pDVars_str = DCLASS_VARS;
+    322            pDParams_t pDParams_str = DCLASS_PARAM;
+    323            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    324            
+    325            /* Mask interrupts to insure a clean intialization */
+    326            TIM_ITConfig(TIMx, TIM_IT_CC1, DISABLE);
+    327            
+    328            pDVars_str->RatioDec = FALSE;
+    329            pDVars_str->RatioInc = FALSE;
+    330            pDVars_str->HallTimeOut = FALSE;
+    331            
+    332            /* Reset speed reliability */
+    333            pDVars_str->SensorIsReliable = TRUE;
+    334            
+    335            /* Acceleration measurement not implemented.*/
+    336            pVars_str->hMecAccel01HzP = 0;
+    337            
+    338            pDVars_str->bFirstCapt = 0u;
+    339            pDVars_str->bBufferFilled = 0u;
+    340            pDVars_str->bOVFCounter = 0u;  
+    341          
+    342            pDVars_str->hCompSpeed = 0;
+    343              
+    344            pDVars_str->bSpeed = POSITIVE;
+    345              
+    346            /* Initialize pointers to speed buffer */
+    347            pDVars_str->bSpeedFIFOSetIdx = 0u;
+    348            pDVars_str->bSpeedFIFOGetIdx = 0u;
+    349            
+    350            /* Clear new speed acquisitions flag */
+    351            pDVars_str->bNewSpeedAcquisition = 0;
+    352            
+    353            /* Re-initialize partly the timer */
+    354            TIMx->PSC = pDVars_str->hHALLMaxRatio;
+    355            
+    356            TIM_SetCounter(TIMx, HALL_COUNTER_RESET);
+    357            
+    358            TIM_Cmd(TIMx, ENABLE);
+    359            
+    360            TIM_ITConfig(TIMx, TIM_IT_CC1, ENABLE);
+    361            
+    362            HALL_Init_Electrical_Angle(this);
+    363          }
+    364          
+    365          #if defined (CCMRAM)
+    366          #if defined (__ICCARM__)
+    367          #pragma location = ".ccmram"
+    368          #elif defined (__CC_ARM)
+    369          __attribute__((section ("ccmram")))
+    370          #endif
+    371          #endif
+    372          /**
+    373          * @brief  Update the rotor electrical angle integrating the last measured 
+    374          *         instantaneous electrical speed express in dpp.
+    375          * @param  this related object of class CSPD.
+    376          * @param  pInputVars_str Not used in this derived class implementation of
+    377          *						 SPD_CalcElAngle
+    378          * @retval int16_t Measured electrical angle in s16degree format.
+    379          */
+    380          static int16_t HALL_CalcElAngle(CSPD this, void *pInputVars_str)
+    381          {
+    382            pVars_t pVars_str = CLASS_VARS;
+    383            pDVars_t pDVars_str = DCLASS_VARS;
+    384              
+    385            if (pVars_str->hElSpeedDpp != HALL_MAX_PSEUDO_SPEED)
+    386            {
+    387              pDVars_str->hMeasuredElAngle += pVars_str->hElSpeedDpp;
+    388              pDVars_str->hTargetElAngle += pVars_str->hElSpeedDpp;
+    389              pVars_str->hElAngle += pVars_str->hElSpeedDpp + pDVars_str->hCompSpeed;
+    390              pDVars_str->hPrevRotorFreq = pVars_str->hElSpeedDpp;
+    391            }
+    392            else
+    393            {
+    394              pVars_str->hElAngle += pDVars_str->hPrevRotorFreq;
+    395            }
+    396                
+    397            return pVars_str->hElAngle;
+    398          }
+    399          
+    400          
+    401          /**
+    402            * @brief  This method must be called - at least - with the same periodicity
+    403            *         on which speed control is executed.
+    404            *         This method compute and store rotor istantaneous el speed (express 
+    405            *         in dpp considering the measurement frequency) in order to provide it
+    406            *         to HALL_CalcElAngle function and SPD_GetElAngle. 
+    407            *         Then compute rotor average el speed (express in dpp considering the 
+    408            *         measurement frequency) based on the buffer filled by IRQ, then - as 
+    409            *         a consequence - compute, store and return - through parameter 
+    410            *         hMecSpeed01Hz - the rotor average mech speed, expressed in 01Hz.
+    411            *         Then check, store and return the reliability state of
+    412            *         the sensor; in this function the reliability is measured with 
+    413            *         reference to specific parameters of the derived
+    414            *         sensor (HALL) through internal variables managed by IRQ.
+    415            * @param  this related object of class CSPD
+    416            * @param  hMecSpeed01Hz pointer to int16_t, used to return the rotor average
+    417            *         mechanical speed (01Hz)
+    418            * @retval TRUE = sensor information is reliable
+    419            *         FALSE = sensor information is not reliable
+    420            */
+    421          static bool HALL_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *hMecSpeed01Hz)
+    422          {
+    423            pVars_t pVars_str = CLASS_VARS;
+    424            pParams_t pParams_str = CLASS_PARAM;
+    425            pDVars_t pDVars_str = DCLASS_VARS;
+    426            pDParams_t pDParams_str = DCLASS_PARAM;
+    427            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    428            PeriodMeas_s PeriodMeasAux;
+    429              
+    430            /* If speed is not reliable the El and Mec speed is set to 0 */
+    431            if (pDVars_str->HallTimeOut == TRUE)
+    432            {
+    433              pVars_str->hElSpeedDpp = 0;
+    434              *hMecSpeed01Hz = 0;
+    435            }
+    436            else  
+    437            {
+    438              /* Computing the rotor istantaneous el speed */
+    439              PeriodMeasAux = pDVars_str->SensorPeriod[pDVars_str->bSpeedFIFOGetIdx];
+    440              
+    441              if(PeriodMeasAux.bDirection != HALL_ERROR)
+    442              {
+    443                /* No errors have been detected during rotor speed information 
+    444                extrapolation */
+    445                if ( TIMx->PSC >= pDVars_str->hHALLMaxRatio )
+    446                {                           
+    447                  /* At start-up or very low freq */
+    448                  /* Based on current prescaler value only */
+    449                  pVars_str->hElSpeedDpp = 0;
+    450                  *hMecSpeed01Hz = 0;
+    451                }
+    452                else
+    453                {
+    454                  if( PeriodMeasAux.wPeriod > pDVars_str->wMaxPeriod) 
+    455                  {
+    456                    /* Speed is too low */
+    457                    pVars_str->hElSpeedDpp = 0;
+    458                    *hMecSpeed01Hz = 0;
+    459                  }
+    460                  else
+    461                  {  
+    462                    /*Avoid u32 DIV Overflow*/
+    463                    if ( PeriodMeasAux.wPeriod > (u32)pDVars_str->wSpeedOverflow )
+    464                    {
+    465                      pVars_str->hElSpeedDpp = (s16)((u16) (pDVars_str->wPseudoFreqConv /
+    466                                                            PeriodMeasAux.wPeriod));
+    467                      pVars_str->hElSpeedDpp *= PeriodMeasAux.bDirection;
+    468                                  
+    469                      #ifdef HALL_MTPA
+    470                      {
+    471                        pDVars_str->hCompSpeed = 0;
+    472                      }
+    473                      #else
+    474                      {
+    475                        pDVars_str->hTargetElAngle = pDVars_str->hMeasuredElAngle;
+    476                        pDVars_str->hDeltaAngle = pDVars_str->hMeasuredElAngle - pVars_str->hElAngle;
+    477                        pDVars_str->hCompSpeed = (int16_t)
+    478                          ((int32_t)(pDVars_str->hDeltaAngle)/
+    479                           (int32_t)(pDVars_str->hPWMNbrPSamplingFreq));
+    480                      }
+    481                      #endif
+    482                      
+    483                      *hMecSpeed01Hz = HALL_CalcAvrgElSpeedDpp(this);
+    484                                  
+    485                      /* Converto el_dpp to Mec01Hz */
+    486                      *hMecSpeed01Hz = (int16_t)((*hMecSpeed01Hz * 
+    487                                        (int32_t)pParams_str->hMeasurementFrequency * 10)/
+    488                                        (65536 * (int32_t)pParams_str->bElToMecRatio));
+    489                      
+    490                    }
+    491                    else
+    492                    {
+    493                      pVars_str->hElSpeedDpp = HALL_MAX_PSEUDO_SPEED;
+    494                      *hMecSpeed01Hz = (int16_t)pDVars_str->hSatSpeed;
+    495                    }
+    496                  }
+    497                }
+    498              }              
+    499            }
+    500            
+    501            pVars_str->hAvrMecSpeed01Hz = *hMecSpeed01Hz;
+    502              
+    503            return (pDVars_str->SensorIsReliable);
+    504          }
+    505          
+    506          /**
+    507          * @brief  Example of private method of the class HALL to implement an MC IRQ function
+    508          * @param  this related object
+    509          * @param  flag used to distinguish between various IRQ sources
+    510          *         0: Capture Event
+    511          *         1: Update Event
+    512          * @retval none
+    513          */
+    514          static void HALL_IRQHandler(void *this, unsigned char flag)
+    515          {
+    516            pVars_t pVars_str = CLASS_VARS;
+    517            pDVars_t pDVars_str = DCLASS_VARS;
+    518            pDParams_t pDParams_str = DCLASS_PARAM;
+    519            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    520            uint8_t bPrevHallState;
+    521            uint32_t wCaptBuf;
+    522            uint16_t hPrscBuf;
+    523            uint16_t hHighSpeedCapture;
+    524            int8_t bNewSpeed = 0;
+    525            
+    526            /* Check for the source of IRQ - Capture or Update Event - */
+    527            if ( flag == 0u )
+    528            {    
+    529              /* A capture event generated this interrupt */
+    530              uint8_t bAux;    
+    531              
+    532              bPrevHallState = pDVars_str->bHallState;
+    533              
+    534              pDVars_str->bHallState  = GPIO_ReadInputDataBit(pDParams_str->hH3Port, pDParams_str->hH3Pin)<<2;
+    535              bAux = GPIO_ReadInputDataBit(pDParams_str->hH2Port, pDParams_str->hH2Pin)<<1;
+    536              pDVars_str->bHallState |= bAux;
+    537              pDVars_str->bHallState |= GPIO_ReadInputDataBit(pDParams_str->hH1Port, pDParams_str->hH1Pin);
+    538              
+    539              if (pDParams_str->bSensorPlacement == DEGREES_120) 
+    540              {
+    541                switch(pDVars_str->bHallState)
+    542                {
+    543                case STATE_5:
+    544                  {
+    545                    if (bPrevHallState == STATE_4)
+    546                    {
+    547                      bNewSpeed = POSITIVE;
+    548                      pDVars_str->hMeasuredElAngle = pDParams_str->hPhaseShift;
+    549                    }
+    550                    else
+    551                    {
+    552                      if (bPrevHallState == STATE_1)
+    553                      {
+    554                        bNewSpeed = NEGATIVE;
+    555                        pDVars_str->hMeasuredElAngle = (s16)(pDParams_str->hPhaseShift+S16_60_PHASE_SHIFT);
+    556                      }
+    557                    }
+    558                  }
+    559                  break;
+    560          
+    561                case STATE_1:
+    562                  {
+    563                    if (bPrevHallState == STATE_5)
+    564                    {
+    565                      bNewSpeed = POSITIVE;
+    566                      pDVars_str->hMeasuredElAngle = pDParams_str->hPhaseShift+S16_60_PHASE_SHIFT;
+    567                    }
+    568                    else
+    569                    {
+    570                      if (bPrevHallState == STATE_3)
+    571                      {
+    572                        bNewSpeed = NEGATIVE;
+    573                        pDVars_str->hMeasuredElAngle = (s16)(pDParams_str->hPhaseShift+S16_120_PHASE_SHIFT);
+    574                      }
+    575                    }
+    576                  }
+    577                  break;
+    578                  
+    579                case STATE_3:
+    580                  {
+    581                    if (bPrevHallState == STATE_1)
+    582                    {
+    583                      bNewSpeed = POSITIVE;
+    584                      pDVars_str->hMeasuredElAngle =(s16)(pDParams_str->hPhaseShift + S16_120_PHASE_SHIFT);
+    585                    }
+    586                    else if (bPrevHallState == STATE_2)
+    587                    {
+    588                      bNewSpeed = NEGATIVE;
+    589                      pDVars_str->hMeasuredElAngle = (s16)(pDParams_str->hPhaseShift+S16_120_PHASE_SHIFT+
+    590                                              S16_60_PHASE_SHIFT);
+    591                    } 
+    592                  }
+    593                  break;  
+    594          
+    595                case STATE_2:
+    596                  {
+    597                    if (bPrevHallState == STATE_3)
+    598                    {
+    599                      bNewSpeed = POSITIVE;
+    600                      pDVars_str->hMeasuredElAngle =(s16)(pDParams_str->hPhaseShift + S16_120_PHASE_SHIFT
+    601                                               + S16_60_PHASE_SHIFT);
+    602                    }
+    603                    else if (bPrevHallState == STATE_6)
+    604                    {
+    605                      bNewSpeed = NEGATIVE;
+    606                      pDVars_str->hMeasuredElAngle = (s16)(pDParams_str->hPhaseShift-S16_120_PHASE_SHIFT);
+    607                    } 
+    608                  }
+    609                  break;  
+    610                  
+    611                case STATE_6: 
+    612                  {
+    613                    if (bPrevHallState == STATE_2)
+    614                    {
+    615                      bNewSpeed = POSITIVE;
+    616                      pDVars_str->hMeasuredElAngle =(s16)(pDParams_str->hPhaseShift - S16_120_PHASE_SHIFT);
+    617                    }
+    618                    else if (bPrevHallState == STATE_4)
+    619                    {
+    620                      bNewSpeed = NEGATIVE;
+    621                      pDVars_str->hMeasuredElAngle =(s16)(pDParams_str->hPhaseShift - S16_60_PHASE_SHIFT);
+    622                    }
+    623                  }
+    624                  break;
+    625          
+    626                case STATE_4: 
+    627                  {
+    628                    if (bPrevHallState == STATE_6)
+    629                    {
+    630                      bNewSpeed = POSITIVE;
+    631                      pDVars_str->hMeasuredElAngle =(s16)(pDParams_str->hPhaseShift - S16_60_PHASE_SHIFT);
+    632                    }
+    633                    else if (bPrevHallState == STATE_5)
+    634                    {
+    635                      bNewSpeed = NEGATIVE;
+    636                      pDVars_str->hMeasuredElAngle =(s16)(pDParams_str->hPhaseShift);
+    637                    }
+    638                  }
+    639                  break;
+    640                  
+    641                default:
+    642                  pDVars_str->bSpeed = HALL_ERROR;
+    643                  
+    644                  /* Bad hall sensor configutarion so update the speed reliability */
+    645                  pDVars_str->SensorIsReliable = FALSE;
+    646                  
+    647                  break;
+    648                }
+    649              }
+    650              
+    651              #ifdef HALL_MTPA
+    652              {
+    653                pVars_str->hElAngle = pDVars_str->hMeasuredElAngle;
+    654              }
+    655              #endif
+    656              
+    657              /* Discard first capture */
+    658              if (pDVars_str->bFirstCapt == 0u)
+    659              {
+    660                pDVars_str->bFirstCapt++;
+    661                TIM_GetCapture1(TIMx);
+    662              }
+    663              else if ((bNewSpeed * pDVars_str->bSpeed) > 0)
+    664              {      
+    665                /* used to validate the average speed measurement */
+    666                if (pDVars_str->bBufferFilled < pDParams_str->bSpeedBufferSize)
+    667                {
+    668                  pDVars_str->bBufferFilled++;
+    669                }
+    670                      
+    671                /* Store the latest speed acquisition */    
+    672                hHighSpeedCapture = (uint16_t)(TIM_GetCapture1(TIMx));
+    673                wCaptBuf = (uint32_t)hHighSpeedCapture;
+    674                hPrscBuf = TIMx->PSC;
+    675                      
+    676                /* Add the numbers of overflow to the counter */
+    677                wCaptBuf += (uint32_t)pDVars_str->bOVFCounter * 0x10000uL;
+    678                
+    679                if (pDVars_str->bOVFCounter != 0u)
+    680                {
+    681                  /* Adjust the capture using prescaler */
+    682                  uint16_t hAux;
+    683                  hAux = hPrscBuf + 1u;
+    684                  wCaptBuf *= hAux;
+    685                  
+    686                  if (pDVars_str->RatioInc)
+    687                  {
+    688                    pDVars_str->RatioInc = FALSE;	/* Previous capture caused overflow */
+    689                    /* Don't change prescaler (delay due to preload/update mechanism) */
+    690                  }
+    691                  else
+    692                  {
+    693                    if ((TIMx->PSC) < pDVars_str->hHALLMaxRatio) /* Avoid OVF w/ very low freq */
+    694                    {
+    695                      (TIMx->PSC)++; /* To avoid OVF during speed decrease */
+    696                      pDVars_str->RatioInc = TRUE;	  /* new prsc value updated at next capture only */
+    697                    }
+    698                  }
+    699                }
+    700                else
+    701                {
+    702                  /* If prsc preload reduced in last capture, store current register + 1 */
+    703                  if (pDVars_str->RatioDec)  /* and don't decrease it again */
+    704                  {
+    705                    /* Adjust the capture using prescaler */
+    706                    uint16_t hAux;
+    707                    hAux = hPrscBuf + 2u;
+    708                    wCaptBuf *= hAux;
+    709                    
+    710                    pDVars_str->RatioDec = FALSE;
+    711                  }
+    712                  else  /* If prescaler was not modified on previous capture */
+    713                  {
+    714                    /* Adjust the capture using prescaler */
+    715                    uint16_t hAux = hPrscBuf + 1u;
+    716                    wCaptBuf *= hAux;
+    717                    
+    718                    if (hHighSpeedCapture < LOW_RES_THRESHOLD)/* If capture range correct */
+    719                    {
+    720                      if(TIMx->PSC > 0u) /* or prescaler cannot be further reduced */
+    721                      {
+    722                        (TIMx->PSC)--;	/* Increase accuracy by decreasing prsc */
+    723                        /* Avoid decrementing again in next capt.(register preload delay) */
+    724                        pDVars_str->RatioDec = TRUE;
+    725                      }
+    726                    }
+    727                  }
+    728                }
+    729                      
+    730                /* Store into the buffer */
+    731                pDVars_str->SensorPeriod[pDVars_str->bSpeedFIFOSetIdx].wPeriod = wCaptBuf;
+    732                pDVars_str->SensorPeriod[pDVars_str->bSpeedFIFOSetIdx].bDirection = pDVars_str->bSpeed;
+    733                      
+    734                /* Reset the number of overflow occurred */
+    735                pDVars_str->bOVFCounter = 0u;
+    736                
+    737                /* Timeout Flag is cleared when receiving an IC */
+    738                pDVars_str->HallTimeOut = FALSE;
+    739                
+    740                /* Update pointers to speed buffer */
+    741                pDVars_str->bSpeedFIFOGetIdx = pDVars_str->bSpeedFIFOSetIdx;
+    742                pDVars_str->bSpeedFIFOSetIdx++;
+    743                if (pDVars_str->bSpeedFIFOSetIdx == pDParams_str->bSpeedBufferSize)
+    744                {
+    745                  pDVars_str->bSpeedFIFOSetIdx = 0u;        
+    746                }
+    747                
+    748                /* Indicate new speed acquisitions */
+    749                pDVars_str->bNewSpeedAcquisition = 1;
+    750              }
+    751              
+    752              pDVars_str->bSpeed = bNewSpeed;
+    753            }
+    754            else if (flag == 1u)
+    755            {
+    756              uint16_t hMaxTimerOverflow;
+    757            	/* an update event occured for this interrupt request generation */
+    758              pDVars_str->bOVFCounter++;
+    759              
+    760              hMaxTimerOverflow = (uint16_t)(((uint32_t)pDVars_str->hHallTimeout * pDVars_str->hOvfDuration)
+    761                /(((uint32_t)TIMx->PSC + 1u) * 1000u));
+    762              if (pDVars_str->bOVFCounter >= hMaxTimerOverflow)
+    763              {
+    764                pDVars_str->HallTimeOut = TRUE;
+    765                
+    766                /* Set rotor speed to zero */
+    767                pVars_str->hElSpeedDpp = 0;
+    768                
+    769                /* Reset the electrical angle according the hall sensor configuration */
+    770                HALL_Init_Electrical_Angle(this);
+    771                
+    772                /* Reset the overflow counter */
+    773                pDVars_str->bOVFCounter = 0u;
+    774              }    
+    775            }
+    776            else
+    777            {
+    778            }
+    779          }
+    780          
+    781          /**
+    782          * @brief  Compute and returns the average rotor electrical speed express in dpp
+    783          * @param  this related object of class CSPD
+    784          * @retval int16_t the average rotor electrical speed express in dpp
+    785          */
+    786          static int16_t HALL_CalcAvrgElSpeedDpp(CSPD this)
+    787          {
+    788            pDVars_t pDVars_str = DCLASS_VARS;
+    789            pDParams_t pDParams_str = DCLASS_PARAM;
+    790            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    791            uint8_t bIndex;
+    792            int32_t wElSpeedSum;
+    793            int16_t hAvrgElSpeed;
+    794            uint8_t bSpeedBufferSize;
+    795            
+    796            if (pDVars_str->bNewSpeedAcquisition == 1)
+    797            {
+    798              
+    799              if (pDVars_str->bBufferFilled < pDParams_str->bSpeedBufferSize)
+    800              {
+    801                uint32_t wAux;
+    802                /*Disable capture interrupts to have presc and capture of the same period*/
+    803                TIMx->DIER &= (u16)~TIM_IT_CC1; /* NB:Std libray not used for perf issues*/
+    804                
+    805                wAux = pDVars_str->wPseudoFreqConv
+    806                         /pDVars_str->SensorPeriod[pDVars_str->bSpeedFIFOGetIdx].wPeriod;
+    807                hAvrgElSpeed = (int16_t)(wAux);
+    808                hAvrgElSpeed *= pDVars_str->SensorPeriod[pDVars_str->bSpeedFIFOGetIdx].bDirection;
+    809                
+    810                TIMx->DIER |= TIM_IT_CC1;   /* NB:Std libray not used for perf issue*/
+    811              }
+    812              else
+    813              {
+    814                wElSpeedSum = 0;
+    815                bSpeedBufferSize = pDParams_str->bSpeedBufferSize;
+    816                for (bIndex = 0u; bIndex < bSpeedBufferSize; bIndex++ )
+    817                {
+    818                  int32_t wPeriod;
+    819                  int8_t bDirection;
+    820                  
+    821                  /*Disable capture interrupts to have presc and capture of the same period*/
+    822                  TIMx->DIER &= (u16)~TIM_IT_CC1; /* NB:Std libray not used for perf issues*/
+    823                  
+    824                  wPeriod = (int32_t)pDVars_str->SensorPeriod[bIndex].wPeriod;
+    825                  bDirection = pDVars_str->SensorPeriod[bIndex].bDirection;
+    826                  
+    827                  TIMx->DIER |= TIM_IT_CC1;   /* NB:Std libray not used for perf issue*/
+    828                          
+    829                  wElSpeedSum += ((int32_t)(pDVars_str->wPseudoFreqConv)/wPeriod) * bDirection;
+    830                }
+    831                
+    832                hAvrgElSpeed = (int16_t)(wElSpeedSum / (int32_t)(bSpeedBufferSize));        /* Average value */
+    833              }
+    834              
+    835              pDVars_str->hAvrElSpeedDpp = hAvrgElSpeed;
+    836                  
+    837              /* Clear new speed acquisitions flag */
+    838              pDVars_str->bNewSpeedAcquisition = 0;
+    839            }
+    840            
+    841            return pDVars_str->hAvrElSpeedDpp;
+    842          }
+    843          
+    844          /**
+    845          * @brief  Read the logic level of the three Hall sensor and individuates in this 
+    846          *         way the position of the rotor (+/- 30°). Electrical angle is then 
+    847          *         initialized.
+    848          * @param  this related object of class CSPD
+    849          * @retval none
+    850          */
+    851          static void HALL_Init_Electrical_Angle(CSPD this)
+    852          {
+    853            pVars_t pVars_str = CLASS_VARS;
+    854            pDVars_t pDVars_str = DCLASS_VARS;
+    855            pDParams_t pDParams_str = DCLASS_PARAM;
+    856            
+    857            u8 bAux;
+    858            
+    859            pDVars_str->bHallState  = GPIO_ReadInputDataBit(pDParams_str->hH3Port, pDParams_str->hH3Pin)<<2;
+    860            bAux = GPIO_ReadInputDataBit(pDParams_str->hH2Port, pDParams_str->hH2Pin)<<1;
+    861            pDVars_str->bHallState |= bAux;
+    862            pDVars_str->bHallState |= GPIO_ReadInputDataBit(pDParams_str->hH1Port, pDParams_str->hH1Pin);
+    863            
+    864            if (pDParams_str->bSensorPlacement == DEGREES_120) 
+    865            {
+    866              switch(pDVars_str->bHallState)
+    867              {
+    868              case STATE_5:
+    869                pVars_str->hElAngle = (s16)(pDParams_str->hPhaseShift+S16_60_PHASE_SHIFT/2);
+    870                break;
+    871              case STATE_1:
+    872                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift+S16_60_PHASE_SHIFT+
+    873                                         S16_60_PHASE_SHIFT/2);
+    874                break;
+    875              case STATE_3:
+    876                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift+S16_120_PHASE_SHIFT+
+    877                                         S16_60_PHASE_SHIFT/2);      
+    878                break;
+    879              case STATE_2:
+    880                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift-S16_120_PHASE_SHIFT-
+    881                                         S16_60_PHASE_SHIFT/2);      
+    882                break;
+    883              case STATE_6:
+    884                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift-S16_60_PHASE_SHIFT-
+    885                                         S16_60_PHASE_SHIFT/2);          
+    886                break;
+    887              case STATE_4:
+    888                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift-S16_60_PHASE_SHIFT/2);          
+    889                break;    
+    890              default:
+    891                /* Bad hall sensor configutarion so update the speed reliability */
+    892                pDVars_str->SensorIsReliable = FALSE;
+    893                break;
+    894              }
+    895            }
+    896            else if (pDParams_str->bSensorPlacement == DEGREES_60)
+    897            {
+    898              switch(pDVars_str->bHallState)
+    899              {  
+    900              case STATE_1:
+    901                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift+S16_60_PHASE_SHIFT/2);
+    902                break;
+    903              case STATE_3:
+    904                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift+S16_60_PHASE_SHIFT+
+    905                                         S16_60_PHASE_SHIFT/2);
+    906                break;
+    907              case STATE_7:
+    908                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift+S16_120_PHASE_SHIFT+
+    909                                         S16_60_PHASE_SHIFT/2);      
+    910                break;
+    911              case STATE_6:
+    912                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift-S16_120_PHASE_SHIFT-
+    913                                         S16_60_PHASE_SHIFT/2);      
+    914                break;
+    915              case STATE_4:
+    916                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift-S16_60_PHASE_SHIFT-
+    917                                         S16_60_PHASE_SHIFT/2);          
+    918                break;
+    919              case STATE_0:
+    920                pVars_str->hElAngle =(s16)(pDParams_str->hPhaseShift-S16_60_PHASE_SHIFT/2);          
+    921                break;    
+    922              default:   
+    923                /* Bad hall sensor configutarion so update the speed reliability */
+    924                pDVars_str->SensorIsReliable = FALSE;
+    925                break;
+    926              }
+    927            }
+    928            else
+    929            {
+    930            }
+    931            
+    932            /* Initialize the measured angle */
+    933            pDVars_str->hMeasuredElAngle = pVars_str->hElAngle;
+    934            
+    935          }
+    936          
+    937          /**
+    938            * @brief  It could be used to set istantaneous information on rotor mechanical
+    939            *         angle.
+    940            *         Note: Mechanical angle management is not implemented in this 
+    941            *         version of Hall sensor class.
+    942            * @param  this related object of class CSPD
+    943            * @param  hMecAngle istantaneous measure of rotor mechanical angle
+    944            * @retval none
+    945            */
+    946          static void HALL_SetMecAngle(CSPD this, int16_t hMecAngle)
+    947          {
+    948          }
+    949          
+    950          /**
+    951            * @brief  It is an internal function used to compute the GPIO Source 
+    952            *         value starting from GPIO pin value. The GPIO Source value 
+    953            *         is used for AF remapping.
+    954            * @param  GPIO_Pin Pin value to be converted.
+    955            * @retval uint16_t The GPIO pin source value converted.
+    956            */
+    957          static uint16_t F30X_GPIOPin2Source(uint16_t GPIO_Pin)
+    958          {
+    959            uint16_t GPIO_Sourcex = 0u;
+    960            
+    961            while (GPIO_Pin != 0x01u)
+    962            {
+    963              GPIO_Pin = GPIO_Pin >> 1u;
+    964              GPIO_Sourcex++;
+    965            }
+    966            return GPIO_Sourcex;
+    967          }
+    968          
+    969          /**
+    970            * @}
+    971            */
+    972            
+    973          /**
+    974            * @}
+    975            */
+    976          
+    977          /**
+    978            * @}
+    979            */
+    980          
+    981          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      24   HALL_CalcAvrgElSpeedDpp
+      24   HALL_CalcAvrgMecSpeed01Hz
+        24   -> HALL_CalcAvrgElSpeedDpp
+       0   HALL_CalcElAngle
+      16   HALL_Clear
+         0   -> HALL_Init_Electrical_Angle
+        16   -> TIM_Cmd
+        16   -> TIM_ITConfig
+        16   -> TIM_SetCounter
+      16   HALL_F30X_NewObject
+        16   -> SPD_NewObject
+        16   -> Set_IRQ_Handler
+      32   HALL_IRQHandler
+        32   -> GPIO_ReadInputDataBit
+        32   -> HALL_Init_Electrical_Angle
+        32   -> TIM_GetCapture1
+      64   HALL_Init
+        64   -> GPIO_Init
+        64   -> GPIO_PinAFConfig
+        64   -> GPIO_StructInit
+        64   -> NVIC_Init
+        64   -> RCC_AHBPeriphClockCmd
+        64   -> RCC_APB1PeriphClockCmd
+        64   -> TIM_Cmd
+        64   -> TIM_DeInit
+        64   -> TIM_ICInit
+        64   -> TIM_ICStructInit
+        64   -> TIM_ITConfig
+        64   -> TIM_InternalClockConfig
+        64   -> TIM_PrescalerConfig
+        64   -> TIM_SelectHallSensor
+        64   -> TIM_SelectInputTrigger
+        64   -> TIM_SelectSlaveMode
+        64   -> TIM_SetCounter
+        64   -> TIM_TimeBaseInit
+        64   -> TIM_TimeBaseStructInit
+        64   -> TIM_UpdateRequestConfig
+      24   HALL_Init_Electrical_Angle
+        24   -> GPIO_ReadInputDataBit
+       0   HALL_SetMecAngle
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable2
+       4  ??DataTable2_1
+       4  ??DataTable2_2
+       4  ??DataTable2_3
+       4  ??DataTable2_4
+     160  HALL_CalcAvrgElSpeedDpp
+     134  HALL_CalcAvrgMecSpeed01Hz
+      62  HALL_CalcElAngle
+     100  HALL_Clear
+      82  HALL_F30X_NewObject
+     598  HALL_IRQHandler
+     604  HALL_Init
+     172  HALL_Init_Electrical_Angle
+     204  HALL_SPD_Allocated
+          HALL_SPDpool
+       2  HALL_SetMecAngle
+
+ 
+   204 bytes in section .bss
+ 1 934 bytes in section .text
+ 
+ 1 934 bytes of CODE memory
+   204 bytes of DATA memory
+
+Errors: none
+Warnings: none

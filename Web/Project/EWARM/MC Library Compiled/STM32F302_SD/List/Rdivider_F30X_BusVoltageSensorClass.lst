@@ -1,0 +1,380 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:39
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\Rdivider_F30X_BusVoltageSensorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\Rdivider_F30X_BusVoltageSensorClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4
+#        -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC
+#        Library Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj"
+#        --debug --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp
+#        --dlib_config "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\Rdivider_F30X_BusVoltageSensorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\Rdivider_F30X_BusVoltageSensorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\Rdivider_F30X_BusVoltageSensorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    Rdivider_BusVoltageSensorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of Rdivider class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "BusVoltageSensorClass.h"
+     30          #include "BusVoltageSensorPrivate.h"
+     31          #include "Rdivider_BusVoltageSensorClass.h"
+     32          #include "Rdivider_F30X_BusVoltageSensorPrivate.h"
+     33          #include "MCLibraryConf.h"
+     34          #include "MC_type.h"
+     35          
+     36          #define DCLASS_PARAMS ((_CRVBS_VBS)(((_CVBS) this)->DerivedClass))->pDParams_str
+     37          #define DCLASS_VARS  ((_CRVBS_VBS)(((_CVBS) this)->DerivedClass))->DVars_str
+     38          
+     39          #define CLASS_PARAMS ((_CVBS)this)->pParams_str
+     40          #define CLASS_VARS   ((_CVBS)this)->Vars_str
+     41          
+     42          #ifdef MC_CLASS_DYNAMIC
+     43          	#include "stdlib.h" /* Used for dynamic allocation */
+     44          #else
+     45          	_CRVBS_VBS_t RVBS_VBSpool[MAX_RVBS_VBS_NUM];
+     46          	unsigned char RVBS_VBS_Allocated = 0u;
+     47          #endif
+     48          
+     49          static void RVBS_Init(CVBS this, CPWMC oPWMnCurrentSensor);
+     50          static void RVBS_Clear(CVBS this);
+     51          static uint16_t RVBS_CalcAvVbus(CVBS this);
+     52          static uint16_t RVBS_SetFaultState(CVBS this);
+     53          
+     54          /**
+     55            * @brief  Creates an object of the class Rdivider
+     56            * @param  pBusVoltageSensorParams pointer to an BusVoltageSensor parameters structure
+     57            * @param  pRdividerParams pointer to an Rdivider parameters structure
+     58            * @retval CRVBS_VBS new instance of Rdivider object
+     59            */
+     60          CRVBS_VBS RVBS_NewObject(pBusVoltageSensorParams_t pBusVoltageSensorParams, pRdividerParams_t pRdividerParams)
+     61          {
+     62          	_CVBS _oBusVoltageSensor;
+     63          	_CRVBS_VBS _oRdivider;
+     64          
+     65          	_oBusVoltageSensor = (_CVBS)VBS_NewObject(pBusVoltageSensorParams);
+     66          
+     67          	#ifdef MC_CLASS_DYNAMIC
+     68          		_oRdivider = (_CRVBS_VBS)calloc(1u,sizeof(_CRVBS_VBS_t));
+     69          	#else
+     70          		if (RVBS_VBS_Allocated  < MAX_RVBS_VBS_NUM)
+     71          		{
+     72          			_oRdivider = &RVBS_VBSpool[RVBS_VBS_Allocated++];
+     73          		}
+     74          		else
+     75          		{
+     76          			_oRdivider = MC_NULL;
+     77          		}
+     78          	#endif
+     79            
+     80          	_oRdivider->pDParams_str = pRdividerParams;
+     81          	_oBusVoltageSensor->DerivedClass = (void*)_oRdivider;
+     82                  
+     83          	_oBusVoltageSensor->Methods_str.pVBS_Init = &RVBS_Init;
+     84          	_oBusVoltageSensor->Methods_str.pVBS_Clear = &RVBS_Clear;
+     85                  _oBusVoltageSensor->Methods_str.pVBS_CalcAvVbus = &RVBS_CalcAvVbus;
+     86          
+     87          	return ((CRVBS_VBS)_oBusVoltageSensor);
+     88          }
+     89          
+     90          /** @addtogroup STM32F10x_PMSM_MC_Library
+     91            * @{
+     92            */
+     93            
+     94          /** @addtogroup BusVoltageSensor_Rdivider
+     95            * @{
+     96            */
+     97          
+     98          /** @defgroup Rdivider_class_private_methods Rdivider class private methods
+     99          * @{
+    100          */
+    101          
+    102          /**
+    103            * @brief  It initializes bus voltage conversion (ADC channel, conversion time, 
+    104            *         GPIO port and pin). It must be called only after PWMC_Init. 
+    105            * @param  this related object of class CVBS
+    106            * @retval none
+    107            */
+    108          static void RVBS_Init(CVBS this, CPWMC oPWMnCurrentSensor)
+    109          {
+    110            GPIO_InitTypeDef GPIO_InitStructure;
+    111            ADConv_t ADConv_struct; 
+    112            pDParams_t pDParams_str = DCLASS_PARAMS;
+    113            
+    114              /* GPIOs configurations --------------------------------------------------*/
+    115            GPIO_StructInit(&GPIO_InitStructure);
+    116            
+    117            /****** Configure phase A ADC channel GPIO as analog input ****/
+    118            GPIO_InitStructure.GPIO_Pin = pDParams_str->hVbusPin;  
+    119            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
+    120            GPIO_Init(pDParams_str->hVbusPort, &GPIO_InitStructure);  
+    121            
+    122            DCLASS_VARS.oPWMnCurrentSensor = oPWMnCurrentSensor;
+    123            /* Configure AD chaneel sampling time */
+    124            ADConv_struct.Channel = pDParams_str->bVbusADChannel;
+    125            ADConv_struct.SamplTime = pDParams_str->bVbusSamplingTime;
+    126            PWMC_ADC_SetSamplingTime(oPWMnCurrentSensor, ADConv_struct);
+    127            RVBS_Clear(this);
+    128            
+    129            if (pDParams_str->hLowPassFilterBW > BUFF_MAX)
+    130            {
+    131              while (1); /* Error VBUS_SW_FILTER_BW_FACTOR > BUFF_MAX */
+    132            }
+    133          }
+    134          
+    135          
+    136          /**
+    137            * @brief  It clears bus voltage FW variable containing average bus voltage 
+    138            *         value
+    139            * @param  this related object of class CVBS
+    140            * @retval none
+    141            */
+    142          static void RVBS_Clear(CVBS this)
+    143          {
+    144            pVars_t pVars_str = &CLASS_VARS;
+    145            pDVars_t pDVars_str = &DCLASS_VARS;
+    146            pDParams_t pDParams_str = DCLASS_PARAMS;
+    147            
+    148            pVars_str->hAvBusVoltage_d = ((pDParams_str->hOverVoltageThreshold) + 
+    149                                              (pDParams_str->hUnderVoltageThreshold))/2u;
+    150            pDVars_str->vindex = 0u;
+    151            pDVars_str->nelem = 0u;
+    152          }
+    153          
+    154          static uint16_t RVBS_ConvertVbusFiltrered(CVBS this)
+    155          {
+    156            pDVars_t pDVars_str = &DCLASS_VARS;
+    157            pDParams_t pDParams_str = DCLASS_PARAMS;
+    158            uint16_t hAux;
+    159            uint8_t vindex;
+    160            uint16_t max,min;
+    161            uint32_t tot = 0u;
+    162            uint16_t hTotElement = pDParams_str->hLowPassFilterBW;
+    163            
+    164            for (vindex = 0; vindex < hTotElement; )
+    165            {
+    166              hAux = PWMC_ExecRegularConv(pDVars_str->oPWMnCurrentSensor,
+    167                                        pDParams_str->bVbusADChannel);
+    168              
+    169              if(hAux != 0xFFFFu)
+    170              {
+    171                if (vindex == 0)
+    172                {
+    173                  min = hAux;
+    174                  max = hAux;
+    175                }
+    176                else
+    177                {
+    178                  if (hAux < min)
+    179                  {
+    180                    min = hAux;
+    181                  }
+    182                  if (hAux > max)
+    183                  {
+    184                    max = hAux;
+    185                  }
+    186                }
+    187                vindex++;
+    188                
+    189                tot += hAux;
+    190              }
+    191            }
+    192            
+    193            tot -= max;
+    194            tot -= min;
+    195            return (uint16_t)(tot / (hTotElement-2u));
+    196          }
+    197          
+    198          /**
+    199            * @brief  It actually performes the Vbus ADC conversion and updates average
+    200            *         value
+    201            * @param  this related object of class CVBS
+    202            * @retval uint16_t Fault code error
+    203            */
+    204          static uint16_t RVBS_CalcAvVbus(CVBS this)
+    205          {
+    206            pVars_t pVars_str = &CLASS_VARS;
+    207            pDVars_t pDVars_str = &DCLASS_VARS;
+    208            pDParams_t pDParams_str = DCLASS_PARAMS;
+    209            uint8_t i;
+    210            uint16_t max,min,mean;
+    211            uint32_t tot = 0u;
+    212            uint16_t hAux;
+    213            uint16_t hTotElement = pDParams_str->hLowPassFilterBW;
+    214            
+    215            hAux = RVBS_ConvertVbusFiltrered(this);
+    216            pVars_str->hLatestConv = hAux;
+    217            
+    218            pDVars_str->vbuffer[pDVars_str->vindex] = hAux;
+    219            mean = hAux;
+    220            pDVars_str->vindex++;
+    221            if (pDVars_str->vindex >= hTotElement)
+    222            {
+    223              pDVars_str->vindex = 0u;
+    224            }
+    225            if (pDVars_str->nelem < hTotElement)
+    226            {
+    227              pDVars_str->nelem++;
+    228            }
+    229            if (pDVars_str->nelem > 2u)
+    230            {
+    231              min = pDVars_str->vbuffer[0];
+    232              max = pDVars_str->vbuffer[0];
+    233              for (i = 0u; i < pDVars_str->nelem; i++)
+    234              {
+    235                uint16_t hElem = pDVars_str->vbuffer[i];
+    236                tot += hElem;
+    237                if (hElem < min)
+    238                {
+    239                  min = hElem;
+    240                }
+    241                if (hElem > max)
+    242                {
+    243                  max = hElem;
+    244                }
+    245              }
+    246              tot -= max;
+    247              tot -= min;
+    248              mean = (uint16_t)(tot / (pDVars_str->nelem-2u));
+    249            }
+    250            pVars_str->hAvBusVoltage_d = mean;
+    251            
+    252            pVars_str->hFaultState = RVBS_SetFaultState(this);
+    253            
+    254            return(pVars_str->hFaultState);
+    255          }
+    256          
+    257          /**
+    258            * @brief  It returns MC_OVER_VOLT, MC_UNDER_VOLT or MC_NO_ERROR depending on
+    259            *         bus voltage and protection threshold values
+    260            * @param  this related object of class CVBS
+    261            * @retval uint16_t Fault code error
+    262            */
+    263          static uint16_t RVBS_SetFaultState(CVBS this)
+    264          {
+    265            uint16_t hFault;
+    266            pDParams_t pDParams_str = DCLASS_PARAMS;  
+    267            pVars_t pVars_str = &CLASS_VARS;
+    268          
+    269            if(pVars_str->hAvBusVoltage_d > pDParams_str->hOverVoltageThreshold)
+    270              {
+    271                hFault = MC_OVER_VOLT;
+    272              }
+    273              else if (pVars_str->hAvBusVoltage_d < pDParams_str->hUnderVoltageThreshold)
+    274              {
+    275                hFault = MC_UNDER_VOLT;    
+    276              }
+    277              else
+    278              {
+    279                hFault = MC_NO_ERROR;    
+    280              }  
+    281            return hFault;
+    282          }
+    283          
+    284          /**
+    285            * @}
+    286            */
+    287            
+    288          /**
+    289            * @}
+    290            */
+    291          
+    292          /**
+    293            * @}
+    294            */
+    295          
+    296          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      48   RVBS_CalcAvVbus
+        48   -> PWMC_ExecRegularConv
+       0   RVBS_Clear
+      32   RVBS_Init
+        32   -> GPIO_Init
+        32   -> GPIO_StructInit
+        32   -> PWMC_ADC_SetSamplingTime
+        32   -> RVBS_Clear
+       8   RVBS_NewObject
+         8   -> VBS_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+     252  RVBS_CalcAvVbus
+      22  RVBS_Clear
+      78  RVBS_Init
+      48  RVBS_NewObject
+      28  RVBS_VBS_Allocated
+          RVBS_VBSpool
+
+ 
+  28 bytes in section .bss
+ 404 bytes in section .text
+ 
+ 404 bytes of CODE memory
+  28 bytes of DATA memory
+
+Errors: none
+Warnings: none

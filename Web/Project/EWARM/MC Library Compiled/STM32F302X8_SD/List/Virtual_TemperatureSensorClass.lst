@@ -1,0 +1,240 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:34
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\Virtual_TemperatureSensorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\Virtual_TemperatureSensorClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\Virtual_TemperatureSensorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\Virtual_TemperatureSensorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\Virtual_TemperatureSensorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    Virtual_TemperatureSensorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of Virtual Vbus sensor 
+      8            *          class      
+      9            ******************************************************************************
+     10            * @attention
+     11            *
+     12            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     13            *
+     14            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     15            * You may not use this file except in compliance with the License.
+     16            * You may obtain a copy of the License at:
+     17            *
+     18            *        http://www.st.com/software_license_agreement_liberty_v2
+     19            *
+     20            * Unless required by applicable law or agreed to in writing, software 
+     21            * distributed under the License is distributed on an "AS IS" BASIS, 
+     22            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     23            * See the License for the specific language governing permissions and
+     24            * limitations under the License.
+     25            *
+     26            ******************************************************************************
+     27            */
+     28          
+     29          /* Includes ------------------------------------------------------------------*/
+     30          #include "TemperatureSensorClass.h"
+     31          #include "TemperatureSensorPrivate.h"
+     32          #include "Virtual_TemperatureSensorClass.h"
+     33          #include "Virtual_TemperatureSensorPrivate.h"
+     34          #include "MCLibraryConf.h"
+     35          #include "MC_type.h"
+     36          
+     37          #define DCLASS_PARAMS ((_CVTS_TSNS)(((_CTSNS) this)->DerivedClass))->pDParams_str
+     38          #define BCLASS_VARS   ((_CTSNS)this)->Vars_str
+     39          #define DCLASS_VARS   ((_CVTS_TSNS)(((_CTSNS) this)->DerivedClass))->DVars_str
+     40          
+     41          #ifdef MC_CLASS_DYNAMIC
+     42          	#include "stdlib.h" /* Used for dynamic allocation */
+     43          #else
+     44          	_CVTS_TSNS_t VTS_TSNSpool[MAX_VTS_TSNS_NUM];
+     45          	unsigned char VTS_TSNS_Allocated = 0u;
+     46          #endif
+     47          
+     48          
+     49          static void VTS_Init(CTSNS this, CPWMC oPWMnCurrentSensor);
+     50          static void VTS_Clear(CTSNS this);
+     51          static uint16_t VTS_NoErrors(CTSNS this);
+     52          static int16_t VTS_GetAvTemp_C(CTSNS this);
+     53          /**
+     54            * @brief  Creates an object of the class Virtual Temperature sensor
+     55            * @param  pTempSensorParams pointer to an TemperatureSensor parameters 
+     56            *         structure
+     57            * @param  pVirtualParams pointer to an Virtual Temperature sensor parameters structure
+     58            * @retval CVTS_TSNS new instance of Virtual Temperature sensor object
+     59            */
+     60          CVTS_TSNS VTS_NewObject(pTempSensorParams_t pTempSensorParams, pVirtualTParams_t pVirtualParams)
+     61          {
+     62          	_CTSNS _oTempSensor;
+     63          	_CVTS_TSNS _oVirtual;
+     64          
+     65          	_oTempSensor = (_CTSNS)TSNS_NewObject(pTempSensorParams);
+     66          
+     67          	#ifdef MC_CLASS_DYNAMIC
+     68          		_oVirtual = (_CVTS_TSNS)calloc(1u,sizeof(_CVTS_TSNS_t));
+     69          	#else
+     70          		if (VTS_TSNS_Allocated  < MAX_VTS_TSNS_NUM)
+     71          		{
+     72          			_oVirtual = &VTS_TSNSpool[VTS_TSNS_Allocated++];
+     73          		}
+     74          		else
+     75          		{
+     76          			_oVirtual = MC_NULL;
+     77          		}
+     78          	#endif
+     79            
+     80          	_oVirtual->pDParams_str = pVirtualParams;
+     81          	_oTempSensor->DerivedClass = (void*)_oVirtual;
+     82                  
+     83          	_oTempSensor->Methods_str.pTSNS_Init = &VTS_Init;
+     84          	_oTempSensor->Methods_str.pTSNS_Clear = &VTS_Clear;
+     85                  _oTempSensor->Methods_str.pTSNS_CalcAvTemp = &VTS_NoErrors;
+     86                  _oTempSensor->Methods_str.pTSNS_GetAvTemp_C = &VTS_GetAvTemp_C;
+     87          	return ((CVTS_TSNS)_oTempSensor);
+     88          }
+     89          
+     90          /** @addtogroup STM32F10x_PMSM_MC_Library
+     91            * @{
+     92            */
+     93            
+     94          /** @addtogroup TemperatureSensor_Virtual
+     95            * @{
+     96            */
+     97          
+     98          /** @defgroup Virtual_class_private_methods Virtual Temperature sensor class private methods
+     99          * @{
+    100          */
+    101          
+    102          /**
+    103            * @brief  It initializes virtual temperature sensor
+    104            * @param  this related object of class CTSNS
+    105            * @retval none
+    106            */
+    107          static void VTS_Init(CTSNS this, CPWMC oPWMnCurrentSensor)
+    108          {
+    109            pVars_t pVars_str = &BCLASS_VARS;
+    110            
+    111            pVars_str->hFaultState = MC_NO_ERROR;
+    112            pVars_str->hAvTemp_d = DCLASS_PARAMS->hExpectedTemp_d;
+    113          }
+    114          
+    115          /**
+    116            * @brief  It simply returns in virtual temperature sensor implementation
+    117            * @param  this related object of class CTSNS
+    118            * @retval none
+    119            */
+    120          static void VTS_Clear(CTSNS this)
+    121          {
+    122            return;
+    123          }
+    124          
+    125          /**
+    126            * @brief  It returns MC_NO_ERROR in virtual temperature implementation
+    127            * @param  this related object of class CTSNS
+    128          * @retval uint16_t Fault code error: MC_NO_ERROR
+    129            */
+    130          static uint16_t VTS_NoErrors(CTSNS this)
+    131          {
+    132            return(MC_NO_ERROR);
+    133          }
+    134          
+    135          /**
+    136            * @brief  It returns expected temperature measurement expressed in 
+    137            *         Celsius degrees
+    138            * @param  this related object of class CTSNS
+    139            * @retval int16_t Expected temperature measurement expressed in Celsius degrees
+    140            */
+    141          static int16_t VTS_GetAvTemp_C(CTSNS this)
+    142            {
+    143            return(DCLASS_PARAMS->hExpectedTemp_C);
+    144            }
+    145          
+    146          /**
+    147            * @}
+    148            */
+    149            
+    150          /**
+    151            * @}
+    152            */
+    153          
+    154          /**
+    155            * @}
+    156            */
+    157          
+    158          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   VTS_Clear
+       0   VTS_GetAvTemp_C
+       0   VTS_Init
+       8   VTS_NewObject
+         8   -> TSNS_NewObject
+       0   VTS_NoErrors
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       2  VTS_Clear
+      10  VTS_GetAvTemp_C
+      14  VTS_Init
+      54  VTS_NewObject
+       4  VTS_NoErrors
+       8  VTS_TSNS_Allocated
+          VTS_TSNSpool
+
+ 
+  8 bytes in section .bss
+ 88 bytes in section .text
+ 
+ 88 bytes of CODE memory
+  8 bytes of DATA memory
+
+Errors: none
+Warnings: none

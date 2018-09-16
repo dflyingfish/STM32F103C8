@@ -1,0 +1,635 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:34
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\SpeednTorqCtrlClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\SpeednTorqCtrlClass.c" -D USE_STDPERIPH_DRIVER
+#        -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\SpeednTorqCtrlClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\SpeednTorqCtrlClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\SpeednTorqCtrlClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    SpeednTorqCtrlClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of SpeednTorqCtrl class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "SpeednTorqCtrlClass.h"
+     30          #include "SpeednTorqCtrlPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CSTC_t STCpool[MAX_STC_NUM];
+     38            unsigned char STC_Allocated = 0u;
+     39          #endif
+     40            
+     41          #define CLASS_VARS   &((_CSTC)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CSTC)this)->pParams_str
+     43            
+     44          #define CHECK_BOUNDARY
+     45          
+     46          /**
+     47            * @brief  Creates an object of the class SpeednTorqCtrl
+     48            * @param  pSpeednTorqCtrlParams pointer to an SpeednTorqCtrl parameters structure
+     49            * @retval CSTC new instance of SpeednTorqCtrl object
+     50            */
+     51          CSTC STC_NewObject(pSpeednTorqCtrlParams_t pSpeednTorqCtrlParams)
+     52          {
+     53            _CSTC _oSTC;
+     54            
+     55            #ifdef MC_CLASS_DYNAMIC
+     56              _oSTC = (_CSTC)calloc(1u,sizeof(_CSTC_t));
+     57            #else
+     58              if (STC_Allocated  < MAX_STC_NUM)
+     59              {
+     60                _oSTC = &STCpool[STC_Allocated++];
+     61              }
+     62              else
+     63              {
+     64                _oSTC = MC_NULL;
+     65              }
+     66            #endif
+     67            
+     68            _oSTC->pParams_str = (pParams_t)pSpeednTorqCtrlParams;
+     69            
+     70            return ((CSTC)_oSTC);
+     71          }
+     72          
+     73          /**
+     74            * @brief  Initializes all the object variables, usually it has to be called 
+     75            *         once right after object creation.
+     76            * @param  this related object of class CSTC.
+     77            * @param  oPI the PI object used as controller for the speed regulation.
+     78            *         It can be equal to MC_NULL if the STC is initialized in torque mode
+     79            *         and it will never be configured in speed mode.
+     80            * @param  oSPD the speed sensor used to perform the speed regulation.
+     81            *         It can be equal to MC_NULL if the STC is used only in torque 
+     82            *         mode.
+     83            * @retval none.
+     84            */
+     85          void STC_Init(CSTC this, CPI oPI, CSPD oSPD)
+     86          {
+     87            pVars_t pVars = CLASS_VARS;
+     88            pParams_t pParams = CLASS_PARAMS;
+     89            
+     90            pVars->oPISpeed = oPI;
+     91            pVars->oSPD = oSPD;
+     92            pVars->bMode = pParams->bModeDefault;
+     93            pVars->wSpeedRef01HzExt = (int32_t)pParams->hMecSpeedRef01HzDefault * 65536;
+     94            pVars->wTorqueRef = (int32_t)pParams->hTorqueRefDefault * 65536;
+     95            pVars->hTargetFinal = 0;
+     96            pVars->wRampRemainingStep = 0u;
+     97            pVars->wIncDecAmount = 0;
+     98            pVars->hMaxPositiveTorque = pParams->hMaxPositiveTorque;
+     99            pVars->hMinNegativeTorque = pParams->hMinNegativeTorque;
+    100          }
+    101          
+    102          /**
+    103            * @brief It sets in real time the speed sensor utilized by the STC. 
+    104            * @param this related object of class CSTC
+    105            * @param oSPD Speed sensor object to be set.
+    106            * @retval none
+    107            */
+    108          void STC_SetSpeedSensor(CSTC this, CSPD oSPD)
+    109          {
+    110            pVars_t pVars = CLASS_VARS;  
+    111            pVars->oSPD = oSPD;
+    112          }
+    113          
+    114          /**
+    115            * @brief It returns the speed sensor utilized by the FOC. 
+    116            * @param this related object of class CSTC
+    117            * @retval CSPD speed sensor utilized by the FOC.
+    118            */
+    119          CSPD STC_GetSpeedSensor(CSTC this)
+    120          {
+    121            pVars_t pVars = CLASS_VARS;
+    122            return (pVars->oSPD);
+    123          }
+    124          
+    125          /**
+    126            * @brief  It should be called before each motor restart. If STC is set in
+    127                      speed mode, this method resets the integral term of speed regulator.
+    128            * @param this related object of class CSTC.
+    129            * @retval none.
+    130            */
+    131          void STC_Clear(CSTC this)
+    132          {
+    133            pVars_t pVars = CLASS_VARS;
+    134            if (pVars->bMode == STC_SPEED_MODE)
+    135            {
+    136              PI_SetIntegralTerm(((_CSTC)this)->Vars_str.oPISpeed,0);
+    137            }
+    138          }
+    139          
+    140          /**
+    141            * @brief  Get the current mechanical rotor speed reference expressed in tenths
+    142            *         of HZ. 
+    143            * @param  this related object of class CSTC.
+    144            * @retval int16_t current mechanical rotor speed reference expressed in tenths
+    145            *         of HZ. 
+    146            */
+    147          int16_t STC_GetMecSpeedRef01Hz(CSTC this)
+    148          {
+    149            return ((int16_t)(((_CSTC)this)->Vars_str.wSpeedRef01HzExt/65536));
+    150          }
+    151          
+    152          /**
+    153            * @brief  Get the current motor torque reference. This value represents 
+    154            *         actually the Iq current reference expressed in digit.
+    155            *         To convert current expressed in digit to current expressed in Amps
+    156            *         is possible to use the formula: 
+    157            *         Current(Amp) = [Current(digit) * Vdd micro] / [65536 * Rshunt * Aop]
+    158            * @param  this related object of class CSTC.
+    159            * @retval int16_t current motor torque reference. This value represents 
+    160            *         actually the Iq current expressed in digit.
+    161            */
+    162          int16_t STC_GetTorqueRef(CSTC this)
+    163          {
+    164            return ((int16_t)(((_CSTC)this)->Vars_str.wTorqueRef/65536));
+    165          }
+    166          
+    167          /**
+    168            * @brief  Set the modality of the speed and torque controller. Two modality 
+    169            *         are available Torque mode and Speed mode.
+    170            *         In Torque mode is possible to set directly the motor torque 
+    171            *         reference or execute a motor torque ramp. This value represents 
+    172            *         actually the Iq current reference expressed in digit.
+    173            *         In Speed mode is possible to set the mechanical rotor speed
+    174            *         reference or execute a speed ramp. The required motor torque is
+    175            *         automatically calculated by the STC.
+    176            *         This command interrupts the execution of any previous ramp command 
+    177            *         maintaining the last value of Iq.
+    178            * @param  this related object of class CSTC.
+    179            * @param  bMode modality of STC. It can be one of these two settings: 
+    180            *         STC_TORQUE_MODE to enable the Torque mode or STC_SPEED_MODE to
+    181            *         enable the Speed mode.
+    182            * @retval none
+    183            */
+    184          void STC_SetControlMode(CSTC this, STC_Modality_t bMode)
+    185          {
+    186            pVars_t pVars = CLASS_VARS;
+    187            pVars->bMode = bMode;
+    188            pVars->wRampRemainingStep = 0u; /* Interrupts previous ramp. */
+    189          }
+    190          
+    191          /**
+    192            * @brief  Get the modality of the speed and torque controller. 
+    193            * @param  this related object of class CSTC.
+    194            * @retval STC_Modality_t It returns the modality of STC. It can be one of 
+    195            *         these two values: STC_TORQUE_MODE or STC_SPEED_MODE.
+    196            */
+    197          STC_Modality_t STC_GetControlMode(CSTC this)
+    198          {
+    199            pVars_t pVars = CLASS_VARS;
+    200            return pVars->bMode;
+    201          }
+    202          
+    203          /**
+    204            * @brief  Starts the execution of a ramp using new target and duration. This
+    205            *         command interrupts the execution of any previous ramp command.
+    206            *         The generated ramp will be in the modality previously set by
+    207            *         STC_SetControlMode method.
+    208            * @param  this related object of class CSTC  
+    209            * @param  hTargetFinal final value of command. This is different accordingly
+    210            *         the STC modality. 
+    211            *         If STC is in Torque mode hTargetFinal is the value of motor torque
+    212            *         reference at the end of the ramp. This value represents actually the
+    213            *         Iq current expressed in digit.
+    214            *         To convert current expressed in Amps to current expressed in digit
+    215            *         is possible to use the formula:
+    216            *         Current(digit) = [Current(Amp) * 65536 * Rshunt * Aop]  /  Vdd micro
+    217            *         If STC is in Speed mode hTargetFinal is the value of mechanical
+    218            *         rotor speed reference at the end of the ramp expressed in tenths of
+    219            *         HZ.
+    220            * @param  hDurationms the duration of the ramp expressed in milliseconds. It
+    221            *         is possible to set 0 to perform an instantaneous change in the value.
+    222            * @retval bool It return false if the absolute value of hTargetFinal is out of
+    223            *         the boundary of the application (Above max application speed or max
+    224            *         application torque or below min application speed depending on
+    225            *         current modality of TSC) in this case the command is ignored and the
+    226            *         previous ramp is not interrupted, otherwise it returns true. 
+    227            */
+    228          bool STC_ExecRamp(CSTC this, int16_t hTargetFinal, uint32_t hDurationms)
+    229          {
+    230            pVars_t pVars = CLASS_VARS;
+    231            pParams_t pParams = CLASS_PARAMS;
+    232            bool AllowedRange = TRUE;
+    233            uint32_t wAux;
+    234            int32_t wAux1;
+    235            int16_t hCurrentReference;
+    236            
+    237            /* Check if the hTargetFinal is out of the bound of application. */
+    238            if (pVars->bMode == STC_TORQUE_MODE)
+    239            {
+    240              hCurrentReference = STC_GetTorqueRef(this);
+    241              #ifdef CHECK_BOUNDARY
+    242              if ((int32_t)hTargetFinal > (int32_t)pVars->hMaxPositiveTorque)
+    243              {
+    244                AllowedRange = FALSE;
+    245              }
+    246              if ((int32_t)hTargetFinal < (int32_t)pVars->hMinNegativeTorque)
+    247              {
+    248                AllowedRange = FALSE;
+    249              }
+    250              #endif
+    251            }
+    252            else
+    253            {
+    254              hCurrentReference = (int16_t)(pVars->wSpeedRef01HzExt >> 16);
+    255              
+    256              #ifdef CHECK_BOUNDARY
+    257              if ((int32_t)hTargetFinal > (int32_t)pParams->hMaxAppPositiveMecSpeed01Hz)
+    258              {
+    259                AllowedRange = FALSE;
+    260              } else
+    261                if (hTargetFinal < pParams->hMinAppNegativeMecSpeed01Hz)
+    262                {
+    263                  AllowedRange = FALSE;
+    264                } else
+    265                  if ((int32_t)hTargetFinal < (int32_t)pParams->hMinAppPositiveMecSpeed01Hz)
+    266                  {
+    267                    if (hTargetFinal > pParams->hMaxAppNegativeMecSpeed01Hz)
+    268                    {
+    269                      AllowedRange = FALSE;
+    270                    }
+    271                  }
+    272                  else{}
+    273              #endif
+    274            }
+    275            
+    276            if (AllowedRange == TRUE)
+    277            {
+    278              /* Interrupts the execution of any previous ramp command */
+    279              if (hDurationms == 0u)
+    280              {
+    281                if (pVars->bMode == STC_SPEED_MODE)
+    282                {
+    283                  pVars->wSpeedRef01HzExt = (int32_t)hTargetFinal * 65536;
+    284                }
+    285                else
+    286                {
+    287                  pVars->wTorqueRef = (int32_t)hTargetFinal * 65536;
+    288                }
+    289                pVars->wRampRemainingStep = 0u;
+    290                pVars->wIncDecAmount = 0;
+    291              }
+    292              else
+    293              {
+    294                /* Store the hTargetFinal to be applied in the last step */
+    295                pVars->hTargetFinal = hTargetFinal;
+    296                
+    297                /* Compute the (wRampRemainingStep) number of steps remaining to complete 
+    298                the ramp. */
+    299                wAux = (uint32_t)hDurationms * (uint32_t)pParams->hSTCFrequencyHz;
+    300                wAux /= 1000u;
+    301                pVars->wRampRemainingStep = wAux;
+    302                pVars->wRampRemainingStep++;
+    303                
+    304                /* Compute the increment/decrement amount (wIncDecAmount) to be applied to 
+    305                the reference value at each CalcTorqueReference. */
+    306                wAux1 = ((int32_t)hTargetFinal - (int32_t)hCurrentReference) * 65536;
+    307                wAux1 /= (int32_t)pVars->wRampRemainingStep;
+    308                pVars->wIncDecAmount = wAux1;
+    309              }
+    310            }
+    311          
+    312            return AllowedRange;
+    313          }
+    314          
+    315          /**
+    316            * @brief  This command interrupts the execution of any previous ramp command.
+    317            *         If STC has been set in Torque mode the last value of Iq is
+    318            *         maintained.
+    319            *         If STC has been set in Speed mode the last value of mechanical
+    320            *         rotor speed reference is maintained.
+    321            * @param  this related object of class CSTC.
+    322            * @retval none
+    323            */
+    324          void STC_StopRamp(CSTC this)
+    325          {
+    326            pVars_t pVars = CLASS_VARS;
+    327            pVars->wRampRemainingStep = 0u;
+    328          	pVars->wIncDecAmount = 0;
+    329          }
+    330          
+    331          /**
+    332            * @brief  It is used to compute the new value of motor torque reference. It
+    333            *         must be called at fixed time equal to hSTCFrequencyHz. It is called
+    334            *         passing as parameter the speed sensor used to perform the speed
+    335            *         regulation.
+    336            * @param  this related object of class CSTC.
+    337            * @retval int16_t motor torque reference. This value represents actually the
+    338            *         Iq current expressed in digit.
+    339            *         To convert current expressed in Amps to current expressed in digit
+    340            *         is possible to use the formula:
+    341            *         Current(digit) = [Current(Amp) * 65536 * Rshunt * Aop]  /  Vdd micro
+    342            */
+    343          int16_t STC_CalcTorqueReference(CSTC this)
+    344          {
+    345            pVars_t pVars = CLASS_VARS;
+    346            int32_t wCurrentReference;
+    347            int16_t hTorqueReference = 0;
+    348            int16_t hMeasuredSpeed;
+    349            int16_t hTargetSpeed;
+    350            int16_t hError;
+    351            
+    352            if (pVars->bMode == STC_TORQUE_MODE)
+    353            {
+    354              wCurrentReference = pVars->wTorqueRef;
+    355            }
+    356            else
+    357            {
+    358              wCurrentReference = pVars->wSpeedRef01HzExt;
+    359            }
+    360            
+    361            /* Update the speed reference or the torque reference according to the mode 
+    362               and terminates the ramp if needed. */
+    363            if (pVars->wRampRemainingStep > 1u)
+    364            {
+    365              /* Increment/decrement the reference value. */
+    366              wCurrentReference += pVars->wIncDecAmount;
+    367              
+    368              /* Decrement the number of remaining steps */
+    369              pVars->wRampRemainingStep--;
+    370            }
+    371            else if (pVars->wRampRemainingStep == 1u)
+    372            {
+    373              /* Set the backup value of hTargetFinal. */
+    374              wCurrentReference = (int32_t)pVars->hTargetFinal * 65536;
+    375              pVars->wRampRemainingStep = 0u;
+    376            }
+    377            else
+    378            {
+    379              /* Do nothing. */
+    380            }
+    381            
+    382            if (pVars->bMode == STC_SPEED_MODE)
+    383            {
+    384              /* Run the speed control loop */
+    385              
+    386              /* Compute speed error */
+    387              hTargetSpeed = (int16_t)(wCurrentReference / 65536);
+    388              hMeasuredSpeed = SPD_GetAvrgMecSpeed01Hz(pVars->oSPD);
+    389              hError = hTargetSpeed - hMeasuredSpeed;
+    390              hTorqueReference = PI_Controller(pVars->oPISpeed, (int32_t)hError);
+    391              
+    392              pVars->wSpeedRef01HzExt = wCurrentReference;
+    393              pVars->wTorqueRef = (int32_t)hTorqueReference * 65536;
+    394            }
+    395            else
+    396            {
+    397              pVars->wTorqueRef = wCurrentReference;
+    398              hTorqueReference = (int16_t)(wCurrentReference / 65536);
+    399            }
+    400            
+    401            return hTorqueReference;
+    402          }
+    403          
+    404          /**
+    405            * @brief  Get the Default mechanical rotor speed reference expressed in tenths
+    406            *         of HZ.
+    407            * @param  this related object of class CSTC.
+    408            * @retval int16_t It returns the Default mechanical rotor speed. reference 
+    409            *         expressed in tenths of HZ.
+    410            */
+    411          int16_t STC_GetMecSpeedRef01HzDefault(CSTC this)
+    412          {
+    413            pParams_t pParams = CLASS_PARAMS;
+    414          
+    415            return pParams->hMecSpeedRef01HzDefault;
+    416          }
+    417          
+    418          /**
+    419            * @brief  Get the Application maximum positive value of rotor speed. It's 
+    420                      expressed in tenth of mechanical Hertz.
+    421            * @param  this related object of class CSTC.
+    422            * @retval uint16_t It returns the application maximum positive value of rotor
+    423                      speed expressed in tenth of mechanical Hertz.
+    424            */
+    425          uint16_t STC_GetMaxAppPositiveMecSpeed01Hz(CSTC this)
+    426          {
+    427            pParams_t pParams = CLASS_PARAMS;
+    428          
+    429            return pParams->hMaxAppPositiveMecSpeed01Hz;
+    430          }
+    431          
+    432          /**
+    433            * @brief  Get the Application minimum negative value of rotor speed. It's 
+    434                      expressed in tenth of mechanical Hertz.
+    435            * @param  this related object of class CSTC.
+    436            * @retval uint16_t It returns the application minimum negative value of rotor
+    437                      speed expressed in tenth of mechanical Hertz.
+    438            */
+    439          int16_t STC_GetMinAppNegativeMecSpeed01Hz(CSTC this)
+    440          {
+    441            pParams_t pParams = CLASS_PARAMS;
+    442          
+    443            return pParams->hMinAppNegativeMecSpeed01Hz;
+    444          }
+    445          
+    446          /**
+    447            * @brief  Check if the settled speed or torque ramp has been completed.
+    448            * @param  this related object of class CSTC.
+    449            * @retval bool It returns TRUE if the ramp is completed, FALSE otherwise.
+    450            */
+    451          bool STC_RampCompleted(CSTC this)
+    452          {
+    453            pVars_t pVars = CLASS_VARS;
+    454            bool retVal = FALSE;
+    455            if (pVars->wRampRemainingStep == 0u)
+    456            {
+    457              retVal = TRUE;
+    458            }
+    459            return retVal;
+    460          }
+    461          
+    462          /**
+    463            * @brief  Stop the execution of speed ramp.
+    464            * @param  this related object of class CSTC.
+    465            * @retval bool It returns TRUE if the command is executed, FALSE otherwise.
+    466            */
+    467          bool STC_StopSpeedRamp(CSTC this)
+    468          {
+    469            pVars_t pVars = CLASS_VARS;
+    470            bool retVal = FALSE;
+    471            if (pVars->bMode == STC_SPEED_MODE)
+    472            {
+    473              pVars->wRampRemainingStep = 0u;
+    474              retVal = TRUE;
+    475            }
+    476            return retVal;
+    477          }
+    478                                                       
+    479          /**
+    480            * @brief It returns the default values of Iqdref. 
+    481            * @param this related object of class CSTC
+    482            * @retval default values of Iqdref.
+    483            */
+    484          Curr_Components STC_GetDefaultIqdref(CSTC this)
+    485          {
+    486            pParams_t pParams = CLASS_PARAMS;
+    487            Curr_Components IqdRefDefault;
+    488            IqdRefDefault.qI_Component1 = pParams->hTorqueRefDefault;
+    489            IqdRefDefault.qI_Component2 = pParams->hIdrefDefault;
+    490            return IqdRefDefault;
+    491          }
+    492          
+    493          /**
+    494            * @brief  Change the nominal current .
+    495            * @param  this related object of class CSTC.
+    496            * @param  hNominalCurrent This value represents actually the maximum Iq current 
+    497                      expressed in digit.
+    498            * @retval none
+    499            */
+    500          void STC_SetNominalCurrent(CSTC this, uint16_t hNominalCurrent)
+    501          {
+    502            pVars_t pVars = CLASS_VARS;
+    503            pVars->hMaxPositiveTorque = hNominalCurrent;
+    504            pVars->hMinNegativeTorque = -hNominalCurrent;
+    505          }
+    506          
+    507          /**
+    508            * @brief  Force the speed reference to the curren speed. It is used
+    509            *         at the START_RUN state to initialize the speed reference.
+    510            * @param  this related object of class CSTC  
+    511            * @retval none
+    512            */
+    513          void STC_ForceSpeedReferenceToCurrentSpeed(CSTC this)
+    514          {
+    515            pVars_t pVars = CLASS_VARS;
+    516            pVars->wSpeedRef01HzExt = (int32_t)SPD_GetAvrgMecSpeed01Hz(pVars->oSPD) * (int32_t)65536;
+    517          }
+    518          
+    519          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   STC_CalcTorqueReference
+        16   -> PI_Controller
+        16   -> SPD_GetAvrgMecSpeed01Hz
+       0   STC_Clear
+         0   -> PI_SetIntegralTerm
+      20   STC_ExecRamp
+       8   STC_ForceSpeedReferenceToCurrentSpeed
+         8   -> SPD_GetAvrgMecSpeed01Hz
+       0   STC_GetControlMode
+       4   STC_GetDefaultIqdref
+       0   STC_GetMaxAppPositiveMecSpeed01Hz
+       0   STC_GetMecSpeedRef01Hz
+       0   STC_GetMecSpeedRef01HzDefault
+       0   STC_GetMinAppNegativeMecSpeed01Hz
+       0   STC_GetSpeedSensor
+       0   STC_GetTorqueRef
+       0   STC_Init
+       0   STC_NewObject
+       0   STC_RampCompleted
+       0   STC_SetControlMode
+       0   STC_SetNominalCurrent
+       0   STC_SetSpeedSensor
+       0   STC_StopRamp
+       0   STC_StopSpeedRamp
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+      10  ?Subroutine0
+      40  STC_Allocated
+          STCpool
+      88  STC_CalcTorqueReference
+      16  STC_Clear
+     140  STC_ExecRamp
+      16  STC_ForceSpeedReferenceToCurrentSpeed
+       4  STC_GetControlMode
+      24  STC_GetDefaultIqdref
+       6  STC_GetMaxAppPositiveMecSpeed01Hz
+       4  STC_GetMecSpeedRef01Hz
+       8  STC_GetMecSpeedRef01HzDefault
+       8  STC_GetMinAppNegativeMecSpeed01Hz
+       4  STC_GetSpeedSensor
+       2  STC_GetTorqueRef
+      44  STC_Init
+      22  STC_NewObject
+      12  STC_RampCompleted
+       8  STC_SetControlMode
+       8  STC_SetNominalCurrent
+       4  STC_SetSpeedSensor
+       8  STC_StopRamp
+      16  STC_StopSpeedRamp
+
+ 
+  40 bytes in section .bss
+ 460 bytes in section .text
+ 
+ 460 bytes of CODE memory
+  40 bytes of DATA memory
+
+Errors: none
+Warnings: none

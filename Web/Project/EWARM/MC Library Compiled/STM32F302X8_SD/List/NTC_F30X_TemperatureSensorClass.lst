@@ -1,0 +1,321 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:31
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\NTC_F30X_TemperatureSensorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\NTC_F30X_TemperatureSensorClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\NTC_F30X_TemperatureSensorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\NTC_F30X_TemperatureSensorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\NTC_F30X_TemperatureSensorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    NTC_TemperatureSensorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of NTC class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "TemperatureSensorClass.h"
+     30          #include "TemperatureSensorPrivate.h"
+     31          #include "NTC_TemperatureSensorClass.h"
+     32          #include "NTC_F30X_TemperatureSensorPrivate.h"
+     33          #include "MCLibraryConf.h"
+     34          #include "MC_type.h"
+     35          
+     36          #define DCLASS_PARAMS ((_CNTC_TSNS)(((_CTSNS) this)->DerivedClass))->pDParams_str
+     37          #define DCLASS_VARS  ((_CNTC_TSNS)(((_CTSNS) this)->DerivedClass))->DVars_str
+     38          
+     39          #define BCLASS_PARAMS ((_CTSNS)this)->pParams_str
+     40          #define BCLASS_VARS   ((_CTSNS)this)->Vars_str
+     41          
+     42          #ifdef MC_CLASS_DYNAMIC
+     43          	#include "stdlib.h" /* Used for dynamic allocation */
+     44          #else
+     45          
+     46          	
+     47          
+     48          	_CNTC_TSNS_t NTC_TSNSpool[MAX_NTC_TSNS_NUM];
+     49          	unsigned char NTC_TSNS_Allocated = 0u;
+     50          #endif
+     51          
+     52          
+     53          static void NTC_Init(CTSNS this, CPWMC oPWMnCurrentSensor);
+     54          static void NTC_Clear(CTSNS this);
+     55          static uint16_t NTC_CalcAvVbus(CTSNS this);
+     56          static uint16_t NTC_SetFaultState(CTSNS this);
+     57          static int16_t NTC_GetAvTemp_C(CTSNS this);
+     58          
+     59          /**
+     60            * @brief  Creates an object of the class NTC
+     61            * @param  pTempSensorParams pointer to an TempSensor parameters structure
+     62            * @param  pNTCParams pointer to an NTC parameters structure
+     63            * @retval CNTC_TSNS new instance of NTC object
+     64            */
+     65          CNTC_TSNS NTC_NewObject(pTempSensorParams_t pTempSensorParams, pNTCParams_t pNTCParams)
+     66          {
+     67          	_CTSNS _oTempSensor;
+     68          	_CNTC_TSNS _oNTC;
+     69          
+     70          	_oTempSensor = (_CTSNS)TSNS_NewObject(pTempSensorParams);
+     71          
+     72          	#ifdef MC_CLASS_DYNAMIC
+     73          		_oNTC = (_CNTC_TSNS)calloc(1u,sizeof(_CNTC_TSNS_t));
+     74          	#else
+     75          		if (NTC_TSNS_Allocated  < MAX_NTC_TSNS_NUM)
+     76          		{
+     77          			_oNTC = &NTC_TSNSpool[NTC_TSNS_Allocated++];
+     78          		}
+     79          		else
+     80          		{
+     81          			_oNTC = MC_NULL;
+     82          		}
+     83          	#endif
+     84            
+     85          	_oNTC->pDParams_str = pNTCParams;
+     86          	_oTempSensor->DerivedClass = (void*)_oNTC;
+     87                  
+     88          	_oTempSensor->Methods_str.pTSNS_Init = &NTC_Init;
+     89          	_oTempSensor->Methods_str.pTSNS_Clear = &NTC_Clear;
+     90                  _oTempSensor->Methods_str.pTSNS_CalcAvTemp = &NTC_CalcAvVbus;
+     91                  _oTempSensor->Methods_str.pTSNS_GetAvTemp_C = &NTC_GetAvTemp_C;
+     92          	return ((CNTC_TSNS)_oTempSensor);
+     93          }
+     94          
+     95          /** @addtogroup STM32F10x_PMSM_MC_Library
+     96            * @{
+     97            */
+     98            
+     99          /** @addtogroup TemperatureSensor_NTC
+    100            * @{
+    101            */
+    102          
+    103          /** @defgroup NTC_class_private_methods NTC class private methods
+    104          * @{
+    105          */
+    106          
+    107          /**
+    108            * @brief  It initializes temperature conversion (ADC channel, conversion time, 
+    109            *         GPIO port and pin). It must be called only after PWMC_Init. 
+    110            * @param  this related object of class TSNS
+    111            * @retval none
+    112            */
+    113          static void NTC_Init(CTSNS this, CPWMC oPWMnCurrentSensor)
+    114          {
+    115            GPIO_InitTypeDef GPIO_InitStructure;
+    116            ADConv_t ADConv_struct; 
+    117            pDParams_t pDParams_str = DCLASS_PARAMS;
+    118            
+    119              /* GPIOs configurations --------------------------------------------------*/
+    120            GPIO_StructInit(&GPIO_InitStructure);
+    121            
+    122            /****** Configure phase A ADC channel GPIO as analog input ****/
+    123            GPIO_InitStructure.GPIO_Pin = pDParams_str->hTsensPin;  
+    124            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
+    125            GPIO_Init(pDParams_str->hTsensPort, &GPIO_InitStructure);  
+    126            
+    127            DCLASS_VARS.oPWMnCurrentSensor = oPWMnCurrentSensor;
+    128            /* Configure AD chaneel sampling time */
+    129            ADConv_struct.Channel = pDParams_str->bTsensADChannel;
+    130            ADConv_struct.SamplTime = pDParams_str->bTsensSamplingTime;
+    131            PWMC_ADC_SetSamplingTime(oPWMnCurrentSensor, ADConv_struct);
+    132            NTC_Clear(this);
+    133          }
+    134          
+    135          
+    136          /**
+    137            * @brief  It clears temperature average value
+    138            * @param  this related object of class CTSNS
+    139            * @retval none
+    140            */
+    141          static void NTC_Clear(CTSNS this)
+    142          {
+    143            BCLASS_VARS.hAvTemp_d = 0u;
+    144          }
+    145          
+    146          /**
+    147            * @brief  It actually performes the temperature sensing ADC conversion and 
+    148            *         updates average value
+    149            * @param  this related object of class CTSNS
+    150            * @retval uint16_t Fault code error
+    151            */
+    152          static uint16_t NTC_CalcAvVbus(CTSNS this)
+    153          {
+    154            uint32_t wtemp;
+    155            uint16_t hAux;
+    156            pDParams_t pDParams_str = DCLASS_PARAMS; 
+    157            pVars_t pVars_str = &BCLASS_VARS;
+    158              
+    159            hAux = PWMC_ExecRegularConv(DCLASS_VARS.oPWMnCurrentSensor,
+    160                                                          pDParams_str->bTsensADChannel);
+    161            
+    162            if(hAux != 0xFFFFu)
+    163            {
+    164              wtemp =  (uint32_t)(pDParams_str->hLowPassFilterBW)-1u;
+    165              wtemp *= (uint32_t) (pVars_str->hAvTemp_d);
+    166              wtemp += hAux;
+    167              wtemp /= (uint32_t)(pDParams_str->hLowPassFilterBW);
+    168              
+    169              pVars_str->hAvTemp_d = (uint16_t) wtemp;
+    170            }
+    171            
+    172            pVars_str->hFaultState = NTC_SetFaultState(this);
+    173            
+    174            return(pVars_str->hFaultState);
+    175          }
+    176          
+    177          /**
+    178            * @brief  It returns MC_OVER_TEMP or MC_NO_ERROR depending on
+    179            *         temperature sensor output and protection threshold values
+    180            * @param  this related object of class CTSNS
+    181            * @retval uint16_t Fault code error
+    182            */
+    183          static uint16_t NTC_SetFaultState(CTSNS this)
+    184          {
+    185            uint16_t hFault;
+    186            pDParams_t pDParams_str = DCLASS_PARAMS;  
+    187            pVars_t pVars_str = &BCLASS_VARS;
+    188          
+    189            if(pVars_str->hAvTemp_d > pDParams_str->hOverTempThreshold)
+    190              {
+    191                hFault = MC_OVER_TEMP;
+    192              }
+    193              else if (pVars_str->hAvTemp_d < pDParams_str->hOverTempDeactThreshold)
+    194              {
+    195                hFault = MC_NO_ERROR;    
+    196              }
+    197              else
+    198              {
+    199                
+    200                hFault = pVars_str->hFaultState;    
+    201              }  
+    202            return hFault;
+    203          }
+    204          
+    205          /**
+    206            * @brief  It returns latest averaged temperature measurement expressed in 
+    207            *         Celsius degrees
+    208            * @param  this related object of class CTSNS
+    209            * @retval uint16_t Latest averaged temperature measurement in Celsius degrees
+    210            */
+    211          static int16_t NTC_GetAvTemp_C(CTSNS this)
+    212            {
+    213            int32_t wTemp;
+    214            pDParams_t pDParams_str = DCLASS_PARAMS;
+    215            
+    216            wTemp = (int32_t)(BCLASS_VARS.hAvTemp_d);
+    217            wTemp -= (int32_t)(pDParams_str->wV0);
+    218            wTemp *= pDParams_str->hSensitivity;
+    219            wTemp = wTemp/65536 + (int32_t)(pDParams_str->hT0);
+    220            
+    221            return((int16_t)wTemp);
+    222            }
+    223          /**
+    224            * @}
+    225            */
+    226            
+    227          /**
+    228            * @}
+    229            */
+    230          
+    231          /**
+    232            * @}
+    233            */
+    234          
+    235          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   NTC_CalcAvVbus
+        16   -> PWMC_ExecRegularConv
+       0   NTC_Clear
+       0   NTC_GetAvTemp_C
+      32   NTC_Init
+        32   -> GPIO_Init
+        32   -> GPIO_StructInit
+        32   -> PWMC_ADC_SetSamplingTime
+       8   NTC_NewObject
+         8   -> TSNS_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      72  NTC_CalcAvVbus
+       6  NTC_Clear
+      34  NTC_GetAvTemp_C
+      68  NTC_Init
+      54  NTC_NewObject
+      16  NTC_TSNS_Allocated
+          NTC_TSNSpool
+
+ 
+  16 bytes in section .bss
+ 238 bytes in section .text
+ 
+ 238 bytes of CODE memory
+  16 bytes of DATA memory
+
+Errors: none
+Warnings: none

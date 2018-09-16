@@ -1,0 +1,604 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:54:47
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Application\src\STM32F30x_PFCInit.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Application\src\STM32F30x_PFCInit.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X --preprocess "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Project\EWARM\PFC Application
+#        Compiled\List" -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\PFC Application Compiled\List" -o "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Project\EWARM\PFC Application
+#        Compiled\Obj" --debug --endian=little --cpu=Cortex-M4 -e
+#        --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\PFC_Application\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\PFC_Application\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Project\EWARM\..\..\MCLibrary\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\MClibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\MCLibrary\interface\common\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\MCApplication\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\MCApplication\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\MCApplication\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\SystemDriveParams\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\PFC_Project\EWARM\..\..\Project\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\PFC_Project\EWARM\..\..\UILibrary\interface\" -Oh
+#        --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Project\EWARM\PFC
+#        Application Compiled\List\STM32F30x_PFCInit.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Project\EWARM\PFC
+#        Application Compiled\Obj\STM32F30x_PFCInit.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\PFC_Application\src\STM32F30x_PFCInit.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    STM32F30x_PFCInit.c
+      4            * @author  STMicroelectronics - GCSA - IPD Motion Control Team - Shenzhen
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of PFC Module specific for STM32F3
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software
+     20            * distributed under the License is distributed on an "AS IS" BASIS,
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "MC_type.h"
+     30          #include "PWMnCurrFdbkClass.h"
+     31          #include "PIRegulatorClass.h"
+     32          #include "StateMachineClass.h"
+     33          #include "MCTuningClass.h"
+     34          #include "MCInterfaceClass.h"
+     35          
+     36          #include "STM32F30x_PFCApplication.h"
+     37          #include "Parameters conversion.h"
+     38          
+     39          #if defined(PFC_ENABLED)
+     40          
+     41          #include "PFCParameters.h"
+     42          #include "PFCInit.h"
+     43          
+     44          #define TIMCK_NS ((1.0/TIM_CLK)*1000000000.0) /*!< duration of TIM clock period, ns*/
+     45          
+     46          #undef NONE
+     47          #undef EXT_MODE
+     48          #undef INT_MODE
+     49          #define NONE		0x00
+     50          #define EXT_MODE 	0x01
+     51          #define INT_MODE 	0x02
+     52          
+     53          #if (PFC_USE_INTERNAL_OPAMP == ENABLE)
+     54            #define PFC_OPAMP_PARAMS &PFC_OpAmpParams
+     55          #else
+     56            #define PFC_OPAMP_PARAMS MC_NULL
+     57            #warning "PFC EXT OPAMP"
+     58          #endif
+     59          
+     60          #if (PFC_BKIN_MODE == INT_MODE)
+     61            #define OCP_PFC1_PARAMS  &OCP_PFC_params1
+     62          #else
+     63            #define OCP_PFC1_PARAMS MC_NULL
+     64            #warning "PFC EXT COMP or NONE"
+     65          #endif
+     66          
+     67          #undef NONE
+     68          #undef EXT_MODE
+     69          #undef INT_MODE
+     70          #define NONE		((uint8_t)(0x00))
+     71          #define EXT_MODE 	((uint8_t)(0x01))
+     72          #define INT_MODE 	((uint8_t)(0x02))
+     73          
+     74          /**
+     75            * @brief  Internal COMP parameters PFC 1 - F30x - OCP
+     76            */
+     77          F30XCOMPParams_t OCP_PFC_params1 =
+     78          {
+     79            OCP_PFC_SELECTION,          /*!< Internal comparator used for protection.
+     80                                             It must be
+     81                                             COMP_Selection_COMPx x = 1,2,3,4,5,6,7.*/
+     82            OCP_PFC_INVERTINGINPUT_MODE,/*!< COMPx inverting input mode. It must be either
+     83                                             equal to EXT_MODE or INT_MODE. */
+     84            OCP_PFC_INVERTINGINPUT,     /*!< COMPx inverting input pin. It must be one of
+     85                                             the following:
+     86                                             COMP1_InvertingInput_PA0,
+     87                                             COMP2_InvertingInput_PA2,
+     88                                             COMP3_InvertingInput_PD15,
+     89                                             COMP3_InvertingInput_PB12,
+     90                                             COMP4_InvertingInput_PE8,
+     91                                             COMP4_InvertingInput_PB2,
+     92                                             COMP5_InvertingInput_PD13,
+     93                                             COMP5_InvertingInput_PB10,
+     94                                             COMP6_InvertingInput_PD10,
+     95                                             COMP6_InvertingInput_PB15 if
+     96                                             bInvertingInput_MODE is EXT_MODE or
+     97                                             COMPX_InvertingInput_DAC1,
+     98                                             COMPX_InvertingInput_DAC2,
+     99                                             COMPX_InvertingInput_VREF,
+    100                                             COMPX_InvertingInput_VREF_1_4,
+    101                                             COMPX_InvertingInput_VREF_1_2,
+    102                                             COMPX_InvertingInput_VREF_3_4 if
+    103                                             bInvertingInput_MODE is INT_MODE.
+    104                                             If bInvertingInput_MODE is EXT_MODE, the
+    105                                             only available options are related to the
+    106                                             selected COMP in wSelection.*/
+    107            OCP_PFC_INVERTINGINPUT_GPIO_PORT,/*!< COMPx inverting input GPIO port as defined in
+    108                                             wInvertingInput (Just if
+    109                                             bInvertingInput_MODE is EXT_MODE).
+    110                                             It must be GPIOx x= A, B, ...*/
+    111            OCP_PFC_INVERTINGINPUT_GPIO_PIN,/*!< COMPx inverting input GPIO pin as defined in
+    112                                             wInvertingInput (Just if
+    113                                             bInvertingInput_MODE is EXT_MODE).
+    114                                             It must be GPIO_Pin_x x= 0, 1, ...*/
+    115            OCP_PFC_NONINVERTINGINPUT,  /*!< COMPx non inverting input. It must be one of
+    116                                             the following:
+    117                                             COMP1_NonInvertingInput_PA1,
+    118                                             COMP2_NonInvertingInput_PA3,
+    119                                             COMP2_NonInvertingInput_PA7,
+    120                                             COMP3_NonInvertingInput_PB14,
+    121                                             COMP3_NonInvertingInput_PD14,
+    122                                             COMP4_NonInvertingInput_PB0,
+    123                                             COMP4_NonInvertingInput_PE7,
+    124                                             COMP5_NonInvertingInput_PB13,
+    125                                             COMP5_NonInvertingInput_PD12,
+    126                                             COMP6_NonInvertingInput_PB11,
+    127                                             COMP6_NonInvertingInput_PD11,
+    128                                             COMP7_NonInvertingInput_PC1,
+    129                                             COMP7_NonInvertingInput_PA0.
+    130                                             The only available options are related to the
+    131                                             selected COMP in wSelection.*/
+    132            OCP_PFC_NONINVERTINGINPUT_GPIO_PORT, /*!< COMPx non inverting input GPIO port as
+    133                                             defined in wNonInvertingInput.
+    134                                             It must be GPIOx x= A, B, ...*/
+    135            OCP_PFC_NONINVERTINGINPUT_GPIO_PIN,  /*!< COMPx non inverting input GPIO pin as defined
+    136                                             in wNonInvertingInput.
+    137                                             It must be GPIO_Pin_x x= 0, 1, ...*/
+    138            OCP_PFC_OUTPUT_MODE,        /*!< COMPx output. It must be either
+    139                                             equal to EXT_MODE or INT_MODE. */
+    140            OCP_PFC_OUTPUT,             /*!< COMPx output selection. It must be one of
+    141                                             the following:
+    142                                             COMP_Output_TIM1BKIN,
+    143                                             COMP_Output_TIM1BKIN2,
+    144                                             COMP_Output_TIM8BKIN,
+    145                                             COMP_Output_TIM8BKIN2,
+    146                                             COMP_Output_TIM1BKIN2_TIM8BKIN2.*/
+    147            OCP_PFC_OUTPUT_GPIO_PORT,   /*!< COMPx output GPIO port.
+    148                                             It must be GPIOx x= A, B, ...*/
+    149            OCP_PFC_OUTPUT_GPIO_PIN,    /*!< COMPx output GPIO pin as defined.
+    150                                             It must be GPIO_Pin_x x= 0, 1, ...*/
+    151            OCP_PFC_OUTPUT_GPIO_AF,     /*!< COMPx output alternate functions setting.
+    152                                             It must be one of the GPIO_AF_x (x=0,1, ...)
+    153                                             according to the defined GPIO port and pin.*/
+    154            OCP_PFC_OUTPUTPOL,          /*!< COMPx output polarity. It must be one of
+    155                                             the following:
+    156                                             COMP_OutputPol_NonInverted,
+    157                                             COMP_OutputPol_Inverted.*/
+    158            OCP_PFC_FILTER,             /*!< COMPx mode it is used to define both
+    159                                             the speed (analog filter) and
+    160                                             the power consumption of the internal
+    161                                             comparator. It must be one of the
+    162                                             following:
+    163                                             COMP_Mode_HighSpeed,
+    164                                             COMP_Mode_MediumSpeed,
+    165                                             COMP_Mode_LowPower,
+    166                                             COMP_Mode_UltraLowPower.
+    167                                             More speed means less filter and more
+    168                                             consumption.*/
+    169          
+    170          };
+    171          
+    172          PFC_R3_4_F30XOPAMPParams_t PFC_OpAmpParams =
+    173          {
+    174            /* Internal OPAMP1 settings --------------------------------------------------*/
+    175            PFC_OPAMP_SELECTION,		            /*!< First OPAMP selection. It must be
+    176                                                     either equal to
+    177                                                     OPAMP_Selection_OPAMP1 or
+    178                                                     OPAMP_Selection_OPAMP3.*/
+    179            PFC_OPAMP_INVERTINGINPUT_MODE,      /*!< First OPAMP inverting input mode.
+    180                                                     It must be either equal to EXT_MODE
+    181                                                     or INT_MODE.*/
+    182            PFC_OPAMP_INVERTINGINPUT,           /*!< First OPAMP inverting input pin.
+    183          
+    184                                                     If wOPAMP_Selection is
+    185                                                     OPAMP_Selection_OPAMP1 it
+    186                                                     must be one of the following:
+    187                                                     OPAMP1_InvertingInput_PC5 or
+    188                                                     OPAMP1_InvertingInput_PA3 if the
+    189                                                     bOPAMP_InvertingInput_MODE is
+    190                                                     EXT_MODE or
+    191                                                     OPAMP1_InvertingInput_PGA or
+    192                                                     OPAMP1_InvertingInput_FOLLOWER if the
+    193                                                     bOPAMP_InvertingInput_MODE is
+    194                                                     INT_MODE.
+    195          
+    196                                                     If wOPAMP_Selection is
+    197                                                     OPAMP_Selection_OPAMP3 it
+    198                                                     must be one of the following:
+    199                                                     OPAMP3_InvertingInput_PB10 or
+    200                                                     OPAMP3_InvertingInput_PB2 if the
+    201                                                     bOPAMP_InvertingInput_MODE is
+    202                                                     EXT_MODE or
+    203                                                     OPAMP3_InvertingInput_PGA or
+    204                                                     OPAMP3_InvertingInput_FOLLOWER if the
+    205                                                     bOPAMP_InvertingInput_MODE is
+    206                                                     INT_MODE.*/
+    207            PFC_OPAMP_INVERTINGINPUT_GPIO_PORT, /*!< First OPAMP inverting input GPIO port
+    208                                                     as defined in wOPAMP_InvertingInput.
+    209                                                     It must be GPIOx x= A, B, ... if
+    210                                                     bOPAMP_InvertingInput_MODE is
+    211                                                     EXT_MODE, otherwise can be dummy.*/
+    212            PFC_OPAMP_INVERTINGINPUT_GPIO_PIN,  /*!< First OPAMP inverting input GPIO pin
+    213                                                     as defined in wOPAMP_InvertingInput.
+    214                                                     It must be GPIO_Pin_x x= 0, 1, ... if
+    215                                                     bOPAMP_InvertingInput_MODE is
+    216                                                     EXT_MODE, otherwise can be dummy.*/
+    217            PFC_OPAMP_NONINVERTINGINPUT,        /*!< First OPAMP non inverting input first
+    218                                                     selection.
+    219          
+    220                                                     If wOPAMP_Selection is
+    221                                                     OPAMP_Selection_OPAMP1 it
+    222                                                     must be one of the following:
+    223                                                     OPAMP1_NonInvertingInput_PA7,
+    224                                                     OPAMP1_NonInvertingInput_PA5,
+    225                                                     OPAMP1_NonInvertingInput_PA3,
+    226                                                     OPAMP1_NonInvertingInput_PA1.
+    227          
+    228                                                     If wOPAMP_Selection is
+    229                                                     OPAMP_Selection_OPAMP3 it
+    230                                                     must be one of the following:
+    231                                                     OPAMP3_NonInvertingInput_PB13,
+    232                                                     OPAMP3_NonInvertingInput_PA5,
+    233                                                     OPAMP3_NonInvertingInput_PA1,
+    234                                                     OPAMP3_NonInvertingInput_PB0.*/
+    235            PFC_OPAMP_NONINVERTINGINPUT_GPIO_PORT,
+    236                                                /*!< First OPAMP non inverting input GPIO
+    237                                                     port as defined in
+    238                                                     wOPAMP_NonInvertingInput_PHA.
+    239                                                     It must be GPIOx x= A, B, ...*/
+    240            PFC_OPAMP_NONINVERTINGINPUT_GPIO_PIN,
+    241                                                /*!< First OPAMP non inverting input GPIO
+    242                                                     pin as defined in
+    243                                                     wOPAMP_NonInvertingInput_PHA.
+    244                                                     It must be GPIO_Pin_x x= 0, 1, ...*/
+    245          
+    246            PFC_OPAMP_OUT_GPIO_PORT,
+    247                                                /*!< First OPAMP output GPIO port.
+    248                                                     It must be GPIOx x= A, B, ...
+    249                                                     Note: Output pin is PA2 for OPAMP1,
+    250                                                     PB1 for OPAMP3.*/
+    251            PFC_OPAMP_OUT_GPIO_PIN,
+    252                                                /*!< First OPAMP output GPIO pin.
+    253                                                     It must be GPIO_Pin_x x= 0, 1, ...
+    254                                                     Note: Output pin is PA2 for OPAMP1,
+    255                                                     PB1 for OPAMP3.*/
+    256          /* Common settings -----------------------------------------------------------*/
+    257            PFC_OPAMP_PGAGAIN,                  /*!< It defines the OPAMP PGA gains.
+    258          	                                         It must be one of the following:
+    259                                                     OPAMP_OPAMP_PGAGain_2,
+    260                                                     OPAMP_OPAMP_PGAGain_4,
+    261                                                     OPAMP_OPAMP_PGAGain_8,
+    262                                                     OPAMP_OPAMP_PGAGain_16.
+    263                                                     This value is taken in account
+    264                                                     just if wOPAMPx_InvertingInput is
+    265                                                     equal to OPAMP2_InvertingInput_PGA*/
+    266            PFC_OPAMP_PGACONNECT                    /*!< It defines the OPAMP connection
+    267                                                     with an external filter when PGA
+    268                                                     is enabled.
+    269                                                     It must be one of the following:
+    270                                                     OPAMP_PGAConnect_No,
+    271                                                     OPAMP_PGAConnect_IO1,
+    272                                                     OPAMP_PGAConnect_IO2.
+    273                                                     See reference manual RM0316.
+    274                                                     This value is taken in account
+    275                                                     just if wOPAMPx_InvertingInput is
+    276                                                     equal to OPAMP2_InvertingInput_PGA*/
+    277          
+    278          };
+    279          
+    280          
+    281          PFCParams_t PFCParams =
+    282          {
+    283            /* Current reading A/D Conversions initialization --------------------------*/
+    284            PFC_ADC,                        /*!< ADC peripheral to be used*/
+    285            (bool)ADCINITIALIZED,           /*!< TRUE if ADC2 has been already
+    286                                                 initialized (3shunt or ICS configurations),
+    287                                                 FALSE otherwise (1shunt configuration)*/
+    288            ADC_CLOCK_DIVIDER,              /*!< APB2 clock prescaling factor for
+    289                                                 ADC peripheral. It must be RCC_PCLK2_DivX
+    290                                                 x = 2, 4, 6, 8 */
+    291            (uint8_t)ICHANNEL,              /*!< ADC channel used for conversion of
+    292                                                 current. It must be equal to
+    293                                                 ADC_Channel_x x= 0, ..., 15*/
+    294            (GPIO_TypeDef*)IPORT,           /*!< GPIO port used by hIChannel. It must
+    295                                                 be equal to GPIOx x= A, B, ...*/
+    296            (uint16_t)IPIN,                 /*!< GPIO pin used by hIChannel. It must be
+    297                                                 equal to GPIO_Pin_x x= 0, 1, ...*/
+    298            (uint8_t)ISAMPLINGTIME,         /*!< Sampling time used to convert hIChannel.
+    299                                                 It must be equal to ADC_SampleTime_xCycles5
+    300                                                 x= 1, 7, ...*/
+    301          
+    302            (uint8_t)VMCHANNEL,             /*!< ADC channel used for conversion of
+    303                                                 Mains Voltage. It must be equal to
+    304                                                 ADC_Channel_x x= 0, ..., 15*/
+    305            (GPIO_TypeDef*)VMPORT,          /*!< GPIO port used by hVMChannel. It must
+    306                                                 be equal to GPIOx x= A, B, ...*/
+    307            (uint16_t)VMPIN,                /*!< GPIO pin used by hVMChannel. It must be
+    308                                                 equal to GPIO_Pin_x x= 0, 1, ...*/
+    309            (uint8_t)VMSAMPLINGTIME,        /*!< Sampling time used to convert hVMChannel.
+    310                                                 It must be equal to ADC_SampleTime_xCycles5
+    311                                                 x= 1, 7, ...*/
+    312          
+    313            /* PWM generation parameters --------------------------------------------------*/
+    314            (uint32_t)TIM_CLK,                  /*!< CPU and TIM frequency, MHz*/
+    315            (uint32_t)PWMFREQ,                  /*!< PWM frequency expressed in Hertz*/
+    316            (uint16_t)(TIM_CLK/PWMFREQ),		    /*!< Timer ARR related to PFC PWM frequency*/
+    317            (uint16_t)PWMPOLARITY,              /*!< PMW output polarity, it must be
+    318                                                     TIM_OCPolarity_High or TIM_OCPolarity_Low
+    319          										                       according to power device driver */
+    320            (GPIO_TypeDef*)PWMPORT,             /*!< PWM output port (as after re-mapping).
+    321                                                     It must be GPIOx x= A, B, ...
+    322          										                       It must be associated to TIMx CH1*/
+    323            (uint16_t)PWMPIN,                   /*!< PWM output pin (as after re-mapping).
+    324                                                     It must be GPIO_Pin_x x= 0, 1, ...
+    325          										                       It must be associated to TIMx CH1*/
+    326          
+    327            (uint8_t)PWM_AF,                    /*!< PFC PWM alternate function output port.
+    328                                                     It must be GPIO_AF_x x= 0, 1, .. according to the GPIO port and Pin */
+    329            (FunctionalState)ETRFAULT,          /*!< It enable/disable the management of
+    330                                                     an emergency input instantaneously
+    331                                                     stopping PWM generation. It must be
+    332                                                     either equal to ENABLE or DISABLE */
+    333            (uint16_t)BKINFILTER,               /*!< ETR input polarity, according to
+    334                                                     hardware protection polarity:
+    335                                                     TIM_ExtTRGPolarity_Inverted,
+    336                                                     TIM_ExtTRGPolarity_NonInverted*/
+    337            (uint8_t)BKINPOLARITY,              /*!< 1 if fault is on rising edge, 0
+    338                                                     if fault is on falling edge*/
+    339            (GPIO_TypeDef*)BKINPORT,            /*!< Fault GPIO input
+    340                                                     port (if used, after re-mapping).
+    341                                                     It must be GPIOx x= A, B, ...*/
+    342            (uint16_t)BKINPIN,                  /*!< Fault GPIO input pin
+    343                                                     (if used, after re-mapping). It must be
+    344                                                     GPIO_Pin_x x= 0, 1, ...*/
+    345            (uint16_t)ETRFILTER,                /*!< Time filter applied to validate ETR.
+    346                                                     This value defines the frequency used to sample
+    347                                                     ETR input and the length of the digital
+    348                                                     filter applied. The digital filter is made of an
+    349                                                     event counter in which N events are needed to
+    350                                                     validate a transition on the input.
+    351                                                     0000: No filter, sampling is done at fCK_INT.
+    352                                                     0001: fSAMPLING=fCK_INT , N=2.
+    353                                                     0010: fSAMPLING=fCK_INT , N=4.
+    354                                                     0011: fSAMPLING=fCK_INT , N=8.
+    355                                                     0100: fSAMPLING=fCK_INT/2, N=6.
+    356                                                     0101: fSAMPLING=fCK_INT/2, N=8.
+    357                                                     0110: fSAMPLING=fCK_INT/4, N=6.
+    358                                                     0111: fSAMPLING=fCK_INT/4, N=8.
+    359                                                     1000: fSAMPLING=fCK_INT/8, N=6.
+    360                                                     1001: fSAMPLING=fCK_INT/8, N=8.
+    361                                                     1010: fSAMPLING=fCK_INT/16, N=5.
+    362                                                     1011: fSAMPLING=fCK_INT/16, N=6.
+    363                                                     1100: fSAMPLING=fCK_INT/16, N=8.
+    364                                                     1101: fSAMPLING=fCK_INT/32, N=5.
+    365                                                     1110: fSAMPLING=fCK_INT/32, N=6.
+    366                                                     1111: fSAMPLING=fCK_INT/32, N=8 */
+    367          
+    368            /* VMAINS syncronization parameters ----------------------------------------*/
+    369            (uint16_t)SYNCPOLARITY,             /*!< Syncronization circuit polarity, it must be
+    370                                                     TIM_ICPolarity_Rising or TIM_ICPolarity_Falling */
+    371            (GPIO_TypeDef*)SYNCPORT,            /*!< SYNC input port (as after re-mapping).
+    372                                                     It must be GPIOx x= A, B, ...
+    373          										                       It must be associated to TIMx CH2*/
+    374            (uint16_t)SYNCPIN,                  /*!< SYNC input pin (as after re-mapping).
+    375                                                     It must be GPIO_Pin_x x= 0, 1, ...
+    376          										                       It must be associated to TIMx CH2*/
+    377            (uint8_t)SYNC_AF,                   /*!< SYNC input port (as after re-mapping).
+    378                                                     It must be GPIO_AF_x x= 0, 1, ...
+    379          										                       It must be associated to TIM4 CH2*/
+    380            (uint16_t)SYNCFILTER,               /*!< Time filter applied to validate SYNC.
+    381                                                     This value defines the frequency used to sample
+    382                                                     SYNC input and the length of the digital
+    383                                                     filter applied. The digital filter is made of an
+    384                                                     event counter in which N events are needed to
+    385                                                     validate a transition on the input.
+    386                                                     0000: No filter, sampling is done at fCK_INT.
+    387                                                     0001: fSAMPLING=fCK_INT , N=2.
+    388                                                     0010: fSAMPLING=fCK_INT , N=4.
+    389                                                     0011: fSAMPLING=fCK_INT , N=8.
+    390                                                     0100: fSAMPLING=fCK_INT/2, N=6.
+    391                                                     0101: fSAMPLING=fCK_INT/2, N=8.
+    392                                                     0110: fSAMPLING=fCK_INT/4, N=6.
+    393                                                     0111: fSAMPLING=fCK_INT/4, N=8.
+    394                                                     1000: fSAMPLING=fCK_INT/8, N=6.
+    395                                                     1001: fSAMPLING=fCK_INT/8, N=8.
+    396                                                     1010: fSAMPLING=fCK_INT/16, N=5.
+    397                                                     1011: fSAMPLING=fCK_INT/16, N=6.
+    398                                                     1100: fSAMPLING=fCK_INT/16, N=8.
+    399                                                     1101: fSAMPLING=fCK_INT/32, N=5.
+    400                                                     1110: fSAMPLING=fCK_INT/32, N=6.
+    401                                                     1111: fSAMPLING=fCK_INT/32, N=8 */
+    402          
+    403            /* PFC Control Parameters --------------------------------------------------*/
+    404            (uint8_t)(PWMFREQ/CURRCTRLFREQUENCY),/*!< Ratio PWM frequency to Current
+    405            				                                 control frequency */
+    406            (uint8_t)(SYS_TICK_FREQUENCY/VOLTCTRLFREQUENCY), /*!< Ratio PFC_Scheduler()
+    407                                                     frequency to Voltage control frequency */
+    408            (uint16_t)(NOMINALCURRENT),           /*!< Output nominal current in u16A */
+    409          	{
+    410            		(int16_t)PID_CURR_KP_DEFAULT,    /*!< Default Kp gain, used to initialize Kp gain
+    411                                                      software variable*/
+    412            		(int16_t)PID_CURR_KI_DEFAULT,    /*!< Default Ki gain, used to initialize Ki gain
+    413                                                      software variable*/
+    414            		(uint16_t)CURR_KPDIV,            /*!< Kp gain divisor, used in conjuction with
+    415                                                      Kp gain allows obtaining fractional values.
+    416                                                      If FULL_MISRA_C_COMPLIANCY is not defined
+    417                                                      the divisor is implemented through
+    418                                                      algebrical right shifts to speed up PI
+    419                                                      execution. Only in this case this parameter
+    420                                                      specifies the number of right shifts to be
+    421                                                      executed */
+    422            		(uint16_t)CURR_KIDIV,            /*!< Ki gain divisor, used in conjuction with
+    423                                                      Ki gain allows obtaining fractional values.
+    424                                                      If FULL_MISRA_C_COMPLIANCY is not defined
+    425                                                      the divisor is implemented through
+    426                                                      algebrical right shifts to speed up PI
+    427                                                      execution. Only in this case this parameter
+    428                                                      specifies the number of right shifts to be
+    429                                                      executed */
+    430            		(int32_t)S16_MAX * CURR_KIDIV,   /*!< Upper limit used to saturate the integral
+    431                                                      term given by Ki / Ki divisor * integral of
+    432                                                      process variable error */
+    433            		(int32_t)(-S16_MAX) * CURR_KIDIV,/*!< Lower limit used to saturate the integral
+    434                                                      term given by Ki / Ki divisor * integral of
+    435                                                      process variable error */
+    436            		S16_MAX,                         /*!< Upper limit used to saturate the PI output */
+    437            		0,                               /*!< Lower limit used to saturate the PI output */
+    438                (uint16_t)LOG2(CURR_KPDIV),      /*!< Kp gain divisor expressed as power of 2.
+    439                                                      E.g. if gain divisor is 512 the value
+    440                                                      must be 9 because 2^9 = 512 */
+    441                (uint16_t)LOG2(CURR_KIDIV)       /*!< Ki gain divisor expressed as power of 2.
+    442                                                      E.g. if gain divisor is 512 the value
+    443                                                      must be 9 because 2^9 = 512 */
+    444          	},
+    445          	{
+    446            		(int16_t)PID_VOLT_KP_DEFAULT,    /*!< Default Kp gain, used to initialize Kp gain
+    447                                                      software variable*/
+    448            		(int16_t)PID_VOLT_KI_DEFAULT,    /*!< Default Ki gain, used to initialize Ki gain
+    449                                                      software variable*/
+    450            		(uint16_t)VOLT_KPDIV,            /*!< Kp gain divisor, used in conjuction with
+    451                                                      Kp gain allows obtaining fractional values.
+    452                                                      If FULL_MISRA_C_COMPLIANCY is not defined
+    453                                                      the divisor is implemented through
+    454                                                      algebrical right shifts to speed up PI
+    455                                                      execution. Only in this case this parameter
+    456                                                      specifies the number of right shifts to be
+    457                                                      executed */
+    458            		(uint16_t)VOLT_KIDIV,            /*!< Ki gain divisor, used in conjuction with
+    459                                                      Ki gain allows obtaining fractional values.
+    460                                                      If FULL_MISRA_C_COMPLIANCY is not defined
+    461                                                      the divisor is implemented through
+    462                                                      algebrical right shifts to speed up PI
+    463                                                      execution. Only in this case this parameter
+    464                                                      specifies the number of right shifts to be
+    465                                                      executed */
+    466            		(int32_t)(NOMINALCURRENT/2) * VOLT_KIDIV,/*!< Upper limit used to saturate the integral
+    467                                                      term given by Ki / Ki divisor * integral of
+    468                                                      process variable error */
+    469            		(int32_t)(-(NOMINALCURRENT/2)) * VOLT_KIDIV,/*!< Lower limit used to saturate the integral
+    470                                                      term given by Ki / Ki divisor * integral of
+    471                                                      process variable error */
+    472            		(int16_t)(NOMINALCURRENT/2),         /*!< Upper limit used to saturate the PI output */
+    473            		(int16_t)(-(NOMINALCURRENT/2)),      /*!< Lower limit used to saturate the PI output */
+    474                (uint16_t)LOG2(VOLT_KPDIV),      /*!< Kp gain divisor expressed as power of 2.
+    475                                                      E.g. if gain divisor is 512 the value
+    476                                                      must be 9 because 2^9 = 512 */
+    477            (uint16_t)LOG2(VOLT_KIDIV)           /*!< Ki gain divisor expressed as power of 2.
+    478                                                      E.g. if gain divisor is 512 the value
+    479                                                      must be 9 because 2^9 = 512 */
+    480          	},
+    481            (int16_t)((STARTUPDURATION*0.001)*(VOLTCTRLFREQUENCY*1.0)), /*!< Default duration of PFC startup
+    482                                                     phase, expressed in voltage loops */
+    483            (int16_t)VOLTAGEREFERENCE,          /*!< Default Boost Voltage reference,
+    484                                                     expressed in Volts */
+    485            (uint16_t)MAINSFREQLOWTH,           /*!< Min Mains frequency allowed for PFC
+    486                                                     operations, expressed in tenth of Hz */
+    487            (uint16_t)MAINSFREQHITH,            /*!< Max Mains frequency allowed for PFC
+    488                                                     operations, expressed in tenth of Hz */
+    489            (int16_t)VMAINSAMPLLOWTH,           /*!< Min Mains voltage amplitude allowed for
+    490                                                     PFC operations, expressed in Volts */
+    491            (int16_t)VMAINSAMPLHITH,            /*!< Max Mains voltage amplitude allowed for
+    492                                                     PFC operations, expressed in Volts */
+    493            (int16_t)OUTPUTPOWERACTIVATION,     /*!< Output power for PFC activation,
+    494                                                     expressed in Watts */
+    495            (int16_t)OUTPUTPOWERDEACTIVATION,   /*!< Output power for PFC deactivation,
+    496                                                     expressed in Watts */
+    497            (int16_t)SWOVERVOLTAGETH,           /*!< Software OverVoltage threshold,
+    498                                                     expressed in Volts */
+    499            (int16_t)SWOVERCURRENTTH,           /*!< Software OverCurrent threshold,
+    500                                                     expressed in s16A */
+    501            (uint16_t)(PROPDELAYON/TIMCK_NS),   /*!< Latency at PFC switch turn-on, TIM clock cycles*/
+    502            (uint16_t)(PROPDELAYOFF/TIMCK_NS),  /*!< Latency at PFC switch turn-off, TIM clock cycles*/
+    503            (uint16_t)(TIM_CLK/(ADC_CLK_MHz*1000000.0)*ISAMPLINGTIMEREAL),   /*!< ADC sampling time, TIM clock cycles*/
+    504            (uint16_t)(TIM_CLK/(ADC_CLK_MHz*1000000.0)*12), /*!< ADC conversion time, TIM clock cycles*/
+    505            (uint16_t)(TIM_CLK/(ADC_CLK_MHz*1000000.0)*3),    /*!< ADC latency time, TIM clock cycles*/
+    506            (uint16_t)(65535.0/(3.3 * VMAINS_PARTITIONING_FACTOR)), /*!< It is used to convert bus voltage from
+    507                                                     u16Volts into real Volts (V).
+    508                                                     1 u16Volt = 65536/hConversionFactor Volts
+    509                                                     For real sensors hConversionFactor it's
+    510                                                     equal to the product between the expected MCU
+    511                                                     voltage and the partioning network
+    512                                                     attenuation*/
+    513            (uint16_t)((PFCSHUNTRESISTOR*PFCAMPLGAIN*65536.0)/3.3), /*!< it's used to convert AC mains current from
+    514                                                     u16Amps into real Amperes (A)*/
+    515            (PFC_pF30XCOMPParams_t) (OCP_PFC1_PARAMS),
+    516            (uint16_t) (OCP_PFC_REF),
+    517            (PFC_pR3_4_F30XOPAMPParams_t) (PFC_OPAMP_PARAMS)
+    518          };
+    519          
+    520          
+    521          /**
+    522            * @brief  It initializes the PFC application. It must be called only after
+    523            *         Motor Control Application initialization (MC_Boot)
+    524            * @param  oMCT CMCT object, motor drive coordinated with PFC
+    525            * @param  oMCT CMCT object, motor drive coordinated with PFC
+    526            * @param  pBusVoltage pointer, if PFC doesn't receive coordinated MC objects
+    527            * @retval none
+    528            */
+    529          void PFC_Boot(CMCT oMCT1, CMCT oMCT2, int16_t *pBusVoltage)
+    530          {
+    531            PFC_Init(&PFCParams,oMCT1,oMCT2,pBusVoltage);
+    532          }
+    533          
+    534          #endif
+    535          
+    536          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+
+ 
+
+ 
+
+
+Errors: none
+Warnings: none

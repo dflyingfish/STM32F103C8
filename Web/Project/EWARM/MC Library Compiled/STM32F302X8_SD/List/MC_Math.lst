@@ -1,0 +1,505 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:30
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\MC_Math.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\MC_Math.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\MC_Math.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\MC_Math.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\MC_Math.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    MC_Math.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of PI Regulator class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          /* Includes ------------------------------------------------------------------*/
+     28          #include "MC_Math.h"
+     29          #include "MC_type.h"
+     30          
+     31          /* Private macro -------------------------------------------------------------*/
+     32          #define SIN_COS_TABLE {\
+     33          0x0000,0x00C9,0x0192,0x025B,0x0324,0x03ED,0x04B6,0x057F,\
+     34          0x0648,0x0711,0x07D9,0x08A2,0x096A,0x0A33,0x0AFB,0x0BC4,\
+     35          0x0C8C,0x0D54,0x0E1C,0x0EE3,0x0FAB,0x1072,0x113A,0x1201,\
+     36          0x12C8,0x138F,0x1455,0x151C,0x15E2,0x16A8,0x176E,0x1833,\
+     37          0x18F9,0x19BE,0x1A82,0x1B47,0x1C0B,0x1CCF,0x1D93,0x1E57,\
+     38          0x1F1A,0x1FDD,0x209F,0x2161,0x2223,0x22E5,0x23A6,0x2467,\
+     39          0x2528,0x25E8,0x26A8,0x2767,0x2826,0x28E5,0x29A3,0x2A61,\
+     40          0x2B1F,0x2BDC,0x2C99,0x2D55,0x2E11,0x2ECC,0x2F87,0x3041,\
+     41          0x30FB,0x31B5,0x326E,0x3326,0x33DF,0x3496,0x354D,0x3604,\
+     42          0x36BA,0x376F,0x3824,0x38D9,0x398C,0x3A40,0x3AF2,0x3BA5,\
+     43          0x3C56,0x3D07,0x3DB8,0x3E68,0x3F17,0x3FC5,0x4073,0x4121,\
+     44          0x41CE,0x427A,0x4325,0x43D0,0x447A,0x4524,0x45CD,0x4675,\
+     45          0x471C,0x47C3,0x4869,0x490F,0x49B4,0x4A58,0x4AFB,0x4B9D,\
+     46          0x4C3F,0x4CE0,0x4D81,0x4E20,0x4EBF,0x4F5D,0x4FFB,0x5097,\
+     47          0x5133,0x51CE,0x5268,0x5302,0x539B,0x5432,0x54C9,0x5560,\
+     48          0x55F5,0x568A,0x571D,0x57B0,0x5842,0x58D3,0x5964,0x59F3,\
+     49          0x5A82,0x5B0F,0x5B9C,0x5C28,0x5CB3,0x5D3E,0x5DC7,0x5E4F,\
+     50          0x5ED7,0x5F5D,0x5FE3,0x6068,0x60EB,0x616E,0x61F0,0x6271,\
+     51          0x62F1,0x6370,0x63EE,0x646C,0x64E8,0x6563,0x65DD,0x6656,\
+     52          0x66CF,0x6746,0x67BC,0x6832,0x68A6,0x6919,0x698B,0x69FD,\
+     53          0x6A6D,0x6ADC,0x6B4A,0x6BB7,0x6C23,0x6C8E,0x6CF8,0x6D61,\
+     54          0x6DC9,0x6E30,0x6E96,0x6EFB,0x6F5E,0x6FC1,0x7022,0x7083,\
+     55          0x70E2,0x7140,0x719D,0x71F9,0x7254,0x72AE,0x7307,0x735E,\
+     56          0x73B5,0x740A,0x745F,0x74B2,0x7504,0x7555,0x75A5,0x75F3,\
+     57          0x7641,0x768D,0x76D8,0x7722,0x776B,0x77B3,0x77FA,0x783F,\
+     58          0x7884,0x78C7,0x7909,0x794A,0x7989,0x79C8,0x7A05,0x7A41,\
+     59          0x7A7C,0x7AB6,0x7AEE,0x7B26,0x7B5C,0x7B91,0x7BC5,0x7BF8,\
+     60          0x7C29,0x7C59,0x7C88,0x7CB6,0x7CE3,0x7D0E,0x7D39,0x7D62,\
+     61          0x7D89,0x7DB0,0x7DD5,0x7DFA,0x7E1D,0x7E3E,0x7E5F,0x7E7E,\
+     62          0x7E9C,0x7EB9,0x7ED5,0x7EEF,0x7F09,0x7F21,0x7F37,0x7F4D,\
+     63          0x7F61,0x7F74,0x7F86,0x7F97,0x7FA6,0x7FB4,0x7FC1,0x7FCD,\
+     64          0x7FD8,0x7FE1,0x7FE9,0x7FF0,0x7FF5,0x7FF9,0x7FFD,0x7FFE}
+     65          
+     66          #define SIN_MASK        0x0300u
+     67          #define U0_90           0x0200u
+     68          #define U90_180         0x0300u
+     69          #define U180_270        0x0000u
+     70          #define U270_360        0x0100u
+     71          #define divSQRT_3	(int32_t)0x49E6    /* 1/sqrt(3) in q1.15 format=0.5773315*/
+     72          
+     73          /* Private variables ---------------------------------------------------------*/
+     74          const int16_t hSin_Cos_Table[256] = SIN_COS_TABLE;
+     75          
+     76          #if defined (CCMRAM)
+     77          #if defined (__ICCARM__)
+     78          #pragma location = ".ccmram"
+     79          #elif defined (__CC_ARM)
+     80          __attribute__((section ("ccmram")))
+     81          #endif
+     82          #endif
+     83          /**
+     84            * @brief  This function transforms stator currents Ia and qIb (which are 
+     85            *         directed along axes each displaced by 120 degrees) into currents 
+     86            *         Ialpha and Ibeta in a stationary qd reference frame.
+     87            *                               Ialpha = Ia
+     88            *                       Ibeta = -(2*Ib+Ia)/sqrt(3)
+     89            * @param  Curr_Input: stator current Ia and Ib in Curr_Components format
+     90            * @retval Stator current Ialpha and Ibeta in Curr_Components format
+     91            */
+     92          Curr_Components MCM_Clarke(Curr_Components Curr_Input)
+     93          {
+     94            Curr_Components Curr_Output;
+     95            
+     96            int32_t qIa_divSQRT3_tmp, qIb_divSQRT3_tmp ;
+     97            int32_t wIbeta_tmp;
+     98            int16_t hIbeta_tmp;
+     99          
+    100            /* qIalpha = qIas*/
+    101            Curr_Output.qI_Component1= Curr_Input.qI_Component1;  
+    102            
+    103            qIa_divSQRT3_tmp = divSQRT_3 * (int32_t)Curr_Input.qI_Component1;
+    104            
+    105            qIb_divSQRT3_tmp = divSQRT_3 * (int32_t)Curr_Input.qI_Component2;
+    106            
+    107            /*qIbeta = -(2*qIbs+qIas)/sqrt(3)*/   
+    108          #ifdef FULL_MISRA_C_COMPLIANCY
+    109            wIbeta_tmp = (-(qIa_divSQRT3_tmp)-(qIb_divSQRT3_tmp)-
+    110                                                                (qIb_divSQRT3_tmp))/32768;
+    111          #else
+    112          /* WARNING: the below instruction is not MISRA compliant, user should verify 
+    113            that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+    114            the compiler to perform the shift (instead of LSR logical shift right) */
+    115          
+    116            wIbeta_tmp = (-(qIa_divSQRT3_tmp)-(qIb_divSQRT3_tmp)-
+    117                                                                 (qIb_divSQRT3_tmp))>> 15;
+    118          #endif
+    119            
+    120            /* Check saturation of Ibeta */
+    121            if (wIbeta_tmp > S16_MAX)
+    122            {
+    123              hIbeta_tmp = S16_MAX;
+    124            }
+    125            else if (wIbeta_tmp < (-32768))
+    126            {
+    127              hIbeta_tmp = (-32768);
+    128            }
+    129            else
+    130            {
+    131              hIbeta_tmp = (int16_t)(wIbeta_tmp);
+    132            }
+    133            
+    134            Curr_Output.qI_Component2 = hIbeta_tmp;
+    135            
+    136            if (Curr_Output.qI_Component2 == (int16_t)(-32768))
+    137            {
+    138              Curr_Output.qI_Component2 = -32767;
+    139            }
+    140            
+    141            return(Curr_Output); 
+    142          }
+    143          
+    144          #if defined (CCMRAM)
+    145          #if defined (__ICCARM__)
+    146          #pragma location = ".ccmram"
+    147          #elif defined (__CC_ARM)
+    148          __attribute__((section ("ccmram")))
+    149          #endif
+    150          #endif
+    151          /**
+    152            * @brief  This function transforms stator currents Ialpha and Ibeta, which 
+    153            *         belong to a stationary qd reference frame, to a rotor flux 
+    154            *         synchronous reference frame (properly oriented), so as Iq and Id.
+    155            *                   Id= Ialpha *sin(theta)+qIbeta *cos(Theta)
+    156            *                   Iq=qIalpha *cos(Theta)-qIbeta *sin(Theta)            
+    157            * @param  Curr_Input: stator current Ialpha and Ibeta in Curr_Components format
+    158            * @param  Theta: rotating frame angular position in q1.15 format
+    159            * @retval Stator current Iq and Id in Curr_Components format
+    160            */
+    161          Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
+    162          {
+    163            Curr_Components Curr_Output;
+    164            int32_t qId_tmp_1, qId_tmp_2, qIq_tmp_1, qIq_tmp_2;     
+    165            Trig_Components Local_Vector_Components;
+    166            int32_t wIqd_tmp;
+    167            int16_t hIqd_tmp;
+    168          
+    169            Local_Vector_Components = MCM_Trig_Functions(Theta);
+    170            
+    171            /*No overflow guaranteed*/
+    172            qIq_tmp_1 = Curr_Input.qI_Component1 * (int32_t)Local_Vector_Components.hCos;  	
+    173          
+    174            /*No overflow guaranteed*/
+    175            qIq_tmp_2 = Curr_Input.qI_Component2 * (int32_t)Local_Vector_Components.hSin;
+    176          
+    177            /*Iq component in Q1.15 Format */
+    178          #ifdef FULL_MISRA_C_COMPLIANCY
+    179            wIqd_tmp = (qIq_tmp_1-qIq_tmp_2)/32768;
+    180          #else
+    181          /* WARNING: the below instruction is not MISRA compliant, user should verify 
+    182            that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+    183            the compiler to perform the shift (instead of LSR logical shift right) */  
+    184            wIqd_tmp = (qIq_tmp_1-qIq_tmp_2)>>15;
+    185          #endif
+    186            
+    187            /* Check saturation of Iq */
+    188            if (wIqd_tmp > S16_MAX)
+    189            {
+    190              hIqd_tmp = S16_MAX;
+    191            }
+    192            else if (wIqd_tmp < (-32768))
+    193            {
+    194              hIqd_tmp = (-32768);
+    195            }
+    196            else
+    197            {
+    198              hIqd_tmp = (int16_t)(wIqd_tmp);
+    199            }
+    200            
+    201            Curr_Output.qI_Component1 = hIqd_tmp;
+    202            
+    203            if (Curr_Output.qI_Component1 == (int16_t)(-32768))
+    204            {
+    205              Curr_Output.qI_Component1 = -32767;
+    206            }
+    207            
+    208            /*No overflow guaranteed*/
+    209            qId_tmp_1 = Curr_Input.qI_Component1 * (int32_t)Local_Vector_Components.hSin;
+    210           
+    211            /*No overflow guaranteed*/
+    212            qId_tmp_2 = Curr_Input.qI_Component2 * (int32_t)Local_Vector_Components.hCos;
+    213           
+    214            /*Id component in Q1.15 Format */
+    215          #ifdef FULL_MISRA_C_COMPLIANCY
+    216            wIqd_tmp = (qId_tmp_1+qId_tmp_2)/32768;
+    217          #else
+    218          /* WARNING: the below instruction is not MISRA compliant, user should verify 
+    219            that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+    220            the compiler to perform the shift (instead of LSR logical shift right) */
+    221            wIqd_tmp = (qId_tmp_1+qId_tmp_2) >>15;
+    222          #endif 
+    223            
+    224            /* Check saturation of Id */
+    225            if (wIqd_tmp > S16_MAX)
+    226            {
+    227              hIqd_tmp = S16_MAX;
+    228            }
+    229            else if (wIqd_tmp < (-32768))
+    230            {
+    231              hIqd_tmp = (-32768);
+    232            }
+    233            else
+    234            {
+    235              hIqd_tmp = (int16_t)(wIqd_tmp);
+    236            }
+    237            
+    238            Curr_Output.qI_Component2 = hIqd_tmp;
+    239            
+    240            if (Curr_Output.qI_Component2 == (int16_t)(-32768))
+    241            {
+    242              Curr_Output.qI_Component2 = -32767;
+    243            }
+    244            
+    245            return (Curr_Output);
+    246          }
+    247          
+    248          #if defined (CCMRAM)
+    249          #if defined (__ICCARM__)
+    250          #pragma location = ".ccmram"
+    251          #elif defined (__CC_ARM)
+    252          __attribute__((section ("ccmram")))
+    253          #endif
+    254          #endif
+    255          /**
+    256            * @brief  This function transforms stator voltage qVq and qVd, that belong to 
+    257            *         a rotor flux synchronous rotating frame, to a stationary reference 
+    258            *         frame, so as to obtain qValpha and qVbeta:
+    259            *                  Valfa= Vq*Cos(theta)+ Vd*Sin(theta)
+    260            *                  Vbeta=-Vq*Sin(theta)+ Vd*Cos(theta)     
+    261            * @param  Curr_Input: stator voltage Vq and Vd in Volt_Components format
+    262            * @param  Theta: rotating frame angular position in q1.15 format
+    263            * @retval Stator voltage Valpha and Vbeta in Volt_Components format
+    264            */
+    265          Volt_Components MCM_Rev_Park(Volt_Components Volt_Input, int16_t Theta)
+    266          { 	
+    267            int32_t qValpha_tmp1,qValpha_tmp2,qVbeta_tmp1,qVbeta_tmp2;
+    268            Trig_Components Local_Vector_Components;
+    269            Volt_Components Volt_Output;
+    270            
+    271            Local_Vector_Components = MCM_Trig_Functions(Theta);
+    272            
+    273            /*No overflow guaranteed*/
+    274            qValpha_tmp1 = Volt_Input.qV_Component1 * (int32_t)Local_Vector_Components.hCos;  
+    275            qValpha_tmp2 = Volt_Input.qV_Component2 * (int32_t)Local_Vector_Components.hSin;
+    276          
+    277          #ifdef FULL_MISRA_C_COMPLIANCY
+    278            Volt_Output.qV_Component1 = (int16_t)(((qValpha_tmp1)+(qValpha_tmp2))/32768);  
+    279          #else  
+    280          /* WARNING: the below instruction is not MISRA compliant, user should verify 
+    281            that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+    282            the compiler to perform the shift (instead of LSR logical shift right) */  
+    283            Volt_Output.qV_Component1 = (int16_t)(((qValpha_tmp1)+(qValpha_tmp2))>>15);
+    284          #endif 
+    285            
+    286            qVbeta_tmp1 = Volt_Input.qV_Component1 * (int32_t)Local_Vector_Components.hSin;
+    287            qVbeta_tmp2 = Volt_Input.qV_Component2 * (int32_t)Local_Vector_Components.hCos;
+    288          
+    289          #ifdef FULL_MISRA_C_COMPLIANCY
+    290            Volt_Output.qV_Component2 = (int16_t)((qVbeta_tmp2-qVbeta_tmp1)/32768);
+    291          #else  
+    292            /* WARNING: the below instruction is not MISRA compliant, user should verify 
+    293            that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+    294            the compiler to perform the shift (instead of LSR logical shift right) */
+    295            Volt_Output.qV_Component2 = (int16_t)((qVbeta_tmp2-qVbeta_tmp1) >>15);
+    296          #endif 
+    297           
+    298            return(Volt_Output);
+    299          }
+    300          
+    301          #if defined (CCMRAM)
+    302          #if defined (__ICCARM__)
+    303          #pragma location = ".ccmram"
+    304          #elif defined (__CC_ARM)
+    305          __attribute__((section ("ccmram")))
+    306          #endif
+    307          #endif
+    308          /**
+    309            * @brief  This function returns cosine and sine functions of the angle fed in 
+    310            *         input
+    311            * @param  hAngle: angle in q1.15 format
+    312            * @retval Sin(angle) and Cos(angle) in Trig_Components format
+    313            */
+    314          
+    315          Trig_Components MCM_Trig_Functions(int16_t hAngle)
+    316          {
+    317            int32_t shindex;
+    318            uint16_t uhindex;
+    319            
+    320            Trig_Components Local_Components;
+    321            
+    322            /* 10 bit index computation  */  
+    323            shindex =((int32_t)32768 + (int32_t)hAngle); 
+    324            uhindex = (uint16_t)shindex;
+    325            uhindex /= (uint16_t)64;      
+    326            
+    327            
+    328            switch ((uint16_t)(uhindex) & SIN_MASK) 
+    329            {
+    330            case U0_90:
+    331              Local_Components.hSin = hSin_Cos_Table[(uint8_t)(uhindex)];
+    332              Local_Components.hCos = hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
+    333              break;
+    334            
+    335            case U90_180:  
+    336               Local_Components.hSin = hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
+    337               Local_Components.hCos = -hSin_Cos_Table[(uint8_t)(uhindex)];
+    338              break;
+    339            
+    340            case U180_270:
+    341               Local_Components.hSin = -hSin_Cos_Table[(uint8_t)(uhindex)];
+    342               Local_Components.hCos = -hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
+    343              break;
+    344            
+    345            case U270_360:
+    346               Local_Components.hSin =  -hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
+    347               Local_Components.hCos =  hSin_Cos_Table[(uint8_t)(uhindex)]; 
+    348              break;
+    349            default:
+    350              break;
+    351            }
+    352            return (Local_Components);
+    353          }
+    354          
+    355          #if defined (CCMRAM)
+    356          #if defined (__ICCARM__)
+    357          #pragma location = ".ccmram"
+    358          #elif defined (__CC_ARM)
+    359          __attribute__((section ("ccmram")))
+    360          #endif
+    361          #endif
+    362          /**
+    363            * @brief  It calculates the square root of a non-negative s32. It returns 0 
+    364            *         for negative s32.
+    365            * @param  Input int32_t number
+    366            * @retval int32_t Square root of Input (0 if Input<0)
+    367            */
+    368          int32_t MCM_Sqrt(int32_t wInput)
+    369          {
+    370            uint8_t biter = 0u;
+    371            int32_t wtemproot;
+    372            int32_t wtemprootnew;
+    373          
+    374            if (wInput > 0)
+    375            {
+    376              
+    377              if (wInput <= (int32_t)2097152)
+    378              {
+    379                wtemproot = (int32_t)128;
+    380              }
+    381              else
+    382              {
+    383                wtemproot = (int32_t)8192;
+    384              }
+    385              
+    386              do
+    387              {
+    388                wtemprootnew = (wtemproot + wInput/wtemproot)/(int32_t)2;
+    389                if (wtemprootnew == wtemproot)
+    390                {
+    391                  biter = 6u;
+    392                }
+    393                else
+    394                {
+    395                  biter ++;
+    396                  wtemproot = wtemprootnew;
+    397                }
+    398              }
+    399              while (biter < 6u);
+    400            }
+    401            else
+    402            {
+    403              wtemprootnew = (int32_t)0;
+    404            }
+    405            
+    406            return (wtemprootnew); 
+    407          }
+    408          
+    409          /**
+    410            * @brief  This function codify a floting point number into the relative
+    411            *         32bit integer.
+    412            * @param  float Floting point number to be coded.
+    413            * @retval uint32_t Coded 32bit integer.
+    414            */
+    415          uint32_t MCM_floatToIntBit(float x)
+    416          {
+    417            uint32_t *pInt;
+    418            pInt = (uint32_t*)(&x);
+    419            return *pInt;
+    420          }
+    421          
+    422          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   MCM_Clarke
+      24   MCM_Park
+        24   -> MCM_Trig_Functions
+      24   MCM_Rev_Park
+        24   -> MCM_Trig_Functions
+       0   MCM_Sqrt
+       4   MCM_Trig_Functions
+       0   MCM_floatToIntBit
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable2
+       4  ??DataTable2_1
+       4  ??DataTable2_2
+       6  ?Subroutine0
+      62  MCM_Clarke
+      96  MCM_Park
+      62  MCM_Rev_Park
+      52  MCM_Sqrt
+     146  MCM_Trig_Functions
+       4  MCM_floatToIntBit
+     512  hSin_Cos_Table
+
+ 
+ 952 bytes in section .text
+ 
+ 952 bytes of CODE memory
+
+Errors: none
+Warnings: none

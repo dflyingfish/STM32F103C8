@@ -1,0 +1,1065 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       13/Sep/2018  23:25:55
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GAP_GateDriverCtrlClass.c
+#    Command line =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GAP_GateDriverCtrlClass.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D MC_LIBRARY_DUAL -lcN
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List" -o
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj" --debug --endian=little --cpu=Cortex-M3 -e
+#        --fpu=None --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\ -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\inc\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\common\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F10x_StdPeriph_Driver\inc\
+#        -Oh --use_c++_inline -I "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List\GAP_GateDriverCtrlClass.lst
+#    Object file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj\GAP_GateDriverCtrlClass.o
+#
+###############################################################################
+
+D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GAP_GateDriverCtrlClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    GAP_GateDriverCtrlClass.c
+      4            * @author  IMS Systems Lab and Technical Marketing - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of GAP class      
+      8            ******************************************************************************
+      9            * <br>
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "GateDriverCtrlClass.h"
+     23          #include "GateDriverCtrlPrivate.h"
+     24          #include "GAP_GateDriverCtrlClass.h"
+     25          #include "GAP_GateDriverCtrlPrivate.h"
+     26          #include "MCLibraryConf.h"
+     27          #include "MC_type.h"
+     28          
+     29          #ifdef MC_CLASS_DYNAMIC
+     30          #include "stdlib.h" /* Used for dynamic allocation */
+     31          #else
+     32          _DCGAP_GDC_t GAP_GDCpool[MAX_GAP_GDC_NUM];
+     33          unsigned char GAP_GDC_Allocated = 0u;
+     34          #endif
+     35          
+     36          #define DCLASS_PARAMS ((_DCGAP_GDC)(((_CGDC) this)->DerivedClass))->pDParams_str
+     37          #define DCLASS_VARS  &(((_DCGAP_GDC)(((_CGDC) this)->DerivedClass))->DVars_str)
+     38          #define CLASS_VARS   &(((_CGDC)this)->Vars_str)
+     39          #define CLASS_PARAMS  (((_CGDC)this)->pParams_str)
+     40          
+     41          /** @defgroup GAP_class_private_defines GAP class private defines
+     42            * @{
+     43            */
+     44          
+     45          #define GAP_STARTCONFIG 0x2A
+     46          #define GAP_STOPCONFIG  0x3A
+     47          #define GAP_WRITEREG    0x80
+     48          #define GAP_READREG     0xA0
+     49          #define GAP_RESETREG    0xC0
+     50          #define GAP_RESETSTATUS 0xD0
+     51          #define GAP_GLOBALRESET 0xEA
+     52          #define GAP_SLPEEP      0xF5
+     53          #define GAP_NOP         0x00
+     54          
+     55          #define CFG1_REG_MASK    (uint8_t)(0xFF)
+     56          #define CFG2_REG_MASK    (uint8_t)(0xFF)
+     57          #define CFG3_REG_MASK    (uint8_t)(0xFF)
+     58          #define CFG4_REG_MASK    (uint8_t)(0x3F)
+     59          #define CFG5_REG_MASK    (uint8_t)(0x0F)
+     60          #define STATUS1_REG_MASK (uint8_t)(0xFF)
+     61          #define STATUS2_REG_MASK (uint8_t)(0x07)
+     62          #define STATUS3_REG_MASK (uint8_t)(0x1F) // It should be 0x3F
+     63          #define TEST1_REG_MASK   (uint8_t)(0x1F)
+     64          #define DIAG1_REG_MASK   (uint8_t)(0xFF)
+     65          #define DIAG2_REG_MASK   (uint8_t)(0xFF)
+     66          
+     67          #define GAP_ERROR_CODE_FROM_DEVICE_MASK (uint32_t)(0xFF000000)
+     68          
+     69          #define WAITTIME      5000 // 860u
+     70          #define WAITTRCHK     50   // 8.6u
+     71          #define WAITTSENSECHK 50   // 8.6u
+     72          #define WAITTGCHK     50   // 8.6u
+     73          #define WAITTDESATCHK 50   // 8.6u
+     74          
+     75          /**
+     76            * @}
+     77            */
+     78              
+     79          /** @defgroup GAP_class_private_functions GAP class private functions
+     80            * @{
+     81            */
+     82          
+     83          static uint16_t GAP_CRCCalculate(uint8_t data, uint8_t crcInitialValue);
+     84          static bool GAP_CRCCheck(uint8_t* out, uint16_t dataIn);
+     85          static void wait(uint16_t count);
+     86          static uint8_t GAP_regMask(GAP_Registers_t reg);
+     87          
+     88          /**
+     89            * @brief  Checks if the GAP devices are programmed with the settled parameters.
+     90            * @param  this related object of class CGDC.
+     91            * @retval True if the GAP devices are already programmed with the settled 
+     92            *         parameters.
+     93            */
+     94          bool GAP_IsDevicesProgrammed(CGDC this);
+     95          
+     96          /**
+     97            * @brief  Programs the GAP devices with the settled parameters.
+     98            * @param  this related object of class CGDC.
+     99            * @retval bool It returns false if an error occurs, otherwise return true.
+    100            */
+    101          bool GAP_DevicesConfiguration(CGDC this);
+    102          
+    103          /**
+    104            * @brief  Reset selected status register.
+    105            * @param  this related object of class CGAP_GDC
+    106            * @param  reg Register to be reset. It must be one of the STATUS register 
+    107             *        defined in \link GAP_class_private_enum GAP_Registers_t\endlink.
+    108            * @retval bool It returns false if an error occurs, otherwise return true.
+    109            */
+    110          bool GAP_ResetStatus(CGDC this, GAP_Registers_t reg);
+    111              
+    112          /**
+    113            * @}
+    114            */
+    115          
+    116          volatile uint16_t waitCnt;
+    117          
+    118          /**
+    119            * @brief  Creates an object of the class GAP
+    120            * @param  pGateDriverCtrlParams pointer to an GateDriverCtrl parameters structure
+    121            * @param  pGAPParams pointer to an GAP parameters structure
+    122            * @retval CGAP_GDC new instance of GAP object
+    123            */
+    124          CGAP_GDC GAP_NewObject(pGateDriverCtrlParams_t pGateDriverCtrlParams, pGAPParams_t pGAPParams)
+    125          {
+    126          	_CGDC _oGateDriverCtrl;
+    127          	_DCGAP_GDC _oGAP;
+    128          	int i,l;
+    129          
+    130          	_oGateDriverCtrl = (_CGDC)GDC_NewObject(pGateDriverCtrlParams);
+    131          
+    132          	#ifdef MC_CLASS_DYNAMIC
+    133          		_oGAP = (_DCGAP_GDC)calloc(1u,sizeof(_DCGAP_GDC_t));
+    134          	#else
+    135          		if (GAP_GDC_Allocated  < MAX_GAP_GDC_NUM)
+    136          		{
+    137          			_oGAP = &GAP_GDCpool[GAP_GDC_Allocated++];
+    138          		}
+    139          		else
+    140          		{
+    141          			_oGAP = MC_NULL;
+    142          		}
+    143          	#endif
+    144            
+    145          	_oGAP->pDParams_str = pGAPParams;
+    146          	_oGateDriverCtrl->DerivedClass = (void*)_oGAP;
+    147            
+    148          	_oGateDriverCtrl->Methods_str.pGDC_Init = &GAP_Init;
+    149                  
+    150                  /* Init of private data */
+    151                  l = pGAPParams->bDeviceNum;
+    152                  for (i = 0; i < l; i++)
+    153                  {
+    154                    _oGAP->DVars_str.wGAP_ErrorsNow[i] = GAP_ERROR_CLEAR;
+    155                    _oGAP->DVars_str.wGAP_ErrorsOccurred[i] = GAP_ERROR_CLEAR;
+    156                  }
+    157                  
+    158          	return ((CGAP_GDC)_oGateDriverCtrl);
+    159          }
+    160          
+    161          /** @addtogroup STM32F10x_PMSM_MC_Library
+    162            * @{
+    163            */
+    164            
+    165          /** @addtogroup GateDriverCtrl_GAP
+    166            * @{
+    167            */
+    168          
+    169          /** @defgroup GAP_class_private_methods GAP class private methods
+    170          * @{
+    171          */
+    172          
+    173          /**
+    174            * @brief  Check errors of GAP devices
+    175            * @param  this related object of class CGAP_GDC
+    176            * @param  errorNow buffer of returned bitfields containing error flags 
+    177            *         coming from GAP device that are currently active.\n
+    178            *         \link GAP_class_error_code Code errors\endlink.\n
+    179            *         The buffer have to be provided from the caller.
+    180            * @param  errorOccurred buffer of returned bitfields containing error flags 
+    181            *         coming from GAP device that are over.\n
+    182            *         \link GAP_class_error_code Code errors\endlink.\n
+    183            *         The buffer have to be provided from the caller.
+    184            * @retval bool It returns false if an error occurs, otherwise return true.
+    185            */
+    186          bool GAP_CheckErrors(CGDC this,uint32_t* errorNow,uint32_t* errorOccurred)
+    187          {
+    188            uint32_t errorFromDevices[MAX_DEVICES_NUMBER];
+    189            bool retVal = FALSE;
+    190            if ((errorNow)&&(errorOccurred))
+    191            {
+    192              pDVars_t pDVars = DCLASS_VARS;
+    193              pDParams_t pDParams = DCLASS_PARAMS;
+    194              uint8_t i,l;
+    195              uint8_t regRead[MAX_DEVICES_NUMBER];
+    196              
+    197          //    /* If current error is device not programmable try to re-configure before
+    198          //       read the status registers */
+    199          //    if ((pDVars->wGAP_ErrorsNow[0] & GAP_ERROR_CODE_DEVICES_NOT_PROGRAMMABLE) ||
+    200          //        (pDVars->wGAP_ErrorsNow[0] & GAP_ERROR_CODE_SPI_CRC))
+    201          //    {
+    202          //      if (GAP_Configuration(this))
+    203          //      {
+    204          //        pDVars->wGAP_ErrorsNow[0] &= ~GAP_ERROR_CODE_DEVICES_NOT_PROGRAMMABLE;
+    205          //        pDVars->wGAP_ErrorsNow[0] &= ~GAP_ERROR_CODE_SPI_CRC;
+    206          //      }
+    207          //    }
+    208              
+    209              
+    210              l = pDParams->bDeviceNum;
+    211              retVal = GAP_ReadRegs(this,regRead,STATUS1);
+    212              for (i = 0; i < l; i++)
+    213              {
+    214                errorFromDevices[i] = (regRead[i] << 16);
+    215              }
+    216              retVal = GAP_ReadRegs(this,regRead,STATUS2);
+    217              for (i = 0; i < l; i++)
+    218              {
+    219                /* Clear GATE bit from STATUS2 - no error if 1 */
+    220                regRead[i] &= 0xFE;
+    221                errorFromDevices[i] |= (regRead[i] << 8);
+    222              }
+    223              retVal = GAP_ReadRegs(this,regRead,STATUS3);
+    224              for (i = 0; i < l; i++)
+    225              {
+    226                errorFromDevices[i] |= regRead[i];
+    227              }
+    228                  
+    229              for (i = 0; i < l; i++)
+    230              {
+    231                pDVars->wGAP_ErrorsNow[i] &= GAP_ERROR_CODE_FROM_DEVICE_MASK;
+    232                pDVars->wGAP_ErrorsNow[i] |= errorFromDevices[i];
+    233                pDVars->wGAP_ErrorsOccurred[i] |= pDVars->wGAP_ErrorsNow[i];
+    234                errorNow[i] = pDVars->wGAP_ErrorsNow[i];
+    235                errorOccurred[i] = pDVars->wGAP_ErrorsOccurred[i];
+    236              }
+    237            }
+    238            return retVal;
+    239          }
+    240          
+    241          /**
+    242            * @brief  Clears the fault state of GAP devices.
+    243            * @param  this related object of class CGDC.
+    244            * @retval none.
+    245            */
+    246          void GAP_FaultAck(CGDC this)
+    247          {
+    248            uint8_t i,l;
+    249            uint16_t value;
+    250            pDParams_t pDParams = DCLASS_PARAMS;
+    251            pDVars_t pDVars = DCLASS_VARS;
+    252            GAP_SD_Activate(this);
+    253            value = GAP_CRCCalculate(GAP_RESETSTATUS, 0xFF);
+    254            GAP_CS_Activate(this);
+    255            l = pDParams->bDeviceNum;
+    256            for (i = 0; i < l; i++)
+    257            {
+    258              GAP_SPI_Send(this, value);
+    259            }
+    260            GAP_CS_Deactivate(this);
+    261            GAP_SD_Deactivate(this);
+    262            wait(WAITTIME);      
+    263            for (i = 0; i < l; i++)
+    264            {
+    265              pDVars->wGAP_ErrorsOccurred[i] = GAP_ERROR_CLEAR;
+    266            }
+    267          }
+    268          
+    269          /**
+    270            * @brief  Programs the GAP devices with the settled parameters.
+    271            * @param  this related object of class CGDC.
+    272            * @retval bool It returns false if at least one device is not programmable,
+    273            *         otherwise return true.
+    274            */
+    275          bool GAP_Configuration(CGDC this)
+    276          {
+    277            bool retVal;
+    278            
+    279            /* Configure devices with settled parameters */
+    280            GAP_DevicesConfiguration(this);
+    281            
+    282            /* Verify if device has been programmed */
+    283            retVal = GAP_IsDevicesProgrammed(this);
+    284            
+    285            if (!retVal)
+    286            {
+    287              /* At least one device is not programmable */
+    288              pDVars_t pDVars = DCLASS_VARS;
+    289              pDVars->wGAP_ErrorsNow[0] |= GAP_ERROR_CODE_DEVICES_NOT_PROGRAMMABLE;
+    290              pDVars->wGAP_ErrorsOccurred[0] |= GAP_ERROR_CODE_DEVICES_NOT_PROGRAMMABLE;
+    291            }
+    292            return retVal;
+    293          }
+    294          
+    295          /**
+    296            * @brief  Checks if the GAP devices are programmed with the settled parameters.
+    297            * @param  this related object of class CGDC.
+    298            * @retval True if the GAP devices are already programmed with the settled 
+    299            *         parameters.
+    300            */
+    301          bool GAP_IsDevicesProgrammed(CGDC this)
+    302          {
+    303            bool retVal = TRUE;
+    304            pDParams_t pDParams = DCLASS_PARAMS;
+    305            uint8_t i, l = pDParams->bDeviceNum;
+    306            uint8_t readRegValues[MAX_DEVICES_NUMBER];
+    307            GAP_ReadRegs(this,readRegValues,CFG1);
+    308            for (i = 0; i < l; i++)
+    309            {
+    310              if ((pDParams->deviceParams[i]->bCFG1 & CFG1_REG_MASK) != readRegValues[i])
+    311              {
+    312                retVal = FALSE;
+    313                break;
+    314              }
+    315            }
+    316            if (retVal)
+    317            {
+    318              GAP_ReadRegs(this,readRegValues,CFG2);
+    319              for (i = 0; i < l; i++)
+    320              {
+    321                if ((pDParams->deviceParams[i]->bCFG2 & CFG2_REG_MASK) != readRegValues[i])
+    322                {
+    323                  retVal = FALSE;
+    324                  break;
+    325                }
+    326              }
+    327            }
+    328            if (retVal)
+    329            {
+    330              GAP_ReadRegs(this,readRegValues,CFG3);
+    331              for (i = 0; i < l; i++)
+    332              {
+    333                if ((pDParams->deviceParams[i]->bCFG3 & CFG3_REG_MASK) != readRegValues[i])
+    334                {
+    335                  retVal = FALSE;
+    336                  break;
+    337                }
+    338              }
+    339            }
+    340            if (retVal)
+    341            {
+    342              GAP_ReadRegs(this,readRegValues,CFG4);
+    343              for (i = 0; i < l; i++)
+    344              {
+    345                if ((pDParams->deviceParams[i]->bCFG4 & CFG4_REG_MASK) != readRegValues[i])
+    346                {
+    347                  retVal = FALSE;
+    348                  break;
+    349                }
+    350              }
+    351            }
+    352            if (retVal)
+    353            {
+    354              GAP_ReadRegs(this,readRegValues,CFG5);
+    355              for (i = 0; i < l; i++)
+    356              {
+    357                if ((pDParams->deviceParams[i]->bCFG5 & CFG5_REG_MASK) != readRegValues[i])
+    358                {
+    359                  retVal = FALSE;
+    360                  break;
+    361                }
+    362              }
+    363            }
+    364            if (retVal)
+    365            {
+    366              GAP_ReadRegs(this,readRegValues,DIAG1);
+    367              for (i = 0; i < l; i++)
+    368              {
+    369                if ((pDParams->deviceParams[i]->bDIAG1 & DIAG1_REG_MASK)  != readRegValues[i])
+    370                {
+    371                  retVal = FALSE;
+    372                  break;
+    373                }
+    374              }
+    375            }
+    376            if (retVal)
+    377            {
+    378              GAP_ReadRegs(this,readRegValues,DIAG2);
+    379              for (i = 0; i < l; i++)
+    380              {
+    381                if ((pDParams->deviceParams[i]->bDIAG2 & DIAG2_REG_MASK) != readRegValues[i])
+    382                {
+    383                  retVal = FALSE;
+    384                  break;
+    385                }
+    386              }
+    387            }
+    388            return retVal;
+    389          }
+    390            
+    391          /**
+    392            * @brief  Programs the GAP devices with the settled parameters.
+    393            * @param  this related object of class CGDC.
+    394            * @retval bool It returns false if an error occurs, otherwise return true.
+    395            */
+    396          bool GAP_DevicesConfiguration(CGDC this)
+    397          {
+    398            bool retVal = TRUE;
+    399            pDParams_t pDParams = DCLASS_PARAMS;
+    400            uint8_t i, l = pDParams->bDeviceNum;
+    401            uint8_t writeRegValues[MAX_DEVICES_NUMBER];
+    402            
+    403            GAP_StartConfig(this);
+    404            
+    405            /* Global Reset before programming */
+    406            GAP_GlobalReset(this);
+    407            
+    408            for (i = 0; i < l; i++)
+    409            {
+    410              writeRegValues[i] = pDParams->deviceParams[i]->bCFG1;
+    411            }
+    412            retVal = GAP_WriteRegs(this,writeRegValues,CFG1);
+    413            
+    414            if (retVal)
+    415            {
+    416              for (i = 0; i < l; i++)
+    417              {
+    418                writeRegValues[i] = pDParams->deviceParams[i]->bCFG2;
+    419              }
+    420              retVal = GAP_WriteRegs(this,writeRegValues,CFG2);
+    421            }
+    422            
+    423            if (retVal)
+    424            {
+    425              for (i = 0; i < l; i++)
+    426              {
+    427                writeRegValues[i] = pDParams->deviceParams[i]->bCFG3;
+    428              }
+    429              retVal = GAP_WriteRegs(this,writeRegValues,CFG3);
+    430            }
+    431            if (retVal)
+    432            {
+    433              for (i = 0; i < l; i++)
+    434              {
+    435                writeRegValues[i] = pDParams->deviceParams[i]->bCFG4;
+    436              }
+    437              retVal = GAP_WriteRegs(this,writeRegValues,CFG4);
+    438            }
+    439            if (retVal)
+    440            {
+    441              for (i = 0; i < l; i++)
+    442              {
+    443                writeRegValues[i] = pDParams->deviceParams[i]->bCFG5;
+    444              }
+    445              retVal = GAP_WriteRegs(this,writeRegValues,CFG5);
+    446            }
+    447            if (retVal)
+    448            {
+    449              for (i = 0; i < l; i++)
+    450              {
+    451                writeRegValues[i] = pDParams->deviceParams[i]->bDIAG1;
+    452              }
+    453              retVal = GAP_WriteRegs(this,writeRegValues,DIAG1);
+    454            }
+    455            if (retVal)
+    456            {
+    457              for (i = 0; i < l; i++)
+    458              {
+    459                writeRegValues[i] = pDParams->deviceParams[i]->bDIAG2;
+    460              }
+    461              retVal = GAP_WriteRegs(this,writeRegValues,DIAG2);
+    462            }
+    463            
+    464            GAP_StopConfig(this);
+    465            
+    466            /* Fault reset */
+    467            GAP_FaultAck(this);
+    468            
+    469            return retVal;
+    470          }
+    471          
+    472          /**
+    473            * @brief  Calculate CRC from data and create 16bit value with data as MSB and
+    474            *         CRC as LSB.
+    475            * @param  data 8bit value used to calculate CRC.
+    476            * @retval uint16_t It returns the 16bit value with data as MSB and
+    477            *         CRC as LSB.
+    478            */
+    479          uint16_t GAP_CRCCalculate(uint8_t data, uint8_t crcInitialValue)
+    480          {
+    481            uint8_t crc =  crcInitialValue;
+    482            uint8_t poly = 0x07;
+    483            uint8_t crc_temp;
+    484            uint8_t crctab[8];
+    485            uint8_t i,j;
+    486            
+    487            uint16_t value;
+    488            value = data;
+    489            value <<= 8;
+    490            
+    491            for (j=0; j<8; j++) {crctab[j] = (crc >> j) & 0x1;}
+    492            for (j=0; j<8; j++)
+    493            {
+    494              crc_temp = (crctab[7] << 7) + (crctab[6] << 6) + (crctab[5] << 5) + (crctab[4] << 4) + (crctab[3] << 3) + (crctab[2] << 2) + (crctab[1] << 1) + (crctab[0]);
+    495              crctab[0] = ((data >> (7-j)) & 0x1 ) ^ crctab[7];
+    496              for (i=1; i<8; i++)
+    497              {
+    498                crctab[i] = (crctab[0] & ((poly >> i)&0x1)) ^ ((crc_temp>>(i-1))&0x1);
+    499              }
+    500            }
+    501            crc = (crctab[7] << 7) + (crctab[6] << 6) + (crctab[5] << 5) + (crctab[4] << 4) + (crctab[3] << 3) + (crctab[2] << 2) + (crctab[1] << 1) + (crctab[0] << 0);
+    502            crc ^= 0xFF;
+    503            
+    504            value |= crc;
+    505            return value;
+    506          }
+    507          
+    508          /**
+    509            * @brief  Verify the CRC from dataIn and extract the 8bit data value (out).
+    510            * @param  out Reference for the extracted 8bit data value.
+    511            * @param  dataIn 16bit value with data as MSB and CRC as LSB.
+    512            * @retval bool It returns TRUE if CRC is correct, FALSE otherwise.
+    513            */
+    514          bool GAP_CRCCheck(uint8_t* out, uint16_t dataIn)
+    515          {
+    516            bool retVal = FALSE;
+    517            uint8_t data = (uint8_t)(dataIn >> 8);
+    518            uint8_t receivedCRC = (uint8_t)(dataIn);
+    519            uint8_t crc = (uint8_t)(GAP_CRCCalculate(data,0xFF)) ^ 0xFF;
+    520            if (crc == receivedCRC)
+    521            {
+    522              *out = data;
+    523              retVal = TRUE;
+    524            }
+    525            return retVal;
+    526          }
+    527          
+    528          /**
+    529            * @brief  Wait a time interval proportional to count.
+    530            * @param  count Number of count to be waited
+    531            * @retval none
+    532            */
+    533          void wait(uint16_t count)
+    534          {
+    535            for (waitCnt = 0; waitCnt < count; waitCnt++)
+    536            {
+    537            }
+    538          }
+    539          
+    540          /**
+    541            * @brief  Return the register mask starting from it address.
+    542            * @param  reg Register address.
+    543            * @retval uint8_t Mask to be and-ed bit wise to data to filter it.
+    544            */
+    545          uint8_t GAP_regMask(GAP_Registers_t reg)
+    546          {
+    547            uint8_t retVal;
+    548            switch (reg)
+    549            {
+    550            case CFG1:
+    551              {
+    552                retVal = CFG1_REG_MASK;
+    553              }
+    554              break;
+    555            case CFG2:
+    556              {
+    557                retVal = CFG2_REG_MASK;
+    558              }
+    559              break;
+    560            case CFG3:
+    561              {
+    562                retVal = CFG3_REG_MASK;
+    563              }
+    564              break;
+    565            case CFG4:
+    566              {
+    567                retVal = CFG4_REG_MASK;
+    568              }
+    569              break;
+    570            case CFG5:
+    571              {
+    572                retVal = CFG5_REG_MASK;
+    573              }
+    574              break;
+    575            case STATUS1:
+    576              {
+    577                retVal = STATUS1_REG_MASK;
+    578              }
+    579              break;
+    580            case STATUS2:
+    581              {
+    582                retVal = STATUS2_REG_MASK;
+    583              }
+    584              break;
+    585            case STATUS3:
+    586              {
+    587                retVal = STATUS3_REG_MASK;
+    588              }
+    589              break;
+    590            case TEST1:
+    591              {
+    592                retVal = TEST1_REG_MASK;
+    593              }
+    594              break;
+    595            case DIAG1:
+    596              {
+    597                retVal = DIAG1_REG_MASK;
+    598              }
+    599              break;
+    600            case DIAG2:
+    601              {
+    602                retVal = DIAG2_REG_MASK;
+    603              }
+    604              break;
+    605            default:
+    606              {
+    607                retVal = 0x00;
+    608              }
+    609              break;
+    610            }
+    611            return retVal;
+    612          }
+    613          
+    614          uint8_t device;
+    615          uint8_t dataReceived;
+    616          
+    617          /**
+    618            * @brief  Read all data in the daisy chain related to register reg.
+    619            * @param  this related object of class CGAP_GDC
+    620            * @param  pDataRead Pointer to the buffer in which will be stored the readed
+    621            *         data. The buffer have to be provided from the caller.
+    622            * @param  reg Register to be read. It must be one of the register defined in
+    623            *         \link GAP_class_private_enum GAP_Registers_t\endlink.
+    624            * @retval bool It returns false if an error occurs, otherwise return true.
+    625            */
+    626          bool GAP_ReadRegs(CGDC this, uint8_t* pDataRead, GAP_Registers_t reg)
+    627          {
+    628            pDParams_t pDParams = DCLASS_PARAMS;
+    629            pDVars_t pDVars = DCLASS_VARS;
+    630            bool retVal = FALSE;
+    631            if (pDataRead)
+    632            {
+    633              uint16_t value;
+    634          		uint8_t i;
+    635              value = GAP_CRCCalculate(GAP_READREG | reg, 0xFF);
+    636              GAP_CS_Activate(this);
+    637              for (i = 0; i < pDParams->bDeviceNum; i++)
+    638              {
+    639                GAP_SPI_Send(this, value);
+    640              }
+    641              GAP_CS_Deactivate(this);
+    642              wait(WAITTIME);
+    643              value = GAP_CRCCalculate(GAP_NOP, 0xFF);
+    644              GAP_CS_Activate(this);
+    645              retVal = TRUE;
+    646              for (i = 0; i < pDParams->bDeviceNum; i++)
+    647              {
+    648                device = pDParams->bDeviceNum - i - 1;
+    649                if (pDParams->deviceParams[device]->bCFG1 & GAP_CFG1_CRC_SPI)
+    650                {
+    651                  uint8_t data;
+    652                  if (GAP_CRCCheck(&data,GAP_SPI_Send(this, value)))
+    653                  {
+    654                    pDataRead[device] = data & GAP_regMask(reg);
+    655                  }
+    656                  else
+    657                  {
+    658                    pDataRead[device] = 0x00;
+    659                    pDVars->wGAP_ErrorsNow[0] |= GAP_ERROR_CODE_SPI_CRC;
+    660                    pDVars->wGAP_ErrorsOccurred[0] |= GAP_ERROR_CODE_SPI_CRC;
+    661                    retVal = FALSE;
+    662                  }
+    663                }
+    664                else
+    665                {
+    666                  dataReceived = (uint8_t)(GAP_SPI_Send(this, value) >> 8) & GAP_regMask(reg);
+    667                  pDataRead[device] = dataReceived;
+    668                }
+    669              }
+    670              GAP_CS_Deactivate(this);
+    671            }
+    672            return retVal;
+    673          }
+    674          
+    675          void GAP_StartConfig(CGDC this)
+    676          {
+    677            pDParams_t pDParams = DCLASS_PARAMS;
+    678            uint16_t value;
+    679            uint8_t i;
+    680            
+    681            GAP_SD_Activate(this);
+    682            
+    683            value = GAP_CRCCalculate(GAP_STARTCONFIG, 0xFF);
+    684            GAP_CS_Activate(this);
+    685            
+    686            for (i = 0; i < pDParams->bDeviceNum; i++)
+    687            {
+    688              GAP_SPI_Send(this, value);
+    689            }
+    690            GAP_CS_Deactivate(this);
+    691            wait(WAITTIME);
+    692          }
+    693          
+    694          void GAP_StopConfig(CGDC this)
+    695          {
+    696            pDParams_t pDParams = DCLASS_PARAMS;
+    697            uint16_t value;
+    698            uint8_t i;
+    699            
+    700            value = GAP_CRCCalculate(GAP_STOPCONFIG, 0xFF);
+    701            GAP_CS_Activate(this);
+    702            for (i = 0; i < pDParams->bDeviceNum; i++)
+    703            {
+    704              GAP_SPI_Send(this, value);
+    705            }
+    706            GAP_CS_Deactivate(this);
+    707            wait(WAITTIME);
+    708            
+    709            GAP_SD_Deactivate(this);
+    710          }
+    711            
+    712          /**
+    713            * @brief  Write data in the daisy chain in to the register reg.
+    714            * @param  this related object of class CGAP_GDC
+    715            * @param  pDataWrite Pointer to the buffer in which are stored the data
+    716            *         to be written in the register reg. The buffer have to be provided 
+    717            *         from the caller.
+    718            * @param  reg Register to be write. It must be one of the register defined in
+    719            *         \link GAP_class_private_enum GAP_Registers_t\endlink.
+    720            * @retval bool It returns false if an error occurs, otherwise return true.
+    721            */
+    722          bool GAP_WriteRegs(CGDC this, uint8_t* pDataWrite, GAP_Registers_t reg)
+    723          {
+    724            pDParams_t pDParams = DCLASS_PARAMS;
+    725            bool retVal = FALSE;
+    726            if (pDataWrite)
+    727            {
+    728              uint8_t i;
+    729              uint16_t value;
+    730              uint8_t crc;
+    731              
+    732              value = GAP_CRCCalculate(GAP_WRITEREG | reg, 0xFF);
+    733              crc = (uint8_t)(value);
+    734              GAP_CS_Activate(this);
+    735              for (i = 0; i < pDParams->bDeviceNum; i++)
+    736              {
+    737                GAP_SPI_Send(this, value);
+    738              }
+    739              GAP_CS_Deactivate(this);
+    740              wait(WAITTIME);
+    741              
+    742              GAP_CS_Activate(this);
+    743              retVal = TRUE;
+    744              for (i = 0; i < pDParams->bDeviceNum; i++)
+    745              {
+    746                value = GAP_CRCCalculate(pDataWrite[i], crc ^ 0xFF);
+    747                GAP_SPI_Send(this, value);
+    748              }
+    749              GAP_CS_Deactivate(this);
+    750              wait(WAITTIME);
+    751              
+    752            }
+    753            return retVal;
+    754          }
+    755          
+    756          /**
+    757            * @brief  Reset all the registers to the default and releases all the failure flag.
+    758            * @param  this related object of class CGDC.
+    759            * @retval none.
+    760            */
+    761          void GAP_GlobalReset(CGDC this)
+    762          {
+    763            pDParams_t pDParams = DCLASS_PARAMS;
+    764            uint8_t i;
+    765            uint16_t value;
+    766            value = GAP_CRCCalculate(GAP_GLOBALRESET, 0xFF);
+    767            GAP_CS_Activate(this);
+    768            for (i = 0; i < pDParams->bDeviceNum; i++)
+    769            {
+    770              GAP_SPI_Send(this, value);
+    771            }
+    772            GAP_CS_Deactivate(this);
+    773            wait(WAITTIME);
+    774          }
+    775          
+    776          /**
+    777            * @brief  Reset selected status register.
+    778            * @param  this related object of class CGAP_GDC
+    779            * @param  reg Register to be reset. It must be one of the STATUS register 
+    780             *        defined in \link GAP_class_private_enum GAP_Registers_t\endlink.
+    781            * @retval bool It returns false if an error occurs, otherwise return true.
+    782            */
+    783          bool GAP_ResetStatus(CGDC this, GAP_Registers_t reg)
+    784          {
+    785            pDParams_t pDParams = DCLASS_PARAMS;
+    786            bool retVal = FALSE;
+    787            uint8_t i;
+    788            uint16_t value;
+    789            GAP_SD_Activate(this);
+    790              
+    791            value = GAP_CRCCalculate(GAP_RESETREG | reg, 0xFF);
+    792            GAP_CS_Activate(this);
+    793            for (i = 0; i < pDParams->bDeviceNum; i++)
+    794            {
+    795              GAP_SPI_Send(this, value);
+    796            }
+    797            GAP_CS_Deactivate(this);
+    798            
+    799            GAP_SD_Deactivate(this);
+    800            return retVal;
+    801          }
+    802          
+    803          /**
+    804            * @brief  ** This function should be called just in IDLE state. **\n
+    805            *         It performs the selected test on each GAP devices.
+    806            * @param  this related object of class CGDC
+    807            * @param  testMode Test mode to be executed. It shall be one of the
+    808            *         test modes present in the
+    809            *         \link GAP_class_testModes GAP class test modes\endlink.
+    810            * @retval bool It returns TRUE if an error occurs, otherwise return FALSE.
+    811            */
+    812          bool GAP_Test(CGDC this, GAP_TestMode_t testMode)
+    813          {
+    814            bool retVal = FALSE;
+    815            pDParams_t pDParams = DCLASS_PARAMS;
+    816            uint8_t testModeData;
+    817            uint8_t clr[MAX_DEVICES_NUMBER];
+    818            uint8_t data[MAX_DEVICES_NUMBER];
+    819            uint8_t i, l = pDParams->bDeviceNum;
+    820            uint16_t waitCnt;
+    821            uint8_t statusMask;
+    822            bool invertResult = FALSE;
+    823            
+    824            switch (testMode)
+    825            {
+    826            case GOFF_CHK:
+    827              {
+    828                testModeData = GAP_TEST1_GOFFCHK;
+    829                waitCnt = WAITTGCHK;
+    830                statusMask = GAP_STATUS1_DESAT;
+    831              }
+    832              break;
+    833            case GON_CHK:
+    834              {
+    835                testModeData = GAP_TEST1_GONCHK;
+    836                waitCnt = WAITTGCHK;
+    837                statusMask = GAP_STATUS1_TSD;
+    838              }
+    839              break;
+    840            case GAP_TEST1_DESCHK:
+    841              {
+    842                testModeData = DESAT_CHK;
+    843                waitCnt = WAITTDESATCHK;
+    844                statusMask = GAP_STATUS1_DESAT;
+    845                invertResult = TRUE;
+    846              }
+    847              break;
+    848            case SENSE_RESISTOR_CHK:
+    849              {
+    850                testModeData = GAP_TEST1_RCHK;
+    851                waitCnt = WAITTRCHK;
+    852                statusMask = GAP_STATUS1_SENSE;
+    853              }
+    854              break;
+    855            case SENSE_COMPARATOR_CHK:
+    856              {
+    857                testModeData = GAP_TEST1_SNSCHK;
+    858                waitCnt = WAITTSENSECHK;
+    859                statusMask = GAP_STATUS1_SENSE;
+    860                invertResult = TRUE;
+    861              }
+    862              break;
+    863            default:
+    864              {
+    865                // Error
+    866                retVal = TRUE;
+    867              }
+    868              break;
+    869            }
+    870            
+    871            for (i = 0; i < l; i++)
+    872            {
+    873              data[i] = testModeData;
+    874              clr[i] = 0x00;
+    875            }
+    876            GAP_WriteRegs(this, data, TEST1);
+    877            wait(waitCnt);
+    878            GAP_ReadRegs(this, data, STATUS1);
+    879            /* Clear TEST1 regs */
+    880            GAP_WriteRegs(this, clr, TEST1);
+    881            /* Clear STATUS1 regs */
+    882            GAP_ResetStatus(this, STATUS1);
+    883            
+    884            for (i = 0; i < l; i++)
+    885            {
+    886              if (invertResult)
+    887              {
+    888                if ((data[i] & statusMask) == 0)
+    889                {
+    890                  retVal = TRUE;
+    891                }
+    892              }
+    893              else
+    894              {
+    895                if ((data[i] & statusMask) != 0)
+    896                {
+    897                  retVal = TRUE;
+    898                }
+    899              }
+    900            }
+    901            
+    902            return retVal;
+    903          }
+    904          
+    905          /**
+    906            * @}
+    907            */
+    908            
+    909          /**
+    910            * @}
+    911            */
+    912          
+    913          /**
+    914            * @}
+    915            */
+    916          
+    917          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      32   GAP_CRCCalculate
+      64   GAP_CheckErrors
+        64   -> GAP_ReadRegs
+       8   GAP_Configuration
+         8   -> GAP_DevicesConfiguration
+         8   -> GAP_IsDevicesProgrammed
+      32   GAP_DevicesConfiguration
+        32   -> GAP_FaultAck
+        32   -> GAP_GlobalReset
+        32   -> GAP_StartConfig
+        32   -> GAP_StopConfig
+        32   -> GAP_WriteRegs
+      24   GAP_FaultAck
+        24   -> GAP_CRCCalculate
+        24   -> GAP_CS_Activate
+        24   -> GAP_CS_Deactivate
+        24   -> GAP_SD_Activate
+        24   -> GAP_SD_Deactivate
+        24   -> GAP_SPI_Send
+      24   GAP_GlobalReset
+        24   -> GAP_CRCCalculate
+        24   -> GAP_CS_Activate
+        24   -> GAP_CS_Deactivate
+        24   -> GAP_SPI_Send
+      32   GAP_IsDevicesProgrammed
+        32   -> GAP_ReadRegs
+       8   GAP_NewObject
+         8   -> GDC_NewObject
+      48   GAP_ReadRegs
+        48   -> GAP_CRCCalculate
+        48   -> GAP_CS_Activate
+        48   -> GAP_CS_Deactivate
+        48   -> GAP_SPI_Send
+      24   GAP_ResetStatus
+        24   -> GAP_CRCCalculate
+        24   -> GAP_CS_Activate
+        24   -> GAP_CS_Deactivate
+        24   -> GAP_SD_Activate
+        24   -> GAP_SD_Deactivate
+        24   -> GAP_SPI_Send
+      24   GAP_StartConfig
+        24   -> GAP_CRCCalculate
+        24   -> GAP_CS_Activate
+        24   -> GAP_CS_Deactivate
+        24   -> GAP_SD_Activate
+        24   -> GAP_SPI_Send
+      24   GAP_StopConfig
+        24   -> GAP_CRCCalculate
+        24   -> GAP_CS_Activate
+        24   -> GAP_CS_Deactivate
+         0   -> GAP_SD_Deactivate
+        24   -> GAP_SPI_Send
+      48   GAP_Test
+        48   -> GAP_ReadRegs
+        48   -> GAP_ResetStatus
+        48   -> GAP_WriteRegs
+      40   GAP_WriteRegs
+        40   -> GAP_CRCCalculate
+        40   -> GAP_CS_Activate
+        40   -> GAP_CS_Deactivate
+        40   -> GAP_SPI_Send
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable6
+       4  ??DataTable6_1
+       4  ??DataTable6_2
+      52  ?Subroutine0
+     286  GAP_CRCCalculate
+     198  GAP_CheckErrors
+      38  GAP_Configuration
+     304  GAP_DevicesConfiguration
+     110  GAP_FaultAck
+     124  GAP_GDC_Allocated
+          GAP_GDCpool
+      26  GAP_GlobalReset
+     296  GAP_IsDevicesProgrammed
+      66  GAP_NewObject
+     406  GAP_ReadRegs
+      72  GAP_ResetStatus
+      34  GAP_StartConfig
+      86  GAP_StopConfig
+     202  GAP_Test
+     172  GAP_WriteRegs
+       4  device
+          dataReceived
+          waitCnt
+
+ 
+   128 bytes in section .bss
+ 2 360 bytes in section .text
+ 
+ 2 360 bytes of CODE memory
+   128 bytes of DATA memory
+
+Errors: none
+Warnings: none

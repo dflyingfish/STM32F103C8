@@ -1,0 +1,186 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:29
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\CircleLimitationClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\CircleLimitationClass.c" -D USE_STDPERIPH_DRIVER
+#        -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\CircleLimitationClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\CircleLimitationClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\CircleLimitationClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    CircleLimitationClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of CircleLimitation class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "CircleLimitationClass.h"
+     30          #include "CircleLimitationPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CCLM_t CLMpool[MAX_CLM_NUM];
+     38            unsigned char CLM_Allocated = 0u;
+     39          #endif
+     40          
+     41          #define CLASS_VARS   &((_CCLM)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CCLM)this)->pParams_str
+     43          
+     44          /**
+     45            * @brief  Creates an object of the class CircleLimitation
+     46            * @param  pCircleLimitationParams pointer to an CircleLimitation parameters structure
+     47            * @retval CCLM new instance of CircleLimitation object
+     48            */
+     49          CCLM CLM_NewObject(pCircleLimitationParams_t pCircleLimitationParams)
+     50          {
+     51            _CCLM _oCLM;
+     52            
+     53            #ifdef MC_CLASS_DYNAMIC
+     54              _oCLM = (_CCLM)calloc(1u,sizeof(_CCLM_t));
+     55            #else
+     56              if (CLM_Allocated  < MAX_CLM_NUM)
+     57              {
+     58                _oCLM = &CLMpool[CLM_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oCLM = MC_NULL;
+     63              }
+     64            #endif
+     65            
+     66            _oCLM->pParams_str = (pParams_t)pCircleLimitationParams;
+     67            
+     68            return ((CCLM)_oCLM);
+     69          }
+     70          
+     71          /**
+     72            * @brief Check whether Vqd.qV_Component1^2 + Vqd.qV_Component2^2 <= 32767^2 
+     73            *        and if not it applies a limitation keeping constant ratio 
+     74            *        Vqd.qV_Component1 / Vqd.qV_Component2
+     75            * @param  this related object of class CCLM
+     76            * @param  Vqd Voltage in qd reference frame  
+     77            * @retval Volt_Components Limited Vqd vector
+     78            */
+     79          Volt_Components Circle_Limitation(CCLM this, Volt_Components Vqd)
+     80          {
+     81            uint32_t uw_temp;
+     82            int32_t sw_temp; 
+     83            Volt_Components Local_Vqd=Vqd;
+     84            pParams_t pParams = CLASS_PARAMS;
+     85            
+     86            sw_temp =(int32_t)(Vqd.qV_Component1) * Vqd.qV_Component1 + 
+     87              (int32_t)(Vqd.qV_Component2) * Vqd.qV_Component2;  
+     88            uw_temp =(uint32_t) sw_temp;
+     89            /* uw_temp min value 0, max value 2*32767*32767 */
+     90            
+     91            if (uw_temp > (uint32_t)(pParams->hMaxModule) * pParams->hMaxModule) 
+     92            {
+     93              uint16_t hTable_Element;
+     94              
+     95              uw_temp /= (uint32_t)(16777216); 
+     96              /* wtemp min value pParams->bStart_index, max value 127 */
+     97              uw_temp -= pParams->bStart_index;
+     98              
+     99              /* uw_temp min value 0, max value 127 - pParams->bStart_index */   
+    100              hTable_Element = pParams->hCircle_limit_table[(uint8_t)uw_temp];
+    101              
+    102              sw_temp = Vqd.qV_Component1 * (int32_t)hTable_Element; 
+    103              Local_Vqd.qV_Component1 = (int16_t)(sw_temp/32768);  
+    104              
+    105              sw_temp = Vqd.qV_Component2 * (int32_t)(hTable_Element); 
+    106              Local_Vqd.qV_Component2 = (int16_t)(sw_temp/32768);  
+    107            }
+    108            
+    109            return(Local_Vqd);
+    110          }
+    111          
+    112          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   CLM_NewObject
+      12   Circle_Limitation
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       8  CLM_Allocated
+          CLMpool
+      22  CLM_NewObject
+      80  Circle_Limitation
+
+ 
+   8 bytes in section .bss
+ 106 bytes in section .text
+ 
+ 106 bytes of CODE memory
+   8 bytes of DATA memory
+
+Errors: none
+Warnings: none

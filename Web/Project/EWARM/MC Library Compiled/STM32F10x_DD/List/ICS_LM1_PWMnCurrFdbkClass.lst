@@ -1,0 +1,933 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       13/Sep/2018  23:25:59
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\ICS_LM1_PWMnCurrFdbkClass.c
+#    Command line =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\ICS_LM1_PWMnCurrFdbkClass.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D MC_LIBRARY_DUAL -lcN
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List" -o
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj" --debug --endian=little --cpu=Cortex-M3 -e
+#        --fpu=None --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\ -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\inc\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\common\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F10x_StdPeriph_Driver\inc\
+#        -Oh --use_c++_inline -I "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List\ICS_LM1_PWMnCurrFdbkClass.lst
+#    Object file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj\ICS_LM1_PWMnCurrFdbkClass.o
+#
+###############################################################################
+
+D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\ICS_LM1_PWMnCurrFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    ICS_LM1_PWMnCurrFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of derived class for 
+      8            *          single motor ICS current reading with STM32F103x Low and Medium 
+      9            *          Density
+     10            ******************************************************************************
+     11            * @attention
+     12            *
+     13            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     14            *
+     15            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     16            * You may not use this file except in compliance with the License.
+     17            * You may obtain a copy of the License at:
+     18            *
+     19            *        http://www.st.com/software_license_agreement_liberty_v2
+     20            *
+     21            * Unless required by applicable law or agreed to in writing, software 
+     22            * distributed under the License is distributed on an "AS IS" BASIS, 
+     23            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     24            * See the License for the specific language governing permissions and
+     25            * limitations under the License.
+     26            *
+     27            ******************************************************************************
+     28            */
+     29          
+     30          #if (defined(STM32F10X_MD)||defined(STM32F10X_LD)||(STM32F10X_HD))
+     31          
+     32          /* Includes ------------------------------------------------------------------*/
+     33          #include "PWMnCurrFdbkClass.h"
+     34          #include "PWMnCurrFdbkPrivate.h"
+     35          #include "ICS_LM1_PWMnCurrFdbkClass.h"
+     36          #include "ICS_LM1_PWMnCurrFdbkPrivate.h"
+     37          #include "MCLibraryConf.h"
+     38          #include "MCLibraryISRPriorityConf.h"
+     39          #include "MC_type.h"
+     40          
+     41          /* ADC1 Data Register address */
+     42          #define ADC1_DR_Address     0x4001244Cu
+     43          
+     44          #define NB_CONVERSIONS 16u
+     45          
+     46          #define ADC_RIGHT_ALIGNMENT 3u
+     47          
+     48          #define DCLASS_PARAMS ((_DCILM1_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str
+     49          #define DCLASS_VARS  ((_DCILM1_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str
+     50          
+     51          /* ADC SMPx mask */
+     52          #define SMPR1_SMP_Set              ((uint32_t) (0x00000007u))
+     53          #define SMPR2_SMP_Set              ((uint32_t) (0x00000007u))
+     54          #define ADC1_CR2_EXTTRIG_SWSTART_BB             0x42248158u
+     55          
+     56          #ifdef MC_CLASS_DYNAMIC
+     57          #include "stdlib.h" /* Used for dynamic allocation */
+     58          #else
+     59          _DCILM1_PWMC_t ILM1_PWMCpool[MAX_DRV_PWMC_NUM];
+     60          unsigned char ILM1_PWMC_Allocated = 0u;
+     61          #endif
+     62          
+     63          /*#define DEBUG*/
+     64          
+     65          #ifdef DEBUG
+     66          static volatile _CPWMC oPWMCdbg;
+     67          static volatile _DCILM1_PWMC oILM1dbg;
+     68          #endif
+     69          
+     70          static void ILM1_Init(CPWMC this);
+     71          static void ILM1_TIM1Init(CPWMC this);
+     72          static void ILM1_CurrentReadingCalibration(CPWMC this);
+     73          static void ILM1_GetPhaseCurrents(CPWMC this,Curr_Components* pStator_Currents);
+     74          static void ILM1_TurnOnLowSides(CPWMC this);
+     75          static void ILM1_SwitchOnPWM(CPWMC this);
+     76          static void ILM1_SwitchOffPWM(CPWMC this);
+     77          static uint16_t ILM1_WriteTIMRegisters(CPWMC this);   
+     78          static void ILM1_ADC_SetSamplingTime(CPWMC this, ADConv_t ADConv_struct);
+     79          static uint16_t ILM1_ExecRegularConv(CPWMC this, uint8_t bChannel);
+     80          static uint16_t ILM1_IsOverCurrentOccurred(CPWMC this);
+     81          
+     82          /**
+     83          * @brief  Creates an object of the class ICS_LM1
+     84          * @param  pPWMnCurrFdbkParams pointer to an PWMnCurrFdbk parameters structure
+     85          * @param  pICS_LM1Params pointer to an ICS_LM1 parameters structure
+     86          * @retval CILM1_PWMC new instance of ICS_LM1 object
+     87          */
+     88          CILM1_PWMC ILM1_NewObject(pPWMnCurrFdbkParams_t pPWMnCurrFdbkParams, 
+     89                                              pICS_LM1Params_t pICS_LM1Params)
+     90          {
+     91            _CPWMC _oPWMnCurrFdbk;
+     92            _DCILM1_PWMC _oICS_LM1;
+     93            
+     94            _oPWMnCurrFdbk = (_CPWMC)PWMC_NewObject(pPWMnCurrFdbkParams);
+     95            
+     96          #ifdef MC_CLASS_DYNAMIC
+     97            _oICS_LM1 = (_DCILM1_PWMC)calloc(1u,sizeof(_DCILM1_PWMC_t));
+     98          #else
+     99            if (ILM1_PWMC_Allocated  < MAX_DRV_PWMC_NUM)
+    100            {
+    101              _oICS_LM1 = &ILM1_PWMCpool[ILM1_PWMC_Allocated++];
+    102            }
+    103            else
+    104            {
+    105              _oICS_LM1 = MC_NULL;
+    106            }
+    107          #endif
+    108            
+    109            _oICS_LM1->pDParams_str = pICS_LM1Params;
+    110            _oPWMnCurrFdbk->DerivedClass = (void*)_oICS_LM1;
+    111            
+    112            _oPWMnCurrFdbk->Methods_str.pPWMC_Init = &ILM1_Init;
+    113            _oPWMnCurrFdbk->Methods_str.pPWMC_GetPhaseCurrents = &ILM1_GetPhaseCurrents;
+    114            _oPWMnCurrFdbk->Methods_str.pPWMC_SwitchOffPWM = &ILM1_SwitchOffPWM;
+    115            _oPWMnCurrFdbk->Methods_str.pPWMC_SwitchOnPWM = &ILM1_SwitchOnPWM;        
+    116            _oPWMnCurrFdbk->Methods_str.pPWMC_CurrentReadingCalibr = 
+    117                                                           &ILM1_CurrentReadingCalibration;         
+    118            _oPWMnCurrFdbk->Methods_str.pPWMC_TurnOnLowSides = &ILM1_TurnOnLowSides;         
+    119            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect1 = 
+    120                                                                &ILM1_WriteTIMRegisters;        
+    121            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect2 = 
+    122                                                                &ILM1_WriteTIMRegisters; 
+    123            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect3 = 
+    124                                                                &ILM1_WriteTIMRegisters;        
+    125            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect4 = 
+    126                                                                &ILM1_WriteTIMRegisters;         
+    127            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect5 = 
+    128                                                                &ILM1_WriteTIMRegisters;        
+    129            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect6 = 
+    130                                                                &ILM1_WriteTIMRegisters; 
+    131            _oPWMnCurrFdbk->Methods_str.pPWMC_ExecRegularConv= &ILM1_ExecRegularConv;
+    132            
+    133            _oPWMnCurrFdbk->Methods_str.pPWMC_SetSamplingTime= &ILM1_ADC_SetSamplingTime;
+    134            
+    135            _oPWMnCurrFdbk->Methods_str.pPWMC_IsOverCurrentOccurred = 
+    136              &ILM1_IsOverCurrentOccurred;
+    137          
+    138            return ((CILM1_PWMC)_oPWMnCurrFdbk);
+    139          }
+    140          
+    141          
+    142          /** @addtogroup STM32F10x_PMSM_MC_Library
+    143          * @{
+    144          */
+    145          
+    146          /** @addtogroup PWMnCurrFdbk_ICS_LM1
+    147          * @{
+    148          */
+    149          
+    150          /** @defgroup ICS_LM1_class_private_methods ICS_LM1 class private methods
+    151          * @{
+    152          */
+    153          
+    154          /**
+    155          * @brief  It initializes TIM1, ADC, GPIO, DMA1 and NVIC for current reading 
+    156          *         in ICS configuration using STM32F103x High Density
+    157          * @param  this: related object of class CILM1_PWMC
+    158          * @retval none
+    159          */
+    160          static void ILM1_Init(CPWMC this)
+    161          {
+    162            NVIC_InitTypeDef NVIC_InitStructure;
+    163            GPIO_InitTypeDef GPIO_InitStructure;
+    164            ADC_InitTypeDef ADC_InitStructure;
+    165            uint16_t hAux;
+    166            DMA_InitTypeDef DMA_InitStructure;
+    167            pDParams_t pLocalDParams = DCLASS_PARAMS;  
+    168            DVars_t *pLocalVars_Str = &DCLASS_VARS;
+    169            
+    170            pLocalVars_Str->Half_PWMPeriod = ((((_CPWMC) this)->pParams_str->hPWMperiod)/2u)-1u;
+    171          
+    172            /* Peripheral clocks enabling ---------------------------------------------*/
+    173            
+    174            RCC->AHBENR |= RCC_AHBPeriph_CRC;
+    175            
+    176            /* ADCCLK = PCLK2 */
+    177            RCC_ADCCLKConfig(pLocalDParams ->wADC_Clock_Divider);
+    178            /* Enable ADC1 clock */
+    179            RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+    180            /* Enable ADC2 clock */
+    181            RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2, ENABLE); 
+    182            /* Enable GPIOA-GPIOF clock */
+    183            RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | 
+    184                                   RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | 
+    185                                     RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | 
+    186                                       RCC_APB2Periph_GPIOF, ENABLE);  
+    187            
+    188            /* Enable the CCS */
+    189            RCC_ClockSecuritySystemCmd((FunctionalState)(ENABLE));
+    190            
+    191            /* Enable TIM1 clock */
+    192            RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+    193            /* Enable DMA1 clock */  
+    194            RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    195          	
+    196          	ILM1_TIM1Init(this);
+    197            
+    198            /* GPIOs configurations --------------------------------------------------*/
+    199            GPIO_StructInit(&GPIO_InitStructure);
+    200            
+    201            /****** Configure phase A ADC channel GPIO as analog input ****/
+    202            GPIO_InitStructure.GPIO_Pin = pLocalDParams->hIaPin;  
+    203            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    204            GPIO_Init(pLocalDParams->hIaPort,
+    205                      &GPIO_InitStructure);
+    206            GPIO_PinLockConfig(pLocalDParams->hIaPort, pLocalDParams->hIaPin);
+    207            
+    208            /****** Configure phase B ADC channel GPIO as analog input ****/
+    209            GPIO_InitStructure.GPIO_Pin = pLocalDParams->hIbPin;  
+    210            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    211            GPIO_Init(pLocalDParams->hIbPort, &GPIO_InitStructure);
+    212            GPIO_PinLockConfig(pLocalDParams->hIbPort, pLocalDParams->hIbPin);
+    213            
+    214              
+    215              /****** Timer1 alternate function full remapping ******/  
+    216              if((pLocalDParams-> wTIM1Remapping) != GPIO_NoRemap_TIM1)
+    217              {   
+    218                GPIO_PinRemapConfig(pLocalDParams->wTIM1Remapping, ENABLE);  
+    219              }  
+    220            
+    221            /****** Configure TIM1 Channel 1, 2 and 3 Outputs ******/ 
+    222            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    223            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    224            
+    225            hAux = (pLocalDParams->hCh1Pin) | (pLocalDParams->hCh2Pin);  
+    226            hAux = hAux | (pLocalDParams->hCh3Pin);  
+    227            GPIO_InitStructure.GPIO_Pin = hAux; 
+    228            GPIO_Init(pLocalDParams->hCh1Port, &GPIO_InitStructure);
+    229            GPIO_PinLockConfig(pLocalDParams->hCh1Port, hAux);
+    230            
+    231            /****** Configure TIM1 Channel 1N, 2N and 3N Outputs, if enabled ******/    
+    232            if ((pLocalDParams->LowSideOutputs)== LS_PWM_TIMER) 
+    233            { 
+    234              GPIO_InitStructure.GPIO_Pin = pLocalDParams->hCh1NPin;  
+    235              GPIO_Init(pLocalDParams->hCh1NPort, &GPIO_InitStructure);  
+    236              GPIO_PinLockConfig(pLocalDParams->hCh1NPort, pLocalDParams->hCh1NPin);
+    237              
+    238              hAux = (pLocalDParams->hCh2NPin) | (pLocalDParams->hCh3NPin);
+    239              GPIO_InitStructure.GPIO_Pin = hAux; 
+    240              GPIO_Init(pLocalDParams->hCh2NPort, &GPIO_InitStructure);    
+    241              GPIO_PinLockConfig(pLocalDParams->hCh2NPort, hAux);
+    242            }  else if ((pLocalDParams->LowSideOutputs)== ES_GPIO)
+    243            {
+    244              /* Only "active high" polarity is supported */
+    245              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    246              GPIO_InitStructure.GPIO_Pin = pLocalDParams->hCh1NPin;  
+    247              GPIO_Init(pLocalDParams->hCh1NPort, &GPIO_InitStructure);  
+    248              GPIO_PinLockConfig(pLocalDParams->hCh1NPort, pLocalDParams->hCh1NPin);
+    249              
+    250              hAux = (pLocalDParams->hCh2NPin) | (pLocalDParams->hCh3NPin);
+    251              GPIO_InitStructure.GPIO_Pin = hAux; 
+    252              GPIO_Init(pLocalDParams->hCh2NPort, &GPIO_InitStructure);    
+    253              GPIO_PinLockConfig(pLocalDParams->hCh2NPort, hAux);
+    254            }
+    255            else
+    256            {
+    257            }
+    258            
+    259            if ((pLocalDParams->EmergencyStop)!= DISABLE)  
+    260            {
+    261              /****** Configure TIMx BKIN input, if enabled ******/   
+    262              GPIO_StructInit(&GPIO_InitStructure);
+    263              GPIO_InitStructure.GPIO_Pin = pLocalDParams->hBKINPin;  
+    264              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    265              GPIO_Init(pLocalDParams->hBKINPort, &GPIO_InitStructure); 
+    266              GPIO_PinLockConfig(pLocalDParams->hBKINPort, pLocalDParams->hBKINPin);
+    267            }
+    268            
+    269            /* TIM1 Counter Clock stopped when the core is halted */
+    270            DBGMCU_Config(DBGMCU_TIM1_STOP, ENABLE);
+    271            
+    272            /* ADC1 and ADC2 registers configuration ---------------------------------*/
+    273            /* ADC1 and ADC2 registers reset */  
+    274            ADC_DeInit(ADC1);
+    275            ADC_DeInit(ADC2);
+    276            
+    277            /* Enable ADC1 and ADC2 */
+    278            ADC_Cmd(ADC1, ENABLE);
+    279            ADC_Cmd(ADC2, ENABLE);
+    280            
+    281            /* ADC Init */
+    282            ADC_StructInit(&ADC_InitStructure);
+    283            ADC_InitStructure.ADC_Mode = ADC_Mode_InjecSimult;
+    284            ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+    285            ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+    286            ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+    287            ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Left;
+    288            ADC_InitStructure.ADC_NbrOfChannel = 1u;
+    289            ADC_Init(ADC1, &ADC_InitStructure);
+    290            ADC_Init(ADC2, &ADC_InitStructure);
+    291            
+    292            /* Enable external trigger (it will be SW) for ADC1 and ADC2 regular 
+    293            conversions */ 
+    294            ADC_ExternalTrigConvCmd(ADC1, ENABLE);
+    295            ADC_ExternalTrigConvCmd(ADC2, ENABLE);
+    296            
+    297            /* ADC1 Injected conversions configuration */     
+    298            ADC_InjectedSequencerLengthConfig(ADC1,1u); 
+    299            ADC_InjectedSequencerLengthConfig(ADC2,1u);
+    300            
+    301            /* Start calibration of ADC1 and ADC2 */
+    302            ADC_StartCalibration(ADC1);
+    303            ADC_StartCalibration(ADC2);
+    304            
+    305            /* Wait for the end of ADCs calibration */
+    306            while (ADC_GetCalibrationStatus(ADC1) & ADC_GetCalibrationStatus(ADC2))
+    307            {
+    308            }
+    309            
+    310            /*Enable external trigger fo injected conv of ADC2 */
+    311            ADC_ExternalTrigInjectedConvCmd(ADC2,ENABLE);  
+    312          
+    313           /* DMA Event related to ADC regular conversion*/
+    314            /* DMA1 channel1 configuration */
+    315            DMA_DeInit(DMA1_Channel1);
+    316            DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)ADC1_DR_Address;
+    317            DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(&(pLocalVars_Str->hRegConv));
+    318            DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    319            DMA_InitStructure.DMA_BufferSize = 1u;
+    320            DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    321            DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+    322            DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    323            DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    324            DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    325            DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
+    326            DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    327            DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+    328            /* Enable DMA1 Channel1 */
+    329            DMA_Cmd(DMA1_Channel1, ENABLE);
+    330            /* Enable ADC1 EOC DMA */
+    331            ADC_DMACmd(ADC1,ENABLE);  
+    332            
+    333            /* Enable the ADC Interrupt */
+    334            NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) ADC1_2_IRQn;
+    335            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 
+    336              ADC_PRE_EMPTION_PRIORITY;
+    337            NVIC_InitStructure.NVIC_IRQChannelSubPriority = ADC_SUB_PRIORITY;
+    338            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    339            NVIC_Init(&NVIC_InitStructure);
+    340          }
+    341          
+    342          /**
+    343          * @brief  It initializes TIM1 peripheral for PWM generation
+    344          * @param 'TIMx': Timer to be initialized
+    345          * @param 'this': related object of class CILM1_PWMC
+    346          * @retval none
+    347          */
+    348          static void ILM1_TIM1Init(CPWMC this)
+    349          {
+    350            TIM_TimeBaseInitTypeDef TIMx_TimeBaseStructure;
+    351            TIM_OCInitTypeDef TIMx_OCInitStructure;
+    352            TIM_BDTRInitTypeDef TIMx_BDTRInitStructure;
+    353            pDParams_t pLocalDParams = DCLASS_PARAMS;
+    354            DVars_t *pLocalVars_Str = &DCLASS_VARS;
+    355            
+    356            pLocalVars_Str->Half_PWMPeriod = ((((_CPWMC) this)->pParams_str->hPWMperiod)/2u)-1u;
+    357            
+    358            /* TIM1 Peripheral Configuration -------------------------------------------*/
+    359            /* TIM1 Registers reset */
+    360            TIM_DeInit(TIM1);
+    361            TIM_TimeBaseStructInit(&TIMx_TimeBaseStructure);
+    362            /* Time Base configuration */
+    363            TIMx_TimeBaseStructure.TIM_Prescaler = (uint16_t)(pLocalDParams->bTim_Clock_Divider) - 1u;
+    364            TIMx_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
+    365            TIMx_TimeBaseStructure.TIM_Period =  pLocalVars_Str->Half_PWMPeriod;
+    366            TIMx_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV2;
+    367            TIMx_TimeBaseStructure.TIM_RepetitionCounter = pLocalDParams->
+    368                                                                       bRepetitionCounter;
+    369            TIM_TimeBaseInit(TIM1, &TIMx_TimeBaseStructure);
+    370            
+    371            /* Channel 1, 2,3 and 4 Configuration in PWM mode */
+    372            TIM_OCStructInit(&TIMx_OCInitStructure);  
+    373            TIMx_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
+    374            TIMx_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+    375            TIMx_OCInitStructure.TIM_Pulse =  (pLocalVars_Str->Half_PWMPeriod)/2u; /* dummy value */
+    376            
+    377            /* Channel 1 */
+    378            TIMx_OCInitStructure.TIM_OCPolarity = pLocalDParams->hCh1Polarity;      
+    379            TIMx_OCInitStructure.TIM_OCIdleState = pLocalDParams->hCh1IdleState;    
+    380            if ((pLocalDParams->LowSideOutputs)== LS_PWM_TIMER)
+    381            {
+    382              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable; 
+    383              TIMx_OCInitStructure.TIM_OCNPolarity = pLocalDParams->hCh1NPolarity; 
+    384              TIMx_OCInitStructure.TIM_OCNIdleState = pLocalDParams->hCh1NIdleState;     
+    385            }    
+    386            else
+    387            {
+    388              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Disable;
+    389            }    
+    390            TIM_OC1Init(TIM1, &TIMx_OCInitStructure); 
+    391            
+    392            
+    393            /* Channel 2 */
+    394            TIMx_OCInitStructure.TIM_OCPolarity = pLocalDParams->hCh2Polarity;      
+    395            TIMx_OCInitStructure.TIM_OCIdleState = pLocalDParams->hCh2IdleState;    
+    396            if ((pLocalDParams->LowSideOutputs)== LS_PWM_TIMER)
+    397            {
+    398            TIMx_OCInitStructure.TIM_OCNPolarity = pLocalDParams->hCh2NPolarity; 
+    399            TIMx_OCInitStructure.TIM_OCNIdleState = pLocalDParams->hCh2NIdleState;         
+    400            }
+    401            TIM_OC2Init(TIM1, &TIMx_OCInitStructure); 
+    402            
+    403            
+    404            /* Channel 3 */
+    405            TIMx_OCInitStructure.TIM_OCPolarity = pLocalDParams->hCh3Polarity;      
+    406            TIMx_OCInitStructure.TIM_OCIdleState = pLocalDParams->hCh3IdleState;    
+    407            if ((pLocalDParams->LowSideOutputs)== LS_PWM_TIMER)
+    408            {
+    409            TIMx_OCInitStructure.TIM_OCNPolarity = pLocalDParams->hCh3NPolarity; 
+    410            TIMx_OCInitStructure.TIM_OCNIdleState = pLocalDParams->hCh3NIdleState;         
+    411            }
+    412            TIM_OC3Init(TIM1, &TIMx_OCInitStructure);   
+    413           
+    414            
+    415            /* Enables the TIM1 Preload on CC1 Register */
+    416            TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
+    417            /* Enables the TIM1 Preload on CC2 Register */
+    418            TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
+    419            /* Enables the TIM1 Preload on CC3 Register */
+    420            TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable); 
+    421            
+    422            /* Dead Time */
+    423            TIM_BDTRStructInit(&TIMx_BDTRInitStructure);
+    424            TIMx_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Enable;
+    425            TIMx_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Enable;
+    426            TIMx_BDTRInitStructure.TIM_LOCKLevel = TIM_LOCKLevel_1; 
+    427            TIMx_BDTRInitStructure.TIM_DeadTime = (pLocalDParams->hDeadTime)/2u;
+    428            /* BKIN, if enabled */
+    429            if ((pLocalDParams->EmergencyStop)!= DISABLE)  
+    430            {
+    431              TIMx_BDTRInitStructure.TIM_Break = TIM_Break_Enable;
+    432              TIMx_BDTRInitStructure.TIM_BreakPolarity = pLocalDParams->hBKINPolarity;
+    433              TIMx_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Disable;
+    434              TIM_ClearITPendingBit(TIM1, TIM_IT_Break);
+    435              TIM_ITConfig(TIM1, TIM_IT_Break, ENABLE);
+    436            }  
+    437            TIM_BDTRConfig(TIM1, &TIMx_BDTRInitStructure);
+    438            
+    439            /* Trigger Output signal is Update Event */
+    440            TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_Update);
+    441            
+    442            /* TIM1 counter enable */
+    443            TIM_Cmd(TIM1, ENABLE); 
+    444          }
+    445          
+    446          /**
+    447          * @brief  It stores into 'this' object variables the voltage present on Ia and 
+    448          *         Ib current feedback analog channels when no current is flowin into the
+    449          *         motor
+    450          * @param  this: related object of class CILM1_PWMC
+    451          * @retval none
+    452          */
+    453          static void ILM1_CurrentReadingCalibration(CPWMC this)
+    454          {
+    455            uint8_t bIndex;
+    456            uint32_t wPhaseAOffset=0u, wPhaseBOffset=0u; 
+    457            pDParams_t pLocalDParams = DCLASS_PARAMS; 
+    458            DVars_t *pLocalVars_Str = &DCLASS_VARS;
+    459            
+    460            ADC_InjectedChannelConfig(ADC1, pLocalDParams->hIaChannel, 1u, 
+    461                                                      pLocalDParams->b_IaSamplingTime);
+    462            ADC_InjectedChannelConfig(ADC2, pLocalDParams->hIbChannel, 1u, 
+    463                                                        pLocalDParams->b_IbSamplingTime); 
+    464            
+    465            /* ADC1 Injected end of conversions interrupt disabling */
+    466            ADC_ITConfig(ADC1, ADC_IT_JEOC, DISABLE);
+    467            
+    468            /* ADC1 Injected conversions trigger is given by software and enabled */ 
+    469            ADC_ExternalTrigInjectedConvConfig(ADC1, ADC_ExternalTrigInjecConv_None);  
+    470            ADC_ExternalTrigInjectedConvCmd(ADC1,ENABLE); 
+    471            
+    472            /* ADC Channel used for current reading are read 
+    473            in order to get zero currents ADC values*/ 
+    474            for(bIndex = NB_CONVERSIONS; bIndex !=0u; bIndex--)
+    475            {
+    476              /* Clear the ADC1 JEOC pending flag */
+    477              ADC_ClearFlag(ADC1, ADC_FLAG_JEOC);   
+    478              ADC_SoftwareStartInjectedConvCmd(ADC1,ENABLE);
+    479              while(!ADC_GetFlagStatus(ADC1,ADC_FLAG_JEOC)) { }
+    480              
+    481              wPhaseAOffset += (ADC_GetInjectedConversionValue(ADC1,ADC_InjectedChannel_1));
+    482              wPhaseBOffset += (ADC_GetInjectedConversionValue(ADC2,ADC_InjectedChannel_1));
+    483            }
+    484            
+    485            pLocalVars_Str->hPhaseAOffset = (uint16_t)(wPhaseAOffset>>3);
+    486            pLocalVars_Str->hPhaseBOffset = (uint16_t)(wPhaseBOffset>>3);
+    487                
+    488            ADC_ClearFlag(ADC1, ADC_FLAG_JEOC); 	  
+    489            
+    490            /* ADC1 Injected conversions trigger is TIM1 Trigger Output */ 
+    491            ADC_ExternalTrigInjectedConvConfig(ADC1, ADC_ExternalTrigInjecConv_T1_TRGO); 
+    492            
+    493            /* ADC1 Injected conversions end interrupt enabling */
+    494            ADC_ITConfig(ADC1, ADC_IT_JEOC, ENABLE); 
+    495          }
+    496          
+    497          /**
+    498          * @brief  It computes and return latest converted motor phase currents motor
+    499          * @param  this: related object of class CILM1_PWMC
+    500          * @retval Ia and Ib current in Curr_Components format
+    501          */
+    502          static void ILM1_GetPhaseCurrents(CPWMC this,Curr_Components* pStator_Currents)
+    503          {
+    504            int32_t wAux;
+    505            uint16_t hReg;
+    506            DVars_t *pLocalVars_Str = &DCLASS_VARS;
+    507          
+    508            /* Clear TIMx Update Flag necessary to detect FOC duration SW error */
+    509            TIM1->SR &= (uint16_t)(~TIM_FLAG_Update); 
+    510          
+    511           /* Ia = (hPhaseAOffset)-(PHASE_A_ADC_CHANNEL vale)  */
+    512            hReg = (uint16_t)((ADC1->JDR1)<<1);
+    513            wAux = (int32_t)(hReg)-(int32_t)(pLocalVars_Str->hPhaseAOffset);
+    514           
+    515           /* Saturation of Ia */
+    516            if (wAux < S16_MIN)
+    517            {
+    518              pStator_Currents->qI_Component1= S16_MIN;
+    519            }  
+    520            else  if (wAux > S16_MAX)
+    521            { 
+    522              pStator_Currents->qI_Component1= S16_MAX;
+    523            }
+    524            else
+    525            {
+    526              pStator_Currents->qI_Component1= (int16_t)wAux;
+    527            }
+    528            
+    529            /* Ib = (hPhaseBOffset)-(PHASE_B_ADC_CHANNEL value) */
+    530            hReg = (uint16_t)((ADC2->JDR1)<<1);
+    531            wAux = (int32_t)(hReg)-(int32_t)(pLocalVars_Str->hPhaseBOffset);
+    532            
+    533            /* Saturation of Ib */
+    534            if (wAux < S16_MIN)
+    535            {
+    536              pStator_Currents->qI_Component2= S16_MIN;
+    537            }  
+    538            else  if (wAux > S16_MAX)
+    539            { 
+    540              pStator_Currents->qI_Component2= S16_MAX;
+    541            }
+    542            else
+    543            {
+    544              pStator_Currents->qI_Component2= (int16_t)wAux;
+    545            }
+    546          }
+    547          
+    548          /**
+    549            * @brief  It turns on low sides switches. This function is intended to be 
+    550            *         used for charging boot capacitors of driving section. It has to be 
+    551            *         called each motor start-up when using high voltage drivers
+    552            * @param  this: related object of class CILM1_PWMC
+    553            * @retval none
+    554            */
+    555          static void ILM1_TurnOnLowSides(CPWMC this)
+    556          {    
+    557            pDParams_t pLocalDParams = DCLASS_PARAMS;
+    558            
+    559            ((_CPWMC) this)->Vars_str.hCntPhA = 
+    560              ((_CPWMC) this)->Vars_str.hCntPhB =
+    561                ((_CPWMC) this)->Vars_str.hCntPhC = 0u;
+    562              
+    563            ILM1_WriteTIMRegisters(this);
+    564            
+    565            TIM_ClearFlag(TIM1,TIM_FLAG_Update);
+    566            while (TIM_GetFlagStatus(TIM1,TIM_FLAG_Update) == RESET)
+    567            {}
+    568            
+    569            /* Main PWM Output Enable */
+    570            TIM_CtrlPWMOutputs(TIM1, ENABLE);
+    571            if ((pLocalDParams->LowSideOutputs)== ES_GPIO)
+    572            {
+    573              GPIO_WriteBit(pLocalDParams->hCh1NPort, pLocalDParams->hCh1NPin, Bit_SET);
+    574              GPIO_WriteBit(pLocalDParams->hCh2NPort, pLocalDParams->hCh2NPin, Bit_SET);
+    575              GPIO_WriteBit(pLocalDParams->hCh3NPort, pLocalDParams->hCh3NPin, Bit_SET);
+    576            }
+    577            return; 
+    578          }
+    579          
+    580          
+    581          /**
+    582          * @brief  It enables PWM generation on the proper Timer peripheral acting on MOE
+    583          *         bit
+    584          * @param  this: related object of class CILM1_PWMC
+    585          * @retval none
+    586          */
+    587          static void ILM1_SwitchOnPWM(CPWMC this)
+    588          {
+    589            pDParams_t pLocalDParams = DCLASS_PARAMS;
+    590            
+    591            /* Main PWM Output Enable */
+    592            TIM_CtrlPWMOutputs(TIM1, ENABLE);
+    593            if ((pLocalDParams->LowSideOutputs)== ES_GPIO)
+    594            {
+    595              GPIO_WriteBit(pLocalDParams->hCh1NPort, pLocalDParams->hCh1NPin, Bit_SET);
+    596              GPIO_WriteBit(pLocalDParams->hCh2NPort, pLocalDParams->hCh2NPin, Bit_SET);
+    597              GPIO_WriteBit(pLocalDParams->hCh3NPort, pLocalDParams->hCh3NPin, Bit_SET);
+    598            }
+    599            ADC_ExternalTrigInjectedConvCmd(ADC1,ENABLE);
+    600            return; 
+    601          }
+    602          
+    603          
+    604          /**
+    605          * @brief  It disables PWM generation on the proper Timer peripheral acting on 
+    606          *         MOE bit
+    607          * @param  this: related object of class CILM1_PWMC
+    608          * @retval none
+    609          */
+    610          static void ILM1_SwitchOffPWM(CPWMC this)
+    611          { 
+    612            pDParams_t pLocalDParams = DCLASS_PARAMS;
+    613            /* Main PWM Output Disable */
+    614            TIM_CtrlPWMOutputs(TIM1, DISABLE);
+    615            if ((pLocalDParams->LowSideOutputs)== ES_GPIO)
+    616            {
+    617              GPIO_WriteBit(pLocalDParams->hCh1NPort, pLocalDParams->hCh1NPin, Bit_RESET);
+    618              GPIO_WriteBit(pLocalDParams->hCh2NPort, pLocalDParams->hCh2NPin, Bit_RESET);
+    619              GPIO_WriteBit(pLocalDParams->hCh3NPort, pLocalDParams->hCh3NPin, Bit_RESET);
+    620            }
+    621            ADC_ExternalTrigInjectedConvCmd(ADC1,DISABLE);  
+    622            
+    623            return; 
+    624          }
+    625          
+    626          /**
+    627          * @brief  It stores into 'this' object variables the voltage present on Ia and 
+    628          *         Ib current feedback analog channels when no current is flow into the
+    629          *         motor
+    630          * @param  this: related object of class CILM1_PWMC
+    631          * @retval none
+    632          */
+    633          static uint16_t ILM1_WriteTIMRegisters(CPWMC this)
+    634          {
+    635            uint16_t hAux;
+    636            
+    637              TIM1->CCR1 = ((_CPWMC) this)->Vars_str.hCntPhA;
+    638              TIM1->CCR2 = ((_CPWMC) this)->Vars_str.hCntPhB;
+    639              TIM1->CCR3 = ((_CPWMC) this)->Vars_str.hCntPhC; 
+    640                
+    641            if ((TIM1->SR & (u32)TIM_FLAG_Update) == TIM_FLAG_Update)
+    642             {
+    643               hAux = MC_FOC_DURATION;
+    644             }
+    645             else
+    646             {
+    647               hAux = MC_NO_ERROR;
+    648             }
+    649                  
+    650            return hAux;
+    651          }
+    652          
+    653          
+    654          /**
+    655          * @brief  Execute a regular conversion using ADC1. 
+    656          *         The function is not re-entrant (can't executed twice at the same time)
+    657          *         It returns 0xFFFF in case of conversion error.
+    658          * @param  this related object of class CILM1_PWMC
+    659          * @retval It returns converted value or oxFFFF for conversion error
+    660          */
+    661          static uint16_t ILM1_ExecRegularConv(CPWMC this, uint8_t bChannel)
+    662          {
+    663            pDVars_t pDVars_str = &DCLASS_VARS;
+    664            uint32_t tmpflag = 0u;
+    665          
+    666            ADC1->SQR3 = bChannel;
+    667            
+    668            DMA1_Channel1->CMAR=(uint32_t)(&(pDVars_str->hRegConv));
+    669            
+    670            /* Reset DMA1_CH1 TC Flag */
+    671            DMA1->IFCR = DMA1_FLAG_TC1;
+    672            
+    673            /* It starts software triggered regular conversion
+    674            through bit banding access. It is equivalent to 
+    675            ADC1->CR2 |= EXTTRIG_SWSTART_Set; */
+    676            *(uint32_t *)(ADC1_CR2_EXTTRIG_SWSTART_BB)=(uint32_t)(0x1u);
+    677            
+    678            /* Wait until end of regular conversion */
+    679            while (tmpflag == 0u)
+    680            {
+    681              tmpflag = (DMA1->ISR & DMA1_FLAG_TC1);
+    682            }
+    683           
+    684            return (pDVars_str->hRegConv);
+    685          }
+    686          
+    687          /**
+    688          * @brief  It sets the specified sampling time for the specified ADC channel
+    689          *         on ADC1. It must be called once for each channel utilized by user
+    690          * @param  ADC channel, sampling time
+    691          * @retval none
+    692          */
+    693          static void ILM1_ADC_SetSamplingTime(CPWMC this, ADConv_t ADConv_struct)
+    694          { 
+    695             uint32_t tmpreg1 = 0u, tmpreg2 = 0u, tmpreg3=0u, tmpreg4 = SMPR1_SMP_Set;
+    696             
+    697            /* if ADC_Channel_10 ... ADC_Channel_17 is selected */
+    698            if (ADConv_struct.Channel> ADC_Channel_9)
+    699            {
+    700              /* Get the old register value */
+    701              tmpreg1 = ADC1->SMPR1;
+    702              /* Calculate the mask to clear */
+    703              tmpreg3 = (uint32_t) (ADConv_struct.Channel) - 10u;
+    704              tmpreg3 = tmpreg3 *3u;
+    705              tmpreg2 =  tmpreg4 << (tmpreg3);
+    706              /* Clear the old discontinuous mode channel count */
+    707              tmpreg1 &= ~tmpreg2;
+    708              /* Calculate the mask to set */
+    709              tmpreg2 = (uint32_t)(ADConv_struct.SamplTime) << (tmpreg3);
+    710              /* Set the discontinuous mode channel count */
+    711              tmpreg1 |= tmpreg2;
+    712              /* Store the new register value */
+    713              ADC1->SMPR1 = tmpreg1;
+    714            }
+    715            else /* ADC_Channel include in ADC_Channel_[0..9] */
+    716            {
+    717              /* Get the old register value */
+    718              tmpreg1 = ADC1->SMPR2;
+    719              tmpreg3 = (uint32_t) (ADConv_struct.Channel) * 3u;
+    720              /* Calculate the mask to clear */
+    721              tmpreg4 = SMPR2_SMP_Set;
+    722              tmpreg2 =  tmpreg4 << (tmpreg3);
+    723              /* Clear the old discontinuous mode channel count */
+    724              tmpreg1 &= ~tmpreg2;
+    725              /* Calculate the mask to set */
+    726              tmpreg2 = (uint32_t)(ADConv_struct.SamplTime) << (tmpreg3);
+    727              /* Set the discontinuous mode channel count */
+    728              tmpreg1 |= tmpreg2;
+    729              /* Store the new register value */
+    730              ADC1->SMPR2 = tmpreg1;
+    731            }
+    732          }
+    733          
+    734          /**
+    735          * @brief  It is used to check if an overcurrent occurred since last call.
+    736          * @param  this related object of class CPWMC
+    737          * @retval uint16_t It returns MC_BREAK_IN whether an overcurrent has been 
+    738          *                  detected since last method call, MC_NO_FAULTS otherwise.
+    739          */
+    740          static uint16_t ILM1_IsOverCurrentOccurred(CPWMC this)
+    741          {
+    742            uint16_t retVal = MC_NO_FAULTS;
+    743            if ((TIM1->SR & TIM_FLAG_Break) != 0u)
+    744            {
+    745              retVal = MC_BREAK_IN;
+    746              TIM1->SR = (u16)~TIM_FLAG_Break;
+    747            }
+    748            return retVal;
+    749          }
+    750          
+    751          /**
+    752          * @}
+    753          */
+    754          
+    755          /**
+    756          * @}
+    757          */
+    758          
+    759          /**
+    760          * @}
+    761          */
+    762          
+    763          
+    764          #endif
+    765          
+    766          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       4   ILM1_ADC_SetSamplingTime
+      32   ILM1_CurrentReadingCalibration
+        32   -> ADC_ClearFlag
+        32   -> ADC_ExternalTrigInjectedConvCmd
+        32   -> ADC_ExternalTrigInjectedConvConfig
+        32   -> ADC_GetFlagStatus
+        32   -> ADC_GetInjectedConversionValue
+         0   -> ADC_ITConfig
+        32   -> ADC_ITConfig
+        32   -> ADC_InjectedChannelConfig
+        32   -> ADC_SoftwareStartInjectedConvCmd
+       0   ILM1_ExecRegularConv
+       0   ILM1_GetPhaseCurrents
+      96   ILM1_Init
+        96   -> ADC_Cmd
+        96   -> ADC_DMACmd
+        96   -> ADC_DeInit
+        96   -> ADC_ExternalTrigConvCmd
+        96   -> ADC_ExternalTrigInjectedConvCmd
+        96   -> ADC_GetCalibrationStatus
+        96   -> ADC_Init
+        96   -> ADC_InjectedSequencerLengthConfig
+        96   -> ADC_StartCalibration
+        96   -> ADC_StructInit
+        96   -> DBGMCU_Config
+        96   -> DMA_Cmd
+        96   -> DMA_DeInit
+        96   -> DMA_Init
+        96   -> GPIO_Init
+        96   -> GPIO_PinLockConfig
+        96   -> GPIO_PinRemapConfig
+        96   -> GPIO_StructInit
+        96   -> ILM1_TIM1Init
+        96   -> NVIC_Init
+        96   -> RCC_ADCCLKConfig
+        96   -> RCC_AHBPeriphClockCmd
+        96   -> RCC_APB2PeriphClockCmd
+        96   -> RCC_ClockSecuritySystemCmd
+       0   ILM1_IsOverCurrentOccurred
+       8   ILM1_NewObject
+         8   -> PWMC_NewObject
+       8   ILM1_SwitchOffPWM
+         0   -> ADC_ExternalTrigInjectedConvCmd
+         8   -> GPIO_WriteBit
+         8   -> TIM_CtrlPWMOutputs
+       8   ILM1_SwitchOnPWM
+         0   -> ADC_ExternalTrigInjectedConvCmd
+         8   -> GPIO_WriteBit
+         8   -> TIM_CtrlPWMOutputs
+      72   ILM1_TIM1Init
+        72   -> TIM_BDTRConfig
+        72   -> TIM_BDTRStructInit
+        72   -> TIM_ClearITPendingBit
+        72   -> TIM_Cmd
+        72   -> TIM_DeInit
+        72   -> TIM_ITConfig
+        72   -> TIM_OC1Init
+        72   -> TIM_OC1PreloadConfig
+        72   -> TIM_OC2Init
+        72   -> TIM_OC2PreloadConfig
+        72   -> TIM_OC3Init
+        72   -> TIM_OC3PreloadConfig
+        72   -> TIM_OCStructInit
+        72   -> TIM_SelectOutputTrigger
+        72   -> TIM_TimeBaseInit
+        72   -> TIM_TimeBaseStructInit
+      16   ILM1_TurnOnLowSides
+         0   -> GPIO_WriteBit
+        16   -> GPIO_WriteBit
+        16   -> TIM_ClearFlag
+        16   -> TIM_CtrlPWMOutputs
+        16   -> TIM_GetFlagStatus
+       0   ILM1_WriteTIMRegisters
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable11
+       4  ??DataTable11_1
+       4  ??DataTable11_10
+       4  ??DataTable11_11
+       4  ??DataTable11_12
+       4  ??DataTable11_13
+       4  ??DataTable11_14
+       4  ??DataTable11_2
+       4  ??DataTable11_3
+       4  ??DataTable11_4
+       4  ??DataTable11_5
+       4  ??DataTable11_6
+       4  ??DataTable11_7
+       4  ??DataTable11_8
+       4  ??DataTable11_9
+       6  ?Subroutine0
+      68  ILM1_ADC_SetSamplingTime
+     168  ILM1_CurrentReadingCalibration
+      32  ILM1_ExecRegularConv
+      84  ILM1_GetPhaseCurrents
+     610  ILM1_Init
+      20  ILM1_IsOverCurrentOccurred
+     112  ILM1_NewObject
+      28  ILM1_PWMC_Allocated
+          ILM1_PWMCpool
+      60  ILM1_SwitchOffPWM
+      60  ILM1_SwitchOnPWM
+     372  ILM1_TIM1Init
+     102  ILM1_TurnOnLowSides
+      24  ILM1_WriteTIMRegisters
+
+ 
+    28 bytes in section .bss
+ 1 778 bytes in section .text
+ 
+ 1 778 bytes of CODE memory
+    28 bytes of DATA memory
+
+Errors: none
+Warnings: none

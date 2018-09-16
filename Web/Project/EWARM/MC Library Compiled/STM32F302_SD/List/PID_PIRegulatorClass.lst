@@ -1,0 +1,326 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:34
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PID_PIRegulatorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PID_PIRegulatorClass.c" -D USE_STDPERIPH_DRIVER
+#        -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\PID_PIRegulatorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\PID_PIRegulatorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\PID_PIRegulatorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    PID_PIRegulatorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private implementation of PID_PI Class     
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "PIRegulatorClass.h"
+     30          #include "PIRegulatorPrivate.h"
+     31          #include "PID_PIRegulatorClass.h"
+     32          #include "PID_PIRegulatorPrivate.h"
+     33          #include "MCLibraryConf.h"
+     34          #include "MC_type.h"
+     35          
+     36          #define DCLASS_VARS  ((_DCPID)(((_CPI) this)->DerivedClass))->DVars_str
+     37          #define DCLASS_PARAMS ((_DCPID)(((_CPI) this)->DerivedClass))->pDParams_str
+     38          
+     39          /*#define MC_CLASS_DYNAMIC*/
+     40          #ifdef MC_CLASS_DYNAMIC
+     41          	#include "stdlib.h" /* Used for dynamic allocation */
+     42          #else
+     43          	_DCPID_t PID_PIpool[MAX_PID_PI_NUM];
+     44          	uint8_t PID_PI_Allocated = 0u;
+     45          #endif
+     46          
+     47          /*#define DEBUG*/
+     48          
+     49          #ifdef DEBUG
+     50          static volatile _CPI oPIdbg;
+     51          static volatile _DCPID oPIDdbg;
+     52          #endif
+     53          
+     54          /**
+     55            * @brief  Creates an object of the derived class PID
+     56            * @param  pPIParams_t pointer to PI regulator class parameters structure
+     57            * @param  pPIDParams_t pointer to a PID Derived class parameters structure
+     58            * @retval CPID_PI new instance of derived class object
+     59            */
+     60          CPID_PI PID_NewObject(pPIParams_t pPIParam,
+     61                                            pPIDParams_t pPIDParam)
+     62          {
+     63            _CPI _oPI;
+     64            _DCPID _oPID;
+     65          
+     66            _oPI = (_CPI)PI_NewObject(pPIParam);
+     67          	#ifdef MC_CLASS_DYNAMIC
+     68          		_oPID = (_DCPID)calloc(1u,sizeof(_DCPID_t));
+     69          	#else
+     70          		if (PID_PI_Allocated  < MAX_PID_PI_NUM)
+     71          		{
+     72          			_oPID = &PID_PIpool[PID_PI_Allocated++];
+     73          		}
+     74          		else
+     75          		{
+     76          			_oPID = MC_NULL;
+     77          		}
+     78          	#endif
+     79              
+     80            _oPID->pDParams_str = pPIDParam;
+     81            _oPI->DerivedClass = (void*)_oPID;
+     82            
+     83            return ((CPID_PI)_oPI);
+     84          }
+     85          
+     86          /**
+     87            * @brief  It initiliazes all the object variables, usually it has to be called 
+     88            *         once right after object creation
+     89            * @param  CPID_PI PID regulator object
+     90            * @retval None
+     91            */
+     92          void PID_ObjectInit(CPID_PI this)
+     93          {
+     94              /* Derived class members container */
+     95            pDVars_t pDVars_str = &DCLASS_VARS;  
+     96            
+     97            ((_CPI)this)->Vars_str.hKpGain = ((_CPI)this)->pParams_str->hDefKpGain;
+     98            
+     99            ((_CPI)this)->Vars_str.hKiGain = ((_CPI)this)->pParams_str->hDefKiGain;
+    100            ((_CPI)this)->Vars_str.wIntegralTerm = 0;
+    101            ((_CPI)this)->Vars_str.wUpperIntegralLimit = ((_CPI)this)->pParams_str->
+    102                                                                      wDefMaxIntegralTerm; 
+    103            ((_CPI)this)->Vars_str.wLowerIntegralLimit = ((_CPI)this)->pParams_str->
+    104                                                                      wDefMinIntegralTerm; 
+    105            ((_CPI)this)->Vars_str.hUpperOutputLimit = ((_CPI)this)->pParams_str->
+    106                                                                            hDefMaxOutput;
+    107            ((_CPI)this)->Vars_str.hLowerOutputLimit = ((_CPI)this)->pParams_str->
+    108                                                                            hDefMinOutput;  
+    109            pDVars_str->hKdGain = DCLASS_PARAMS->hDefKdGain;
+    110                                
+    111            pDVars_str->wPrevProcessVarError = 0;                  
+    112              
+    113            return;
+    114          }
+    115          
+    116          
+    117              
+    118          /**
+    119            * @brief  It set a new value into the PID Previous error variable required to 
+    120            *         compute derivative term
+    121            * @param  CPID_PI PID regulator object
+    122            * @param  int32_t New integral term value
+    123            * @retval None
+    124            */
+    125          void PID_SetPrevError(CPID_PI this, int32_t wPrevProcessVarError)
+    126          {
+    127           ((_DCPID)(((_CPI)this)->DerivedClass))->DVars_str.wPrevProcessVarError = 
+    128                                                                     wPrevProcessVarError;
+    129            return;
+    130          }
+    131          
+    132          
+    133          /**
+    134            * @brief  It updates the Kd gain 
+    135            * @param  CPID_PI PID regulator object
+    136            * @param  int16_t New Kd gain
+    137            * @retval None
+    138          */
+    139          void PID_SetKD(CPID_PI  this, int16_t hKdGain)
+    140          {
+    141            if(((_DCPID)(((_CPI)this)->DerivedClass)) != MC_NULL)
+    142            {
+    143            ((_DCPID)(((_CPI)this)->DerivedClass))->DVars_str.hKdGain = hKdGain;
+    144            }
+    145          }
+    146          
+    147          /**
+    148            * @brief  It returns the Kd gain structure of the PID object passed
+    149            * @param  CPID_PI PI regulator object
+    150            * @retval int16_t Kd gain
+    151            */
+    152          int16_t PID_GetKD(CPID_PI this)
+    153          { 
+    154            int16_t haux;
+    155            if(((_DCPID)(((_CPI)this)->DerivedClass)) != MC_NULL)
+    156            {
+    157              haux = ((_DCPID)(((_CPI)this)->DerivedClass))->DVars_str.hKdGain;
+    158            }
+    159            else
+    160            {
+    161              haux= (int16_t) 0;
+    162            }
+    163            return (haux);
+    164          }
+    165          
+    166          
+    167          /**
+    168            * @brief  It returns the Kd gain divisor of the PID object passed 
+    169            * @param  CPID_PI PID regulator object
+    170            * @retval int16_t Kd gain
+    171            */
+    172          uint16_t PID_GetKDDivisor(CPID_PI this)
+    173          {
+    174            uint16_t hAux = 0u;
+    175            
+    176            if(((_DCPID)(((_CPI)this)->DerivedClass)) != MC_NULL)
+    177            {
+    178              hAux = ((_DCPID)(((_CPI)this)->DerivedClass))->pDParams_str->hKdDivisor;
+    179            }   
+    180            return (hAux); 
+    181          }
+    182          
+    183          #if defined (CCMRAM)
+    184          #if defined (__ICCARM__)
+    185          #pragma location = ".ccmram"
+    186          #elif defined (__CC_ARM)
+    187          __attribute__((section ("ccmram")))
+    188          #endif
+    189          #endif
+    190          /**
+    191          * @brief  This function compute the output of a PID regulator sum of its 
+    192          *         proportional, integral and derivative terms
+    193          * @param  CPID_PI PID regulator object
+    194          * @param  int32_t Present process variable error, intended as the 
+    195          *         reference value minus the present process variable value
+    196          * @retval int16_t PI output
+    197          */
+    198          int16_t PID_Controller(CPID_PI  this, int32_t wProcessVarError)
+    199          {
+    200            int32_t wDifferential_Term, wDeltaError, wTemp_output;
+    201            
+    202            /* Derived class members container */
+    203            pDVars_t pDVars_str = &DCLASS_VARS;  
+    204            
+    205            wDeltaError = wProcessVarError - pDVars_str->wPrevProcessVarError;
+    206            
+    207            wDifferential_Term = pDVars_str->hKdGain * wDeltaError; 
+    208            
+    209          #ifdef FULL_MISRA_C_COMPLIANCY
+    210            wDifferential_Term /= (int32_t)((_DCPID)(((_CPI)this)->DerivedClass))->
+    211              pDParams_str->hKdDivisor;
+    212          #else  
+    213            /* WARNING: the below instruction is not MISRA compliant, user should verify
+    214            that Cortex-M3 assembly instruction ASR (arithmetic shift right) 
+    215            is used by the compiler to perform the shifts (instead of LSR 
+    216            logical shift right)*/ 
+    217            wDifferential_Term >>= 
+    218              (int32_t)((_DCPID)(((_CPI)this)->DerivedClass))->
+    219                pDParams_str->hKdDivisorPOW2;
+    220          #endif
+    221            
+    222            pDVars_str->wPrevProcessVarError = wProcessVarError; 
+    223            
+    224            wTemp_output = PI_Controller((CPI)this, wProcessVarError) + wDifferential_Term;
+    225            
+    226            if (wTemp_output > ((_CPI)this)->Vars_str.hUpperOutputLimit)
+    227            {
+    228              wTemp_output = ((_CPI)this)->Vars_str.hUpperOutputLimit;		  			 	
+    229            }
+    230            else if (wTemp_output < ((_CPI)this)->Vars_str.hLowerOutputLimit)
+    231            {
+    232              wTemp_output = ((_CPI)this)->Vars_str.hLowerOutputLimit;
+    233            }
+    234            else
+    235            {}
+    236            
+    237            return((int16_t) wTemp_output); 		
+    238          }
+    239          
+    240          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   PID_Controller
+        16   -> PI_Controller
+       0   PID_GetKD
+       0   PID_GetKDDivisor
+       8   PID_NewObject
+         8   -> PI_NewObject
+       0   PID_ObjectInit
+       0   PID_SetKD
+       0   PID_SetPrevError
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      54  PID_Controller
+      10  PID_GetKD
+      14  PID_GetKDDivisor
+      40  PID_NewObject
+      56  PID_ObjectInit
+     100  PID_PI_Allocated
+          PID_PIpool
+       8  PID_SetKD
+       6  PID_SetPrevError
+
+ 
+ 100 bytes in section .bss
+ 192 bytes in section .text
+ 
+ 192 bytes of CODE memory
+ 100 bytes of DATA memory
+
+Errors: none
+Warnings: none

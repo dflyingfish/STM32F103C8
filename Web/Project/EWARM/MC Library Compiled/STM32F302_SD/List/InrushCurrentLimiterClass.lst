@@ -1,0 +1,275 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:32
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\InrushCurrentLimiterClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\InrushCurrentLimiterClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4
+#        -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC
+#        Library Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj"
+#        --debug --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp
+#        --dlib_config "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\InrushCurrentLimiterClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\InrushCurrentLimiterClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\InrushCurrentLimiterClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    InrushCurrentLimiterClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of InrushCurrentLimiter class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "InrushCurrentLimiterClass.h"
+     30          #include "InrushCurrentLimiterPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CICL_t ICLpool[MAX_ICL_NUM];
+     38            unsigned char ICL_Allocated = 0u;
+     39          #endif
+     40          
+     41          #define CLASS_VARS   &((_CICL)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CICL)this)->pParams_str
+     43          
+     44          /**
+     45            * @brief  Creates an object of the class InrushCurrentLimiter
+     46            * @param  pInrushCurrentLimiterParams pointer to an InrushCurrentLimiter parameters structure
+     47            * @retval CICL new instance of InrushCurrentLimiter object
+     48            */
+     49          CICL ICL_NewObject(pInrushCurrentLimiterParams_t pInrushCurrentLimiterParams)
+     50          {
+     51            _CICL _oICL;
+     52            
+     53            #ifdef MC_CLASS_DYNAMIC
+     54              _oICL = (_CICL)calloc(1u,sizeof(_CICL_t));
+     55            #else
+     56              if (ICL_Allocated  < MAX_ICL_NUM)
+     57              {
+     58                _oICL = &ICLpool[ICL_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oICL = MC_NULL;
+     63              }
+     64            #endif
+     65            
+     66            _oICL->pParams_str = (pParams_t)pInrushCurrentLimiterParams;
+     67            
+     68            return ((CICL)_oICL);
+     69          }
+     70          
+     71          /**
+     72            * @brief  Initializes all the object variables, usually it has to be called 
+     73            *         once right after object creation. It is also used to assign the 
+     74            *         bus voltage sensor and digital output to be used by the ICL.
+     75            * @param  this related object of class CICL.
+     76            * @param  oVBS the bus voltage sensor used by the ICL.
+     77            * @param  oDOUT the digital output used by the ICL.
+     78            * @retval none.
+     79            */
+     80          void ICL_Init(CICL this, CVBS oVBS, CDOUT oDOUT)
+     81          {
+     82            pVars_t pVars = CLASS_VARS;
+     83            pParams_t pParams = CLASS_PARAMS;
+     84            int32_t wAux;
+     85            
+     86            pVars->oVBS = oVBS;
+     87            pVars->oDOUT = oDOUT;
+     88            pVars->ICLState = ICL_ACTIVE;
+     89            DOUT_SetOutputState(oDOUT, ACTIVE);
+     90            pVars->hRemainingTicks = 0u;
+     91            wAux = (int32_t)(pParams->hDurationms);
+     92            wAux *= (int32_t)(pParams->hICLFrequencyHz);
+     93            wAux /= 1000;
+     94            wAux -= 1;
+     95            if (wAux > (int32_t)(U16_MAX))
+     96            {
+     97              wAux = (int32_t)(U16_MAX);
+     98            }
+     99            if (wAux < 1)
+    100            {
+    101              wAux = 1;
+    102            }
+    103            pVars->hTotalTicks = (uint16_t)(wAux);
+    104          }
+    105          
+    106          /**
+    107            * @brief  It clocks the inrush current limiter and must be called with a 
+    108            *         frequency equal to the one settled in the parameters
+    109            *         hEACFrequencyHz. 
+    110            * @param  this related object of class CICL.
+    111            * @retval ICLState_t returns the ICL state see 
+    112            * \link InrushCurrentLimiter_class_exported_types ICLState_t\endlink.
+    113            */
+    114          ICLState_t ICL_Exec(CICL this)
+    115          {
+    116            pVars_t pVars = CLASS_VARS;
+    117            
+    118            /* ICL actions.*/
+    119            switch (pVars->ICLState)
+    120            {
+    121            case ICL_ACTIVATION:
+    122              {
+    123                /* ICL activation: counting the step before pass in ICL_ACTIVE.*/
+    124                if (pVars->hRemainingTicks == 0u)
+    125                {
+    126                  pVars->ICLState = ICL_ACTIVE;
+    127                }
+    128                else
+    129                {
+    130                  pVars->hRemainingTicks--;
+    131                }
+    132              }
+    133              break;
+    134            case ICL_DEACTIVATION:
+    135              {
+    136                /* ICL deactivation: counting the step before pass in ICL_INACTIVE.*/
+    137                if (pVars->hRemainingTicks == 0u)
+    138                {
+    139                  pVars->ICLState = ICL_INACTIVE;
+    140                }
+    141                else
+    142                {
+    143                  pVars->hRemainingTicks--;
+    144                }
+    145              }
+    146              break;
+    147            case ICL_ACTIVE:
+    148              {
+    149                /* ICL is active: if bus is present deactivate the ICL */
+    150                if (VBS_CheckVbus(pVars->oVBS) != MC_UNDER_VOLT)
+    151                {
+    152                  DOUT_SetOutputState(pVars->oDOUT, INACTIVE);
+    153                  pVars->ICLState = ICL_DEACTIVATION;
+    154                  pVars->hRemainingTicks = pVars->hTotalTicks;
+    155                }
+    156              }
+    157              break;
+    158            case ICL_INACTIVE:
+    159              {
+    160                /* ICL is inactive: if bus is not present activate the ICL */
+    161                if (VBS_CheckVbus(pVars->oVBS) == MC_UNDER_VOLT)
+    162                {
+    163                  DOUT_SetOutputState(pVars->oDOUT, ACTIVE);
+    164                  pVars->ICLState = ICL_ACTIVATION;
+    165                  pVars->hRemainingTicks = pVars->hTotalTicks;
+    166                }
+    167              }
+    168              break;
+    169            case ICL_IDLE:
+    170            default:
+    171              {
+    172              }
+    173              break;
+    174            }
+    175            
+    176            return pVars->ICLState;
+    177          }
+    178          
+    179          /**
+    180            * @brief It returns the state of the ICL. See 
+    181            * \link InrushCurrentLimiter_class_exported_types ICLState_t\endlink.
+    182            * @param this related object of class CICL.
+    183            * @retval ICLState_t returns the ICL state see 
+    184            * \link InrushCurrentLimiter_class_exported_types ICLState_t\endlink.
+    185            */
+    186          ICLState_t ICL_GetState(CICL this)
+    187          {
+    188            pVars_t pVars = CLASS_VARS;
+    189            
+    190            return pVars->ICLState;
+    191          }
+    192          
+    193          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   ICL_Exec
+         8   -> DOUT_SetOutputState
+         8   -> VBS_CheckVbus
+       0   ICL_GetState
+      16   ICL_Init
+        16   -> DOUT_SetOutputState
+       0   ICL_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+      24  ICL_Allocated
+          ICLpool
+      94  ICL_Exec
+       4  ICL_GetState
+      68  ICL_Init
+      22  ICL_NewObject
+
+ 
+  24 bytes in section .bss
+ 196 bytes in section .text
+ 
+ 196 bytes of CODE memory
+  24 bytes of DATA memory
+
+Errors: none
+Warnings: none

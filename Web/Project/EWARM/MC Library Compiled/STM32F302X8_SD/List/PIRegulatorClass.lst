@@ -1,0 +1,478 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:31
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PIRegulatorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PIRegulatorClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\PIRegulatorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\PIRegulatorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\PIRegulatorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    PIRegulatorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private implementation of PI class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "PIRegulatorClass.h"
+     30          #include "PIRegulatorPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          /*#define MC_CLASS_DYNAMIC*/
+     35          #ifdef MC_CLASS_DYNAMIC
+     36            #include "stdlib.h" /* Used for dynamic allocation */
+     37          #else
+     38            _CPI_t PIpool[MAX_PI_NUM];
+     39            uint8_t PI_Allocated = 0u;
+     40          #endif
+     41          
+     42          /**
+     43            * @brief  Creates an object of the class PI regulator
+     44            * @param  pPIParams_t pointer to a PI parameters structure
+     45            * @retval CPI new instance of PI object
+     46            */
+     47          CPI PI_NewObject(pPIParams_t pPIParams)
+     48          {
+     49            _CPI _oPI;
+     50            
+     51            #ifdef MC_CLASS_DYNAMIC
+     52            _oPI = (_CPI)calloc(1u, sizeof(_CPI_t));
+     53            #else
+     54              if (PI_Allocated  < MAX_PI_NUM)
+     55              {
+     56                _oPI = &PIpool[PI_Allocated++];
+     57              }
+     58              else
+     59              {
+     60                _oPI = MC_NULL;
+     61              }
+     62            #endif
+     63          
+     64            
+     65            _oPI->pParams_str = (pParams_t)pPIParams;
+     66              
+     67            _oPI->DerivedClass = MC_NULL; 
+     68            
+     69            return ((CPI)_oPI);
+     70          }
+     71          
+     72          
+     73          /**
+     74            * @brief  Initiliaze all the object variables, usually it has to be called 
+     75            *         once right after object creation
+     76            * @param  CPI PI regulator object
+     77            * @retval None
+     78            */
+     79          void PI_ObjectInit(CPI this)
+     80          {
+     81           ((_CPI)this)->Vars_str.hKpGain = ((_CPI)this)->pParams_str->hDefKpGain;
+     82           ((_CPI)this)->Vars_str.hKiGain = ((_CPI)this)->pParams_str->hDefKiGain;
+     83           ((_CPI)this)->Vars_str.wIntegralTerm = 0;
+     84           ((_CPI)this)->Vars_str.wUpperIntegralLimit = ((_CPI)this)->pParams_str->wDefMaxIntegralTerm; 
+     85           ((_CPI)this)->Vars_str.wLowerIntegralLimit = ((_CPI)this)->pParams_str->wDefMinIntegralTerm; 
+     86           ((_CPI)this)->Vars_str.hUpperOutputLimit = ((_CPI)this)->pParams_str->hDefMaxOutput;
+     87           ((_CPI)this)->Vars_str.hLowerOutputLimit = ((_CPI)this)->pParams_str->hDefMinOutput;
+     88           ((_CPI)this)->Vars_str.hKpDivisor = ((_CPI)this)->pParams_str->hKpDivisor;
+     89           ((_CPI)this)->Vars_str.hKiDivisor = ((_CPI)this)->pParams_str->hKiDivisor;
+     90           ((_CPI)this)->Vars_str.hKpDivisorPOW2 = ((_CPI)this)->pParams_str->hKpDivisorPOW2;
+     91           ((_CPI)this)->Vars_str.hKiDivisorPOW2 = ((_CPI)this)->pParams_str->hKiDivisorPOW2;
+     92            return;
+     93          }
+     94          
+     95          /**
+     96            * @brief  It updates the Kp gain 
+     97            * @param  CPI PI object
+     98            * @param  int16_t New Kp gain
+     99            * @retval None
+    100            */
+    101          void PI_SetKP(CPI this, int16_t hKpGain)
+    102          {
+    103           ((_CPI)this)->Vars_str.hKpGain = hKpGain;
+    104          }
+    105          
+    106          /**
+    107            * @brief  It updates the Ki gain 
+    108            * @param  CPI PI object
+    109            * @param  int16_t New Ki gain
+    110            * @retval None
+    111            */
+    112          void PI_SetKI(CPI this, int16_t hKiGain)
+    113          {
+    114           ((_CPI)this)->Vars_str.hKiGain = hKiGain;
+    115          }
+    116          
+    117          /**
+    118            * @brief  It returns the Kp gain of the passed PI object
+    119            * @param  CPI PI regulator object
+    120            * @retval int16_t Kp gain 
+    121            */
+    122          int16_t PI_GetKP(CPI this)
+    123          {
+    124            return(((_CPI)this)->Vars_str.hKpGain);
+    125          }
+    126          
+    127          /**
+    128            * @brief  It returns the Ki gain of the passed PI object
+    129            * @param  CPI PI regulator object
+    130            * @retval int16_t Ki gain 
+    131            */
+    132          int16_t PI_GetKI(CPI this)
+    133          {
+    134            return(((_CPI)this)->Vars_str.hKiGain);
+    135          }
+    136          
+    137          /**
+    138            * @brief  It returns the Default Kp gain of the passed PI object
+    139            * @param  CPI PI regulator object
+    140            * @retval int16_t Kp gain 
+    141            */
+    142          int16_t PI_GetDefaultKP(CPI this)
+    143          {
+    144             return(((_CPI)this)->pParams_str->hDefKpGain);
+    145          }
+    146          
+    147          /**
+    148            * @brief  It returns the Default Ki gain of the passed PI object
+    149            * @param  CPI PI regulator object
+    150            * @retval int16_t Ki gain 
+    151            */
+    152          int16_t PI_GetDefaultKI(CPI this)
+    153          {
+    154             return(((_CPI)this)->pParams_str->hDefKiGain);
+    155          }
+    156          
+    157          /**
+    158            * @brief  It set a new value into the PI integral term 
+    159            * @param  CPI PI regulator object
+    160            * @param  int32_t New integral term value
+    161            * @retval None
+    162            */
+    163          void PI_SetIntegralTerm(CPI this, int32_t wIntegralTermValue)
+    164          {
+    165           ((_CPI)this)->Vars_str.wIntegralTerm = wIntegralTermValue;  
+    166          
+    167           return;
+    168          }
+    169          
+    170          #if defined (CCMRAM)
+    171          #if defined (__ICCARM__)
+    172          #pragma location = ".ccmram"
+    173          #elif defined (__CC_ARM)
+    174          __attribute__((section ("ccmram")))
+    175          #endif
+    176          #endif
+    177          /**
+    178            * @brief  This function compute the output of a PI regulator sum of its 
+    179            *         proportional and integral terms
+    180            * @param  CPI PI regulator object
+    181            * @param  int32_t Present process variable error, intended as the reference 
+    182            *         value minus the present process variable value
+    183            * @retval int16_t PI output
+    184            */
+    185          int16_t PI_Controller(CPI this, int32_t wProcessVarError)
+    186          {
+    187            int32_t wProportional_Term, wIntegral_Term, wOutput_32,wIntegral_sum_temp;
+    188            int32_t wDischarge = 0;
+    189            int16_t hUpperOutputLimit = ((_CPI)this)->Vars_str.hUpperOutputLimit;
+    190            int16_t hLowerOutputLimit = ((_CPI)this)->Vars_str.hLowerOutputLimit;
+    191            
+    192            /* Proportional term computation*/
+    193            wProportional_Term = ((_CPI)this)->Vars_str.hKpGain * wProcessVarError;
+    194            
+    195            /* Integral term computation */
+    196            if (((_CPI)this)->Vars_str.hKiGain == 0)
+    197            {
+    198              ((_CPI)this)->Vars_str.wIntegralTerm = 0;
+    199            }
+    200            else
+    201            { 
+    202              wIntegral_Term = ((_CPI)this)->Vars_str.hKiGain * wProcessVarError;
+    203              wIntegral_sum_temp = ((_CPI)this)->Vars_str.wIntegralTerm + wIntegral_Term;
+    204              
+    205              if (wIntegral_sum_temp < 0)
+    206              {
+    207                if (((_CPI)this)->Vars_str.wIntegralTerm > 0)
+    208                {
+    209                  if (wIntegral_Term > 0)
+    210                  {
+    211                    wIntegral_sum_temp = S32_MAX;
+    212                  }
+    213                }
+    214              }
+    215              else
+    216              {
+    217                if (((_CPI)this)->Vars_str.wIntegralTerm < 0)
+    218                {
+    219                  if (wIntegral_Term < 0)
+    220                  {
+    221                    wIntegral_sum_temp = -S32_MAX;
+    222                  }
+    223                }
+    224              }		
+    225          
+    226              if (wIntegral_sum_temp > ((_CPI)this)->Vars_str.wUpperIntegralLimit)
+    227              {
+    228                ((_CPI)this)->Vars_str.wIntegralTerm = ((_CPI)this)->Vars_str.
+    229                                                                      wUpperIntegralLimit;
+    230              }
+    231              else if (wIntegral_sum_temp < ((_CPI)this)->Vars_str.wLowerIntegralLimit)
+    232              { 
+    233                ((_CPI)this)->Vars_str.wIntegralTerm = ((_CPI)this)->Vars_str.
+    234                                                                      wLowerIntegralLimit;
+    235              }
+    236              else
+    237              {
+    238                ((_CPI)this)->Vars_str.wIntegralTerm = wIntegral_sum_temp;
+    239              }
+    240            }
+    241            
+    242          #ifdef FULL_MISRA_C_COMPLIANCY
+    243            wOutput_32 = (wProportional_Term/(int32_t)((_CPI)this)->Vars_str.
+    244                          hKpDivisor)+(((_CPI)this)->Vars_str.wIntegralTerm/(int32_t)
+    245                          ((_CPI)this)->Vars_str.hKiDivisor);
+    246          #else    
+    247           /* WARNING: the below instruction is not MISRA compliant, user should verify
+    248                       that Cortex-M3 assembly instruction ASR (arithmetic shift right) 
+    249                       is used by the compiler to perform the shifts (instead of LSR 
+    250                       logical shift right)*/ 
+    251            wOutput_32 = (wProportional_Term >>((_CPI)this)->Vars_str.hKpDivisorPOW2) + 
+    252            (((_CPI)this)->Vars_str.wIntegralTerm >> ((_CPI)this)->Vars_str.hKiDivisorPOW2);
+    253          #endif
+    254          
+    255            if (wOutput_32 > hUpperOutputLimit)
+    256            {
+    257              
+    258              wDischarge = hUpperOutputLimit - wOutput_32;
+    259              wOutput_32 = hUpperOutputLimit;		  			 	
+    260            }
+    261            else if (wOutput_32 < hLowerOutputLimit)
+    262            {
+    263              
+    264              wDischarge = hLowerOutputLimit - wOutput_32; 
+    265              wOutput_32 = hLowerOutputLimit;
+    266            }
+    267            else
+    268            {}
+    269            
+    270            ((_CPI)this)->Vars_str.wIntegralTerm += wDischarge;
+    271            
+    272            return((int16_t)(wOutput_32)); 	
+    273          }
+    274          /**
+    275            * @brief  It returns the Kp gain divisor of the passed PI object
+    276            * @param  CPI PI regulator object
+    277            * @retval int16_t Kp gain 
+    278            */
+    279          uint16_t PI_GetKPDivisor(CPI this)
+    280          {
+    281            return (((_CPI)this)->Vars_str.hKpDivisor);
+    282          }
+    283          
+    284          /**
+    285            * @brief  It updates the Kp divisor
+    286            * @param  CPI PI regulator object
+    287            * @param  uint16_t New Kp divisor expressed as power of 2.
+    288                      E.g. if gain divisor is 512 the value 
+    289                      must be 9 because 2^9 = 512
+    290            * @retval None
+    291            */
+    292          void PI_SetKPDivisorPOW2(CPI this, uint16_t hKpDivisorPOW2)
+    293          {
+    294            ((_CPI)this)->Vars_str.hKpDivisorPOW2 = hKpDivisorPOW2;
+    295            ((_CPI)this)->Vars_str.hKpDivisor = ((uint16_t)(1u) << hKpDivisorPOW2);
+    296          }
+    297          
+    298          /**
+    299            * @brief  It returns the Ki gain divisor of the passed PI object
+    300            * @param  CPI PI regulator object
+    301            * @retval int16_t Ki gain 
+    302            */
+    303          uint16_t PI_GetKIDivisor(CPI this)
+    304          {
+    305            return (((_CPI)this)->Vars_str.hKiDivisor);  
+    306          }
+    307          
+    308          /**
+    309            * @brief  It updates the Ki divisor
+    310            * @param  CPI PI regulator object
+    311            * @param  uint16_t New Ki divisor expressed as power of 2.
+    312                      E.g. if gain divisor is 512 the value 
+    313                      must be 9 because 2^9 = 512
+    314            * @retval None
+    315            */
+    316          void PI_SetKIDivisorPOW2(CPI this, uint16_t hKiDivisorPOW2)
+    317          {
+    318            int32_t wKiDiv = ((int32_t)(1u) << hKiDivisorPOW2);
+    319            ((_CPI)this)->Vars_str.hKiDivisorPOW2 = hKiDivisorPOW2;
+    320            ((_CPI)this)->Vars_str.hKiDivisor = (uint16_t)(wKiDiv);
+    321            PI_SetUpperIntegralTermLimit(this, (int32_t)S16_MAX * wKiDiv);
+    322            PI_SetLowerIntegralTermLimit(this, (int32_t)S16_MIN * wKiDiv);
+    323          }
+    324          
+    325          /**
+    326            * @brief  It set a new value for lower integral term limit  
+    327            * @param  CPI PI regulator object
+    328            * @param  int32_t New lower integral term limit value
+    329            * @retval None
+    330            */
+    331          void PI_SetLowerIntegralTermLimit(CPI this, int32_t wLowerLimit)
+    332          {
+    333            ((_CPI)this)->Vars_str.wLowerIntegralLimit = wLowerLimit;
+    334          }
+    335          
+    336          /**
+    337            * @brief  It set a new value for upper integral term limit  
+    338            * @param  CPI PI regulator object
+    339            * @param  int32_t New upper integral term limit value
+    340            * @retval None
+    341            */
+    342          void PI_SetUpperIntegralTermLimit(CPI this, int32_t wUpperLimit)
+    343          {
+    344            ((_CPI)this)->Vars_str.wUpperIntegralLimit = wUpperLimit;
+    345          }
+    346          
+    347          /**
+    348            * @brief  It set a new value for lower output limit  
+    349            * @param  CPI PI regulator object
+    350            * @param  int32_t New lower output limit value
+    351            * @retval None
+    352            */
+    353          void PI_SetLowerOutputLimit(CPI this, int16_t hLowerLimit)
+    354          {
+    355            ((_CPI)this)->Vars_str.hLowerOutputLimit = hLowerLimit;
+    356          }
+    357          
+    358          /**
+    359            * @brief  It set a new value for upper output limit  
+    360            * @param  CPI PI regulator object
+    361            * @param  int32_t New upper output limit value
+    362            * @retval None
+    363            */
+    364          void PI_SetUpperOutputLimit(CPI this, int16_t hUpperLimit)
+    365          {
+    366            ((_CPI)this)->Vars_str.hUpperOutputLimit = hUpperLimit;
+    367          }
+    368          
+    369          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   PI_Controller
+       0   PI_GetDefaultKI
+       0   PI_GetDefaultKP
+       0   PI_GetKI
+       0   PI_GetKIDivisor
+       0   PI_GetKP
+       0   PI_GetKPDivisor
+       0   PI_NewObject
+       0   PI_ObjectInit
+       0   PI_SetIntegralTerm
+       0   PI_SetKI
+       0   PI_SetKIDivisorPOW2
+       0   PI_SetKP
+       0   PI_SetKPDivisorPOW2
+       0   PI_SetLowerIntegralTermLimit
+       0   PI_SetLowerOutputLimit
+       0   PI_SetUpperIntegralTermLimit
+       0   PI_SetUpperOutputLimit
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       6  ?Subroutine0
+       6  ?Subroutine1
+     292  PI_Allocated
+          PIpool
+     114  PI_Controller
+       2  PI_GetDefaultKI
+       2  PI_GetDefaultKP
+       2  PI_GetKI
+       4  PI_GetKIDivisor
+       2  PI_GetKP
+       4  PI_GetKPDivisor
+      36  PI_NewObject
+      66  PI_ObjectInit
+       4  PI_SetIntegralTerm
+       4  PI_SetKI
+      22  PI_SetKIDivisorPOW2
+       4  PI_SetKP
+      12  PI_SetKPDivisorPOW2
+       4  PI_SetLowerIntegralTermLimit
+       4  PI_SetLowerOutputLimit
+       4  PI_SetUpperIntegralTermLimit
+       4  PI_SetUpperOutputLimit
+
+ 
+ 292 bytes in section .bss
+ 314 bytes in section .text
+ 
+ 314 bytes of CODE memory
+ 292 bytes of DATA memory
+
+Errors: none
+Warnings: none

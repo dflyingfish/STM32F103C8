@@ -1,0 +1,467 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:40
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\StateMachineClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\StateMachineClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\StateMachineClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\StateMachineClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\StateMachineClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    StateMachineClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of StateMachine class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "StateMachineClass.h"
+     30          #include "StateMachinePrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CSTM_t STMpool[MAX_STM_NUM];
+     38            unsigned char STM_Allocated = 0u;
+     39          #endif
+     40          
+     41          #define CLASS_VARS   ((_CSTM)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CSTM)this)->pParams_str  
+     43            
+     44          /**
+     45            * @brief  Creates an object of the class StateMachine
+     46            * @param  pStateMachineParams pointer to an StateMachine parameters structure
+     47            * @retval CSTM new instance of StateMachine object
+     48            */
+     49          CSTM STM_NewObject(void)
+     50          {
+     51            _CSTM _oSTM;
+     52            
+     53            #ifdef MC_CLASS_DYNAMIC
+     54              _oSTM = (_CSTM)calloc(1u,sizeof(_CSTM_t));
+     55            #else
+     56              if (STM_Allocated  < MAX_STM_NUM)
+     57              {
+     58                _oSTM = &STMpool[STM_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oSTM = MC_NULL;
+     63              }
+     64            #endif
+     65            
+     66            return ((CSTM)_oSTM);
+     67          }
+     68          
+     69          
+     70          /**
+     71            * @brief  Initializes all the object variables, usually it has to be called 
+     72            *         once right after object creation.
+     73            * @param this related object of class CSTM.
+     74            * @retval none.
+     75            */
+     76          void STM_Init(CSTM this)
+     77          {
+     78            pVars_t pVars = &CLASS_VARS;
+     79            
+     80            pVars->bState = IDLE;
+     81            pVars->hFaultNow = MC_NO_FAULTS;     
+     82            pVars->hFaultOccurred = MC_NO_FAULTS;  
+     83          }     
+     84          
+     85          /**
+     86            * @brief It submits the request for moving the state machine into the state 
+     87            *        specified by bState (FAULT_NOW and FAUL_OVER are not handled by this 
+     88            *        method). Accordingly with the current state, the command is really
+     89            *        executed (state machine set to bState) or discarded (no state 
+     90            *        changes).
+     91            *        If requested state can't be reached the return value is FALSE and the 
+     92            *        MC_SW_ERROR is raised, but if requested state is IDLE_START, 
+     93            *        IDLE_ALIGNMENT or ANY_STOP, that corresponds with the user actions: 
+     94            *        Start Motor, Encoder Alignemnt and Stop Motor, the MC_SW_ERROR is
+     95            *        not raised.
+     96            * @param this related object of class CSTM.
+     97            * @param bState New requested state
+     98            * @retval bool It returns TRUE if the state has been really set equal to 
+     99            *         bState, FALSE if the requested state can't be reached
+    100            */
+    101          bool STM_NextState(CSTM this, State_t bState)
+    102          {
+    103            bool bChangeState = FALSE;
+    104            pVars_t pVars = &CLASS_VARS;
+    105            State_t bCurrentState = pVars->bState;
+    106            State_t bNewState = bCurrentState;
+    107            
+    108            switch(bCurrentState)
+    109            {
+    110            case ICLWAIT:
+    111              if (bState == IDLE)
+    112              {
+    113                bNewState = bState;
+    114                bChangeState = TRUE;
+    115              }  
+    116              break;
+    117            case IDLE:
+    118              if((bState == IDLE_START) || (bState == IDLE_ALIGNMENT) 
+    119                                        || (bState == ICLWAIT))
+    120              {
+    121                bNewState = bState;
+    122                bChangeState = TRUE;
+    123              }
+    124              break;
+    125              
+    126            case IDLE_ALIGNMENT:
+    127              if((bState == ANY_STOP) || (bState == ALIGN_CHARGE_BOOT_CAP) 
+    128                                      || (bState == ALIGN_OFFSET_CALIB))
+    129              {
+    130                bNewState = bState;
+    131                bChangeState = TRUE;
+    132              }
+    133              break;
+    134              
+    135            case ALIGN_CHARGE_BOOT_CAP:
+    136              if ((bState == ALIGN_OFFSET_CALIB) || (bState == ANY_STOP))
+    137              {
+    138                bNewState = bState;
+    139                bChangeState = TRUE;
+    140              }
+    141              break;
+    142              
+    143              case ALIGN_OFFSET_CALIB:
+    144                if ((bState == ALIGN_CLEAR) || (bState == ANY_STOP))
+    145                {
+    146                  bNewState = bState;
+    147                  bChangeState = TRUE;
+    148                }
+    149                break;
+    150                
+    151            case ALIGN_CLEAR:
+    152              if ((bState == ALIGNMENT) || (bState == ANY_STOP))
+    153              {
+    154                bNewState = bState;
+    155                bChangeState = TRUE;
+    156              }
+    157              break;      
+    158              
+    159            case ALIGNMENT:
+    160              if(bState == ANY_STOP)
+    161              {
+    162                bNewState = bState;
+    163                bChangeState = TRUE;
+    164              }
+    165              break;  
+    166              
+    167            case IDLE_START:
+    168              if((bState == ANY_STOP) || (bState == CHARGE_BOOT_CAP) ||
+    169                 (bState == START) ||
+    170                 (bState == OFFSET_CALIB) || (bState == IDLE_ALIGNMENT))
+    171              {
+    172                bNewState = bState;
+    173                bChangeState = TRUE;
+    174              }
+    175              break;
+    176              
+    177            case CHARGE_BOOT_CAP:
+    178              if ((bState == OFFSET_CALIB) || (bState == ANY_STOP))
+    179              {
+    180                bNewState = bState;
+    181                bChangeState = TRUE;
+    182              }
+    183              break;
+    184              
+    185              case OFFSET_CALIB:
+    186                if ((bState == CLEAR) || (bState == ANY_STOP))
+    187                {
+    188                  bNewState = bState;
+    189                  bChangeState = TRUE;
+    190                }
+    191                break;
+    192                
+    193            case CLEAR:
+    194              if ((bState == START) || (bState == ANY_STOP))
+    195              {
+    196                bNewState = bState;
+    197                bChangeState = TRUE;
+    198              }
+    199              break;
+    200              
+    201            case START:
+    202              if((bState == START_RUN) || (bState == ANY_STOP))
+    203              {
+    204                bNewState = bState;
+    205                bChangeState = TRUE;
+    206              }
+    207              break;
+    208              
+    209            case START_RUN:
+    210              if((bState == RUN) || (bState == ANY_STOP))
+    211              {
+    212                bNewState = bState;
+    213                bChangeState = TRUE;
+    214              }
+    215              break;       
+    216              
+    217            case RUN:
+    218              if(bState == ANY_STOP)
+    219              {
+    220                bNewState = bState;
+    221                bChangeState = TRUE;
+    222              }
+    223              break;          
+    224              
+    225            case ANY_STOP:
+    226              if(bState == STOP)
+    227              {
+    228                bNewState = bState;
+    229                bChangeState = TRUE;
+    230              }
+    231              break;      
+    232              
+    233            case STOP:
+    234              if(bState == STOP_IDLE)
+    235              {
+    236                bNewState = bState;
+    237                bChangeState = TRUE;
+    238              }
+    239              break;       
+    240              
+    241            case STOP_IDLE:
+    242              if((bState == IDLE)||(bState == ICLWAIT))
+    243              {
+    244                bNewState = bState;
+    245                bChangeState = TRUE;
+    246              }
+    247              break;      
+    248            default:
+    249              break;
+    250            }
+    251            
+    252            if (bChangeState)
+    253            {
+    254              pVars->bState = bNewState;
+    255            }
+    256            else
+    257            {
+    258              if (!((bState == IDLE_START) || (bState == IDLE_ALIGNMENT) 
+    259                             || (bState == ANY_STOP)))
+    260              {
+    261                /* If new state is not a user command START/STOP raise a software error */
+    262                STM_FaultProcessing(this, MC_SW_ERROR, 0u);
+    263              }
+    264            }
+    265            
+    266            return(bChangeState); 
+    267          }
+    268          
+    269          /**
+    270            * @brief It clocks both HW and SW faults processing and update the state 
+    271            *        machine accordingly with hSetErrors, hResetErrors and present state. 
+    272            *        Refer to State_t description for more information about fault states.
+    273            * @param this object of class CSTM
+    274            * @param hSetErrors Bit field reporting faults currently present
+    275            * @param hResetErrors Bit field reporting faults to be cleared
+    276            * @retval State_t New state machine state after fault processing
+    277            */
+    278          State_t STM_FaultProcessing(CSTM this, uint16_t hSetErrors, uint16_t 
+    279                                                                            hResetErrors)
+    280          {
+    281            pVars_t pVars = &CLASS_VARS;  
+    282            State_t LocalState =  pVars->bState;
+    283            uint16_t hAux;
+    284            
+    285            /* Set corrent errors */
+    286            hAux = (uint16_t)(pVars->hFaultNow);
+    287            hAux |= hSetErrors;  
+    288            pVars->hFaultNow = (FaultCondition_t)(hAux);
+    289            hAux = (uint16_t)(pVars->hFaultOccurred);
+    290            hAux |= hSetErrors; 
+    291            pVars->hFaultOccurred = (FaultCondition_t)(hAux);
+    292            /* Reset current errors */
+    293            hAux = (uint16_t)(pVars->hFaultNow);
+    294            hAux &= (uint16_t)(~hResetErrors);
+    295            pVars->hFaultNow = (FaultCondition_t)(hAux);
+    296           
+    297            if(LocalState == FAULT_NOW)
+    298            {
+    299              if (pVars->hFaultNow == MC_NO_FAULTS)
+    300              {
+    301                pVars->bState = FAULT_OVER;
+    302                LocalState = FAULT_OVER;
+    303              }
+    304            }  
+    305            else
+    306            {
+    307              if (pVars->hFaultNow != MC_NO_FAULTS)
+    308              {
+    309                pVars->bState = FAULT_NOW;
+    310                LocalState = FAULT_NOW;
+    311              }
+    312            }
+    313            
+    314            return (LocalState);
+    315          }
+    316          
+    317          #if defined (CCMRAM)
+    318          #if defined (__ICCARM__)
+    319          #pragma location = ".ccmram"
+    320          #elif defined (__CC_ARM)
+    321          __attribute__((section ("ccmram")))
+    322          #endif
+    323          #endif
+    324          /**
+    325            * @brief  Returns the current state machine state
+    326            * @param  this object of class CSTM
+    327            * @retval State_t Current state machine state
+    328            */
+    329          State_t STM_GetState(CSTM this)
+    330          {
+    331            return(CLASS_VARS.bState);
+    332          }
+    333          
+    334          
+    335          /**
+    336            * @brief It reports to the state machine that the fault state has been 
+    337            *        acknowledged by the user. If the state machine is in FAULT_OVER state
+    338            *        then it is moved into STOP_IDLE and the bit field variable containing 
+    339            *        information about the faults historically occured is cleared. 
+    340            *        The method call is discarded if the state machine is not in FAULT_OVER
+    341            * @param this object of class CSTM
+    342            * @retval bool TRUE if the state machine has been moved to IDLE, FALSE if the 
+    343            *        method call had no effects 
+    344            */
+    345          bool STM_FaultAcknowledged(CSTM this)
+    346          {
+    347           bool bToBeReturned = FALSE;
+    348           pVars_t pVars = &CLASS_VARS;   
+    349          
+    350           if(pVars->bState == FAULT_OVER)
+    351           {
+    352            pVars->bState = STOP_IDLE;
+    353            pVars->hFaultOccurred = MC_NO_FAULTS;  
+    354            bToBeReturned = TRUE;
+    355           }
+    356          
+    357           return(bToBeReturned);  
+    358          }
+    359          
+    360          
+    361          /**
+    362            * @brief It returns two 16 bit fields containing information about both faults
+    363            *        currently present and faults historically occurred since the state 
+    364            *        machine has been moved into state
+    365            * @param this object of class CSTM.
+    366            * @retval uint32_t  Two 16 bit fields: in the most significant half are stored
+    367            *         the information about currently present faults. In the least 
+    368            *         significant half are stored the information about the faults 
+    369            *         historically occurred since the state machine has been moved into 
+    370            *         FAULT_NOW state
+    371            */
+    372          uint32_t STM_GetFaultState(CSTM this)
+    373          {
+    374           uint32_t LocalFaultState;
+    375           pVars_t pVars = &CLASS_VARS;   
+    376           
+    377           LocalFaultState = (uint32_t)(pVars->hFaultOccurred);
+    378           LocalFaultState |= (uint32_t)(pVars->hFaultNow)<<16;
+    379             
+    380           return LocalFaultState;
+    381          }
+    382          
+    383          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   STM_FaultAcknowledged
+       4   STM_FaultProcessing
+       0   STM_GetFaultState
+       0   STM_GetState
+       0   STM_Init
+       0   STM_NewObject
+       4   STM_NextState
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      12  STM_Allocated
+          STMpool
+      22  STM_FaultAcknowledged
+      46  STM_FaultProcessing
+      10  STM_GetFaultState
+       4  STM_GetState
+      10  STM_Init
+      26  STM_NewObject
+     196  STM_NextState
+
+ 
+  12 bytes in section .bss
+ 318 bytes in section .text
+ 
+ 318 bytes of CODE memory
+  12 bytes of DATA memory
+
+Errors: none
+Warnings: none

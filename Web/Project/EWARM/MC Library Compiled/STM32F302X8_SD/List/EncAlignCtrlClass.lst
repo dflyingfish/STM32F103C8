@@ -1,0 +1,293 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:30
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\EncAlignCtrlClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\EncAlignCtrlClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\EncAlignCtrlClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\EncAlignCtrlClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\EncAlignCtrlClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    EncAlignCtrlClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of EncAlignCtrl class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "EncAlignCtrlClass.h"
+     30          #include "EncAlignCtrlPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CEAC_t EACpool[MAX_EAC_NUM];
+     38            unsigned char EAC_Allocated = 0u;
+     39          #endif
+     40            
+     41          #define CLASS_VARS   &((_CEAC)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CEAC)this)->pParams_str
+     43            
+     44          /**
+     45            * @brief  Creates an object of the class EncAlignCtrl
+     46            * @param  pEncAlignCtrlParams pointer to an EncAlignCtrl parameters structure
+     47            * @retval CEAC new instance of EncAlignCtrl object
+     48            */
+     49          CEAC EAC_NewObject(pEncAlignCtrlParams_t pEncAlignCtrlParams)
+     50          {
+     51            _CEAC _oEAC;
+     52            
+     53            #ifdef MC_CLASS_DYNAMIC
+     54              _oEAC = (_CEAC)calloc(1u,sizeof(_CEAC_t));
+     55            #else
+     56              if (EAC_Allocated  < MAX_EAC_NUM)
+     57              {
+     58                _oEAC = &EACpool[EAC_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oEAC = MC_NULL;
+     63              }
+     64            #endif
+     65            
+     66            _oEAC->pParams_str = (pParams_t)pEncAlignCtrlParams;
+     67            
+     68            return ((CEAC)_oEAC);
+     69          }
+     70          
+     71          /**
+     72            * @brief  Initializes all the object variables, usually it has to be called 
+     73            *         once right after object creation. It is also used to assign the 
+     74            *         speed and torque controller, the virtual speed sensor objects and 
+     75            *         the encoder object to be used by encoder alignment controller.
+     76            * @param  this related object of class CEAC.
+     77            * @param  oSTC the speed and torque controller used by the EAC.
+     78            * @param  oVSS the virtual speed sensor used by the EAC.
+     79            * @param  oENC the encoder object used by the EAC.
+     80            * @retval none.
+     81            */
+     82          void EAC_Init(CEAC this, CSTC oSTC, CVSS_SPD oVSS, CENC_SPD oENC )
+     83          {
+     84            pVars_t pVars = CLASS_VARS;
+     85            pVars->oSTC = oSTC;
+     86            pVars->oVSS = oVSS;
+     87            pVars->oENC = oENC;
+     88            pVars->EncAligned = FALSE;
+     89            pVars->EncRestart = FALSE;
+     90          }
+     91          
+     92          /**
+     93            * @brief  It is called to start the encoder alignment procedure.
+     94            *	       	It configure the VSS with the required angle and sets the STC to 
+     95            *         execute the required torque ramp.
+     96            * @param  this related object of class CEAC.
+     97            * @retval none.
+     98            */
+     99          void EAC_StartAlignment(CEAC this)
+    100          {
+    101            pVars_t pVars = CLASS_VARS;
+    102            pParams_t pParams = CLASS_PARAMS;
+    103            
+    104            uint32_t wAux;
+    105            
+    106            /* Set oVSS mechanical speed to zero.*/
+    107            VSPD_SetMecAcceleration((CSPD)pVars->oVSS, 0, 0u);
+    108            
+    109            /* Set oVSS mechanical angle.*/
+    110            SPD_SetMecAngle((CSPD)pVars->oVSS, pParams->hElAngle);
+    111            
+    112            /* Set oSTC in STC_TORQUE_MODE.*/
+    113            STC_SetControlMode(pVars->oSTC, STC_TORQUE_MODE);
+    114            
+    115            /* Set starting torque to Zero */
+    116            STC_ExecRamp(pVars->oSTC, 0, 0u);
+    117            
+    118            /* Execute the torque ramp.*/
+    119            STC_ExecRamp(pVars->oSTC, pParams->hFinalTorque, (uint32_t)(pParams->hDurationms));
+    120            
+    121            /* Compute hRemainingTicks, the number of thick of alignment phase.*/
+    122            wAux = (uint32_t)pParams->hDurationms * (uint32_t)pParams->hEACFrequencyHz;
+    123            wAux /= 1000u;
+    124            pVars->hRemainingTicks = (uint16_t)(wAux);
+    125            pVars->hRemainingTicks++;  
+    126          }
+    127          
+    128          /**
+    129            * @brief  It clocks the encoder alignment controller and must be called with a 
+    130            *         frequency equal to the one settled in the parameters 
+    131            *         hEACFrequencyHz. Calling this method the EAC is possible to verify 
+    132            *         if the alignment duration has been finished. At the end of alignment 
+    133            *         the encoder object it is set to the defined mechanical angle.
+    134            *         Note: STC, VSS, ENC are not clocked by EAC_Exec.
+    135            * @param  this related object of class CEAC.
+    136            * @retval bool It returns TRUE when the programmed alignment has been 
+    137            *         completed. 
+    138            */
+    139          bool EAC_Exec(CEAC this)
+    140          {
+    141            pVars_t pVars = CLASS_VARS;
+    142            pParams_t pParams = CLASS_PARAMS;
+    143            
+    144            bool retVal = TRUE;
+    145          
+    146            if (pVars->hRemainingTicks > 0u)
+    147            {
+    148              pVars->hRemainingTicks--;
+    149              
+    150              if (pVars->hRemainingTicks == 0u)
+    151              {
+    152                /* Set oVSS mechanical angle.*/
+    153                SPD_SetMecAngle((CSPD)pVars->oENC, pParams->hElAngle / (int16_t)(pParams->bElToMecRatio));
+    154                pVars->EncAligned = TRUE;
+    155                retVal = TRUE;
+    156              }
+    157              else
+    158              {
+    159                retVal = FALSE;
+    160              }
+    161            }
+    162            
+    163            return retVal;
+    164          }
+    165          
+    166          /**
+    167            * @brief  This function returns TRUE if the encoder has been aligned at least 
+    168            *         one time, FALSE if hasn't been never aligned.
+    169            * @param  this related object of class CEAC.
+    170            * @retval bool It returns TRUE if the encoder has been aligned at least 
+    171            *         one time, FALSE if hasn't been never aligned. 
+    172            */
+    173          bool EAC_IsAligned(CEAC this)
+    174          {
+    175            pVars_t pVars = CLASS_VARS;
+    176            return pVars->EncAligned;
+    177          }
+    178          
+    179          /**
+    180            * @brief  This function is used to program a restart after an encoder 
+    181            *         alignment.
+    182            * @param  this related object of class CEAC.
+    183            * @param  restart Set to TRUE if a restart is programmed else FALSE
+    184            * @retval none. 
+    185            */
+    186          void EAC_SetRestartState(CEAC this, bool restart)
+    187          {
+    188            pVars_t pVars = CLASS_VARS;
+    189            pVars->EncRestart = restart;
+    190          }
+    191          
+    192          /**
+    193            * @brief  This function is used to verify if a restart after an encoder 
+    194            *         alignment has been requested.
+    195            * @param  this related object of class CEAC.
+    196            * @retval bool It is TRUE if a restart is programmed else FALSE.
+    197            */
+    198          bool EAC_GetRestartState(CEAC this)
+    199          {
+    200            pVars_t pVars = CLASS_VARS;
+    201            return pVars->EncRestart;
+    202          }
+    203          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   EAC_Exec
+        16   -> SPD_SetMecAngle
+       0   EAC_GetRestartState
+       0   EAC_Init
+       0   EAC_IsAligned
+       0   EAC_NewObject
+       0   EAC_SetRestartState
+      16   EAC_StartAlignment
+        16   -> SPD_SetMecAngle
+        16   -> STC_ExecRamp
+        16   -> STC_SetControlMode
+        16   -> VSPD_SetMecAcceleration
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+      24  EAC_Allocated
+          EACpool
+      50  EAC_Exec
+       4  EAC_GetRestartState
+      14  EAC_Init
+       4  EAC_IsAligned
+      22  EAC_NewObject
+       4  EAC_SetRestartState
+      76  EAC_StartAlignment
+
+ 
+  24 bytes in section .bss
+ 182 bytes in section .text
+ 
+ 182 bytes of CODE memory
+  24 bytes of DATA memory
+
+Errors: none
+Warnings: none

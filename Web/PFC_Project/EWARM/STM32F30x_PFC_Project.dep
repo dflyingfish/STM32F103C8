@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>2167984808</fileChecksum>
+  <configuration>
+    <name>RELEASE</name>
+    <outputs>
+      <file>$PROJ_DIR$\..\..\MCLibrary\interface\common\MC_type.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cm4.h</file>
+      <file>$PROJ_DIR$\PFC Application Compiled\Obj\STM32F30x_PFCInit.__cstat.et</file>
+      <file>$PROJ_DIR$\PFC Application Compiled\List\STM32F30x_PFCInit.i</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\stm32f30x.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$PROJ_DIR$\PFC Application Compiled\Exe\STM32F30x_PFC_Project.a</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\PFC Application Compiled\Obj\STM32F30x_PFCInit.o</file>
+      <file>$PROJ_DIR$\..\..\PFC_Application\obj\STM32F30x_PFCApplication.o</file>
+      <file>$PROJ_DIR$\..\..\PFC_Application\interface\PFCApplication.h</file>
+      <file>$PROJ_DIR$\..\..\PFC_Application\interface\PFCInit.h</file>
+      <file>$PROJ_DIR$\..\..\PFC_Application\interface\STM32F30x_PFCApplication.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_misc.h</file>
+      <file>$PROJ_DIR$\..\..\PFC_Application\src\STM32F30x_PFCInit.c</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\PFCParameters.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_rtc.h</file>
+      <file>$PROJ_DIR$\..\..\MCLibrary\interface\StateMachineClass.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\Parameters conversion.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_opamp.h</file>
+      <file>$PROJ_DIR$\..\..\MCLibrary\interface\common\MC_Math.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\Drive parameters.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\Definitions.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_rcc.h</file>
+      <file>$PROJ_DIR$\..\..\MCApplication\interface\MCTuningClass.h</file>
+      <file>$PROJ_DIR$\PFC Application Compiled\List\STM32F30x_PFCInit.lst</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_iwdg.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_usart.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\PMSM motor parameters.h</file>
+      <file>$PROJ_DIR$\..\..\MCLibrary\interface\common\PIRegulatorClass.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_spi.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_wwdg.h</file>
+      <file>$PROJ_DIR$\..\..\MCApplication\interface\MCInterfaceClass.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\Parameters conversion_F30x.h</file>
+      <file>$PROJ_DIR$\..\..\MCLibrary\interface\PWMnCurrFdbkClass.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_syscfg.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_tim.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_pwr.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_dbgmcu.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_dma.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\Power stage parameters.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_i2c.h</file>
+      <file>$PROJ_DIR$\..\..\SystemDriveParams\Control stage parameters.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_can.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_dac.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_gpio.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_crc.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_comp.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_flash.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_exti.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\system_stm32f30x.h</file>
+      <file>$PROJ_DIR$\..\..\Project\stm32f30x_conf.h</file>
+      <file>$PROJ_DIR$\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\stm32f30x_adc.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cmInstr.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\cmsis_iar.h</file>
+      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cmFunc.h</file>
+      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cmSimd.h</file>
+    </outputs>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>IARCHIVE</name>
+          <file> 9</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\PFC_Application\src\STM32F30x_PFCInit.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 6 29 12</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 5</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 0 7 4 3 8 2 1 10 11 57 58 59 61 60 62 63 54 55 56 47 50 51 48 42 43 53 52 49 39 45 30 23 41 27 20 34 40 31 35 17 38 33 21 28 36 16 22 37 26 32 25 44 46 24</file>
+        </tool>
+      </inputs>
+    </file>
+    <forcedrebuild>
+      <name>[REBUILD_ALL]</name>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+

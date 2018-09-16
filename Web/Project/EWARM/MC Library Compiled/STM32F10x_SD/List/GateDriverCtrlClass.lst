@@ -1,0 +1,159 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       13/Sep/2018  23:24:35
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GateDriverCtrlClass.c
+#    Command line =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GateDriverCtrlClass.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D MC_LIBRARY_SINGLE -lcN
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\List" -o
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\Obj" --debug --endian=little --cpu=Cortex-M3 -e
+#        --fpu=None --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\ -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\inc\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\common\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F10x_StdPeriph_Driver\inc\
+#        -Oh --use_c++_inline -I "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\List\GateDriverCtrlClass.lst
+#    Object file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_SD\Obj\GateDriverCtrlClass.o
+#
+###############################################################################
+
+D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\GateDriverCtrlClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    GateDriverCtrlClass.c
+      4            * @author  IMS Systems Lab and Technical Marketing - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of GateDriverCtrl class
+      8            ******************************************************************************
+      9            * <br>
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "GateDriverCtrlClass.h"
+     23          #include "GateDriverCtrlPrivate.h"
+     24          #include "MCLibraryConf.h"
+     25          #include "MC_type.h"
+     26          
+     27          #ifdef MC_CLASS_DYNAMIC
+     28          #include "stdlib.h" /* Used for dynamic allocation */
+     29          #else
+     30          _CGDC_t GDCpool[MAX_GDC_NUM];
+     31          unsigned char GDC_Allocated = 0u;
+     32          #endif
+     33          
+     34          #define CLASS_VARS   &((_CGDC)this)->Vars_str
+     35          #define CLASS_PARAMS  ((_CGDC)this)->pParams_str
+     36          
+     37          /**
+     38            * @brief  Creates an object of the class GateDriverCtrl
+     39            * @param  pGateDriverCtrlParams pointer to an GateDriverCtrl parameters structure
+     40            * @retval CGDC new instance of GateDriverCtrl object
+     41            */
+     42          CGDC GDC_NewObject(pGateDriverCtrlParams_t pGateDriverCtrlParams)
+     43          {
+     44            _CGDC _oGDC;
+     45            
+     46            #ifdef MC_CLASS_DYNAMIC
+     47              _oGDC = (_CGDC)calloc(1u,sizeof(_CGDC_t));
+     48            #else
+     49              if (GDC_Allocated  < MAX_GDC_NUM)
+     50              {
+     51                _oGDC = &GDCpool[GDC_Allocated++];
+     52              }
+     53              else
+     54              {
+     55                _oGDC = MC_NULL;
+     56              }
+     57            #endif
+     58            
+     59            _oGDC->pParams_str = (pParams_t)pGateDriverCtrlParams;
+     60            
+     61            return ((CGDC)_oGDC);
+     62          }
+     63          
+     64          /**
+     65            * @brief  Example of public method of the class GateDriverCtrl
+     66            * @param  this related object of class CGDC
+     67            * @retval none
+     68            */
+     69          void GDC_Func(CGDC this)
+     70          {
+     71            ((_CGDC)this)->Vars_str.base_vars = 0u;
+     72          }
+     73          
+     74          /**
+     75            * @brief  Initiliaze all the object variables and MCU peripherals. Usually 
+     76            *         it has to be called once right after object creation.
+     77            * @param  this Gate driver controller object
+     78            * @retval none
+     79            */
+     80          void GDC_Init(CGDC this)
+     81          {
+     82            ((_CGDC)this)->Methods_str.pGDC_Init(this);
+     83          }
+     84          
+     85          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   GDC_Func
+       0   GDC_Init
+         0   -- Indirect call
+       0   GDC_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      20  GDC_Allocated
+          GDCpool
+       6  GDC_Func
+       4  GDC_Init
+      22  GDC_NewObject
+
+ 
+ 20 bytes in section .bss
+ 36 bytes in section .text
+ 
+ 36 bytes of CODE memory
+ 20 bytes of DATA memory
+
+Errors: none
+Warnings: none

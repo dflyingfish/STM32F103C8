@@ -1,0 +1,689 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:29
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\ENC_F30X_SpeednPosFdbkClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\ENC_F30X_SpeednPosFdbkClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\ENC_F30X_SpeednPosFdbkClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\ENC_F30X_SpeednPosFdbkClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\ENC_F30X_SpeednPosFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    ENC_F30x_SpeednPosFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private implementation of ENCODER class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "SpeednPosFdbkClass.h"
+     30          #include "SpeednPosFdbkPrivate.h"
+     31          #include "ENCODER_SpeednPosFdbkClass.h"
+     32          #include "ENC_F30X_SpeednPosFdbkPrivate.h"
+     33          #include "MCIRQHandlerPrivate.h"
+     34          #include "MCLibraryConf.h"
+     35          #include "MCLibraryISRPriorityConf.h"
+     36          #include "MC_type.h"
+     37          
+     38          /* Private Defines -----------------------------------------------------------*/
+     39          #define DCLASS_PARAM ((_DCENC_SPD)(((_CSPD) this)->DerivedClass))->pDParams_str
+     40          #define DCLASS_VARS  &(((_DCENC_SPD)(((_CSPD) this)->DerivedClass))->DVars_str)
+     41          #define  CLASS_VARS  &(((_CSPD)this)->Vars_str)
+     42          #define  CLASS_PARAM (((_CSPD)this)->pParams_str)
+     43          
+     44          /* Direct address of the registers used by DMA */
+     45          #define TIM2_SR_Address   0x40000010u
+     46          #define TIM3_SR_Address   0x40000410u
+     47          #define TIM4_SR_Address   0x40000810u
+     48          
+     49          #ifdef MC_CLASS_DYNAMIC
+     50          	#include "stdlib.h" /* Used for dynamic allocation */
+     51          #else
+     52          	_DCENC_SPD_t ENC_SPDpool[MAX_ENC_SPD_NUM];
+     53          	unsigned char ENC_SPD_Allocated = 0u;
+     54          #endif
+     55          
+     56          static void ENC_IRQHandler(void *this, unsigned char flag);
+     57          static void ENC_Init(CSPD this);
+     58          static void ENC_Clear(CSPD this);
+     59          static int16_t ENC_CalcAngle(CSPD this, void *pInputVars_str);
+     60          static bool ENC_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *pMecSpeed01Hz);
+     61          static void ENC_SetMecAngle(CSPD this, int16_t hMecAngle);
+     62          static uint16_t F30X_GPIOPin2Source(uint16_t GPIO_Pin);
+     63          
+     64          /**
+     65            * @brief  Creates an object of the class ENCODER
+     66            * @param  pSpeednPosFdbkParams pointer to an SpeednPosFdbk parameters structure
+     67            * @param  pENCODERParams pointer to an ENCODER parameters structure
+     68            * @retval CENC_SPD new instance of ENCODER object
+     69            */
+     70          CENC_SPD ENC_NewObject(pSpeednPosFdbkParams_t pSpeednPosFdbkParams, pENCODERParams_t pENCODERParams)
+     71          {
+     72          	_CSPD _oSpeednPosFdbk;
+     73          	_DCENC_SPD _oENCODER;
+     74          
+     75          	_oSpeednPosFdbk = (_CSPD)SPD_NewObject(pSpeednPosFdbkParams);
+     76          
+     77          	#ifdef MC_CLASS_DYNAMIC
+     78          		_oENCODER = (_DCENC_SPD)calloc(1u,sizeof(_DCENC_SPD_t));
+     79          	#else
+     80          		if (ENC_SPD_Allocated  < MAX_ENC_SPD_NUM)
+     81          		{
+     82          			_oENCODER = &ENC_SPDpool[ENC_SPD_Allocated++];
+     83          		}
+     84          		else
+     85          		{
+     86          			_oENCODER = MC_NULL;
+     87          		}
+     88          	#endif
+     89            
+     90          	_oENCODER->pDParams_str = pENCODERParams;
+     91          	_oSpeednPosFdbk->DerivedClass = (void*)_oENCODER;
+     92          	
+     93          	_oSpeednPosFdbk->Methods_str.pIRQ_Handler = &ENC_IRQHandler;
+     94          	Set_IRQ_Handler(pENCODERParams->IRQnb, (_CMCIRQ)_oSpeednPosFdbk);
+     95          
+     96                  _oSpeednPosFdbk->Methods_str.pSPD_Init = &ENC_Init;
+     97                  _oSpeednPosFdbk->Methods_str.pSPD_Clear = &ENC_Clear;
+     98                  _oSpeednPosFdbk->Methods_str.pSPD_CalcAngle = &ENC_CalcAngle;
+     99                  _oSpeednPosFdbk->Methods_str.pSPD_CalcAvrgMecSpeed01Hz = 
+    100                    &ENC_CalcAvrgMecSpeed01Hz;
+    101                  _oSpeednPosFdbk->Methods_str.pSPD_SetMecAngle =
+    102                    &ENC_SetMecAngle;
+    103                  
+    104          	return ((CENC_SPD)_oSpeednPosFdbk);
+    105          }
+    106          
+    107          /** @addtogroup STM32F10x_PMSM_MC_Library
+    108            * @{
+    109            */
+    110            
+    111          /** @addtogroup SpeednPosFdbk_ENCODER
+    112            * @{
+    113            */
+    114          
+    115          /** @defgroup ENCODER_class_private_methods ENCODER class private methods
+    116          * @{
+    117          */
+    118          
+    119          /**
+    120            * @brief  It initializes the hardware peripherals (TIMx, GPIO and NVIC) 
+    121                      required for the speed position sensor management using ENCODER 
+    122                      sensors.
+    123            * @param  this related object of class CSPD
+    124            * @retval none
+    125            */
+    126          static void ENC_Init(CSPD this)
+    127          {
+    128            TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    129            TIM_ICInitTypeDef TIM_ICInitStructure;
+    130            GPIO_InitTypeDef GPIO_InitStructure;
+    131            NVIC_InitTypeDef NVIC_InitStructure;
+    132            DMA_InitTypeDef DMA_InitStructure;
+    133            
+    134            uint16_t hTIM_Channel_x = TIM_Channel_4;  
+    135            uint16_t hTIM_IT_CCx = TIM_IT_CC4;
+    136            uint16_t hTIM_DMA_CCx = TIM_DMA_CC4;  
+    137            
+    138            pDParams_t pDParams_str = DCLASS_PARAM;
+    139            pDVars_t pDVars_str = DCLASS_VARS;
+    140            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    141            DMA_Channel_TypeDef *DMAPeriph_Channel = 0;
+    142            uint16_t hSignalPolarity = TIM_ICPolarity_Rising;  
+    143          
+    144            uint32_t wTimerStatusRegisterAddress = 0u;
+    145            uint8_t bBufferSize;
+    146            uint8_t bIndex;
+    147            uint8_t bChA_AF;
+    148            uint8_t bChB_AF;
+    149            
+    150            if (pDParams_str->RevertSignal)
+    151            {
+    152              hSignalPolarity = TIM_ICPolarity_Falling;
+    153            }  
+    154            
+    155            /*Selection of appropriate capture channel, DMA channel, timer status register*/
+    156            pDVars_str->wTIMxCCRAddress = &(TIMx->CCR4);
+    157            pDVars_str->hTIM_FLAG_CCx = (uint16_t)(TIM_FLAG_CC4);
+    158            pDVars_str->hTIM_EventSource_CCx = TIM_EventSource_CC4;
+    159            
+    160            if (TIMx == TIM2)
+    161            {
+    162              wTimerStatusRegisterAddress = (uint32_t)TIM2_SR_Address;
+    163              DMAPeriph_Channel = DMA1_Channel7;
+    164              bChA_AF = 1u;
+    165              bChB_AF = 1u;
+    166              if (pDParams_str->hAPort == GPIOD)
+    167              {
+    168                bChA_AF = 2u;
+    169              }
+    170              if (pDParams_str->hBPort == GPIOD)
+    171              {
+    172                bChB_AF = 2u;
+    173              }
+    174            }
+    175            else if (TIMx == TIM3)
+    176            {
+    177              wTimerStatusRegisterAddress = (uint32_t)TIM3_SR_Address;
+    178              DMAPeriph_Channel = DMA1_Channel3;
+    179              bChA_AF = 2u;
+    180              bChB_AF = 2u;    
+    181            }
+    182            else if (TIMx == TIM4)
+    183            {
+    184              hTIM_Channel_x = TIM_Channel_3;
+    185              hTIM_IT_CCx = TIM_IT_CC3;
+    186              hTIM_DMA_CCx = TIM_DMA_CC3;
+    187              pDVars_str->wTIMxCCRAddress = &(TIMx->CCR3);
+    188              pDVars_str->hTIM_FLAG_CCx = (uint16_t)(TIM_FLAG_CC3);    
+    189              pDVars_str->hTIM_EventSource_CCx = TIM_EventSource_CC3;    
+    190              
+    191              wTimerStatusRegisterAddress = (uint32_t)TIM4_SR_Address;
+    192              DMAPeriph_Channel = DMA1_Channel5;
+    193              bChA_AF = 2u;
+    194              bChB_AF = 2u;
+    195              if (pDParams_str->hAPort == GPIOA)
+    196              {
+    197                bChA_AF = 10u;
+    198              }
+    199              if (pDParams_str->hBPort == GPIOA)
+    200              {
+    201                bChB_AF = 10u;
+    202              }    
+    203            }
+    204            else
+    205            {
+    206              ;
+    207            }  
+    208          
+    209            /* TIMx clock enable */  
+    210            RCC_APB1PeriphClockCmd(pDParams_str->RCC_APB1Periph_TIMx, ENABLE);
+    211            
+    212            /* Enable GPIOA-GPIOF clock */
+    213            RCC_AHBPeriphClockCmd( RCC_AHBPeriph_GPIOA | 
+    214                                   RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_GPIOC | 
+    215                                     RCC_AHBPeriph_GPIOD | RCC_AHBPeriph_GPIOE | 
+    216                                       RCC_AHBPeriph_GPIOF, ENABLE);
+    217          
+    218            /****** TIMx alternate function remapping ******/  
+    219            GPIO_PinAFConfig(pDParams_str->hAPort, F30X_GPIOPin2Source(pDParams_str->hAPin), bChA_AF);
+    220            GPIO_PinAFConfig(pDParams_str->hBPort, F30X_GPIOPin2Source(pDParams_str->hBPin), bChB_AF);
+    221            
+    222            GPIO_StructInit(&GPIO_InitStructure);
+    223          
+    224            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    225            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    226            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    227            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    228            
+    229            GPIO_InitStructure.GPIO_Pin = pDParams_str->hAPin;
+    230            GPIO_Init(pDParams_str->hAPort, &GPIO_InitStructure);
+    231            GPIO_InitStructure.GPIO_Pin = pDParams_str->hBPin;
+    232            GPIO_Init(pDParams_str->hBPort, &GPIO_InitStructure);
+    233            
+    234            /* Timer configuration in Encoder mode, Input Capture, DMA request */
+    235            TIM_DeInit(TIMx);
+    236            
+    237            TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);  
+    238            TIM_TimeBaseStructure.TIM_Prescaler = 0u;
+    239            TIM_TimeBaseStructure.TIM_Period = (uint32_t)(pDParams_str->hPulseNumber) - 1u;  
+    240            TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    241            TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;   
+    242            TIM_TimeBaseInit(TIMx, &TIM_TimeBaseStructure);
+    243              
+    244            TIM_ICStructInit(&TIM_ICInitStructure);  
+    245            TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+    246            TIM_ICInitStructure.TIM_ICFilter = pDParams_str->hInpCaptFilter;
+    247            TIM_ICInit(TIMx, &TIM_ICInitStructure);  
+    248            TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
+    249            TIM_ICInit(TIMx, &TIM_ICInitStructure);
+    250            TIM_ICInitStructure.TIM_Channel = hTIM_Channel_x;
+    251            TIM_ICInit(TIMx, &TIM_ICInitStructure);
+    252            TIM_DMACmd(TIMx,hTIM_DMA_CCx,ENABLE);
+    253          
+    254            TIM_EncoderInterfaceConfig(TIMx, TIM_EncoderMode_TI12, 
+    255                                       TIM_ICPolarity_Rising, hSignalPolarity);
+    256            
+    257            /* DMA Configuration for status register transfer*/ 
+    258            DMA_DeInit(DMAPeriph_Channel);
+    259            DMA_InitStructure.DMA_PeripheralBaseAddr = wTimerStatusRegisterAddress;
+    260            DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(&(pDVars_str->wTimerStatusRegisterCopy));
+    261            DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    262            DMA_InitStructure.DMA_BufferSize = 1u;
+    263            DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    264            DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+    265            DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    266            DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    267            DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    268            DMA_InitStructure.DMA_Priority = ENC_DMA_PRIORITY;
+    269            DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    270            DMA_Init(DMAPeriph_Channel, &DMA_InitStructure);
+    271            
+    272            /* Enable the TIMx Update Interrupt */
+    273            NVIC_InitStructure.NVIC_IRQChannel = pDParams_str->TIMx_IRQChannel;
+    274            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIMx_PRE_EMPTION_PRIORITY;
+    275            NVIC_InitStructure.NVIC_IRQChannelSubPriority = TIMx_SUB_PRIORITY;
+    276            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    277            NVIC_Init(&NVIC_InitStructure);
+    278                
+    279            /* Clear all pending interrupts */
+    280            TIM_ClearFlag(TIMx, (uint16_t)(TIM_FLAG_Update));
+    281            TIM_ClearFlag(TIMx, pDVars_str->hTIM_FLAG_CCx);
+    282          
+    283            /*Configure IRQ related to ENCODER*/
+    284            TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
+    285            TIM_ITConfig(TIMx, hTIM_IT_CCx, ENABLE);
+    286            
+    287            /* Reset counter */
+    288            TIMx->CNT = 0u;
+    289            
+    290            /*Calculations of convenience*/
+    291            pDVars_str->wU32MAXdivPulseNumber = U32_MAX/(uint32_t)(pDParams_str->hPulseNumber);
+    292            pDVars_str->hSpeedSamplingFreqHz = pDParams_str->hSpeedSamplingFreq01Hz/ 10u;
+    293            
+    294            /*Enable the DMA channel*/
+    295            DMA_Cmd(DMAPeriph_Channel, ENABLE);
+    296            
+    297            /* Enable the counting timer*/  
+    298            TIM_Cmd(TIMx, ENABLE);
+    299          
+    300            /* Erase speed buffer */
+    301            bBufferSize = pDParams_str->bSpeedBufferSize;
+    302            
+    303            for (bIndex=0u;bIndex<bBufferSize;bIndex++)
+    304            {
+    305              pDVars_str->wDeltaCapturesBuffer[bIndex]=0;
+    306            }  
+    307          }
+    308          
+    309          /**
+    310          * @brief  Clear software FIFO where are "pushed" rotor angle variations captured
+    311          *         This function must be called before starting the motor to initialize
+    312          *	        the speed measurement process.
+    313          * @param  this related object of class CSPD
+    314          * @retval none
+    315          */
+    316          static void ENC_Clear(CSPD this)
+    317          {
+    318            pDVars_t pDVars_str = DCLASS_VARS;
+    319              
+    320            pDVars_str->SensorIsReliable = TRUE;
+    321          }
+    322          
+    323          #if defined (CCMRAM)
+    324          #if defined (__ICCARM__)
+    325          #pragma location = ".ccmram"
+    326          #elif defined (__CC_ARM)
+    327          __attribute__((section ("ccmram")))
+    328          #endif
+    329          #endif
+    330          /**
+    331          * @brief  It calculates the rotor electrical and mechanical angle, on the basis
+    332          *         of the instantaneous value of the timer counter.
+    333          * @param  this related object of class CSPD
+    334          * @param  pInputVars_str Not used in this derived class implementation of
+    335          *						 SPD_CalcElAngle
+    336          * @retval int16_t Measured electrical angle in s16degree format.
+    337          */
+    338          static int16_t ENC_CalcAngle(CSPD this, void *pInputVars_str)
+    339          {
+    340            pDParams_t pDParams_str = DCLASS_PARAM;
+    341            pDVars_t pDVars_str = DCLASS_VARS;
+    342            int32_t wtemp1;
+    343            int32_t wtemp2;
+    344            int16_t htemp1;
+    345            int16_t htemp2;
+    346            
+    347            wtemp1 = (int32_t)(pDParams_str->TIMx->CNT) *
+    348              (int32_t)(pDVars_str->wU32MAXdivPulseNumber);
+    349            
+    350            /*Computes and stores the rotor electrical angle*/
+    351            wtemp2 = wtemp1 * (int32_t)((_CSPD)this)->pParams_str->bElToMecRatio;
+    352            htemp1 = (int16_t)(wtemp2/65536);  
+    353          
+    354            ((_CSPD)this)->Vars_str.hElAngle = htemp1;
+    355            
+    356            /*Computes and stores the rotor mechanical angle*/
+    357            htemp2 = (int16_t)(wtemp1/65536);
+    358            
+    359            ((_CSPD)this)->Vars_str.hMecAngle = htemp2;
+    360            
+    361            /*Returns rotor electrical angle*/  
+    362            return(htemp1);
+    363          }
+    364          
+    365          /**
+    366            * @brief  This method must be called with the periodicity defined by parameter
+    367            *         hSpeedSamplingFreq01Hz. The method generates a capture event on
+    368            *         a channel, computes & stores average mechanical speed [01Hz] (on the
+    369            *         basis of the buffer filled by CCx IRQ), computes & stores average 
+    370            *         mechanical acceleration [01Hz/SpeedSamplingFreq], computes & stores
+    371            *         the instantaneous electrical speed [dpp], updates the index of the
+    372            *         speed buffer, then checks & stores & returns the reliability state
+    373            *         of the sensor.
+    374            * @param  this related object of class CSPD
+    375            * @param  hMecSpeed01Hz pointer to int16_t, used to return the rotor average
+    376            *         mechanical speed (01Hz)
+    377            * @retval TRUE = sensor information is reliable
+    378            *         FALSE = sensor information is not reliable
+    379            */
+    380          static bool ENC_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *pMecSpeed01Hz)
+    381          {
+    382            pDParams_t pDParams_str = DCLASS_PARAM;
+    383            pDVars_t pDVars_str = DCLASS_VARS;
+    384            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    385            int32_t wOverallAngleVariation = 0;
+    386            int32_t wtemp1;
+    387            int32_t wtemp2;
+    388            uint8_t bBufferIndex = 0u;
+    389            bool bReliability = TRUE;
+    390            uint8_t bBufferSize = pDParams_str->bSpeedBufferSize;
+    391            
+    392            /*Generates a capture event on CCx*/
+    393            TIMx->EGR = pDVars_str->hTIM_EventSource_CCx;
+    394            
+    395            /*Computes & returns average mechanical speed [01Hz], var wtemp1*/
+    396            for (bBufferIndex=0u;bBufferIndex<bBufferSize;bBufferIndex++)
+    397            {
+    398              wOverallAngleVariation += pDVars_str->wDeltaCapturesBuffer[bBufferIndex];
+    399            }
+    400            wtemp1 = wOverallAngleVariation * (int32_t)(pDParams_str->hSpeedSamplingFreq01Hz);
+    401            wtemp2 = (int32_t)(pDParams_str->hPulseNumber)*
+    402              (int32_t)(pDParams_str->bSpeedBufferSize);
+    403            wtemp1 /= wtemp2;  
+    404            *pMecSpeed01Hz = (int16_t)(wtemp1);
+    405            
+    406            /*Computes & stores average mechanical acceleration [01Hz/SpeedSamplingFreq]*/
+    407            ((_CSPD)this)->Vars_str.hMecAccel01HzP = (int16_t)(wtemp1 - 
+    408                        ((_CSPD)this)->Vars_str.hAvrMecSpeed01Hz);
+    409              
+    410            /*Stores average mechanical speed [01Hz]*/
+    411            ((_CSPD)this)->Vars_str.hAvrMecSpeed01Hz = (int16_t)wtemp1;
+    412            
+    413            /*Computes & stores the instantaneous electrical speed [dpp], var wtemp1*/
+    414            wtemp1 = pDVars_str->wDeltaCapturesBuffer[pDVars_str->bDeltaCapturesIndex] *
+    415              (int32_t)(pDVars_str->hSpeedSamplingFreqHz) *
+    416                (int32_t)((_CSPD)this)->pParams_str->bElToMecRatio;
+    417            wtemp1 /= (int32_t)(pDParams_str->hPulseNumber);
+    418            wtemp1 *= (int32_t)U16_MAX;  
+    419            wtemp1 /= (int32_t)(((_CSPD)this)->pParams_str->hMeasurementFrequency); 
+    420          
+    421            ((_CSPD)this)->Vars_str.hElSpeedDpp = (int16_t)wtemp1;
+    422            
+    423            /*Buffer index update*/
+    424            pDVars_str->bDeltaCapturesIndex++;
+    425            if (pDVars_str->bDeltaCapturesIndex == pDParams_str->bSpeedBufferSize)
+    426            {
+    427              pDVars_str->bDeltaCapturesIndex = 0u;
+    428            }
+    429            
+    430            /*Checks the reliability status, then stores and returns it*/
+    431            if (pDVars_str->TimerOverflowError)
+    432            {
+    433              bReliability = FALSE;
+    434              pDVars_str->SensorIsReliable = FALSE;
+    435              
+    436            }
+    437          
+    438            return(bReliability);
+    439          }
+    440          
+    441          /**
+    442            * @brief  It could be used to set istantaneous information on rotor mechanical
+    443            *         angle. As a consequence, timer counted is computed and updated.
+    444            * @param  this related object of class CSPD
+    445            * @param  hMecAngle istantaneous measure of rotor mechanical angle (s16degrees)
+    446            * @retval none
+    447            */
+    448          static void ENC_SetMecAngle(CSPD this, int16_t hMecAngle)
+    449          {
+    450            pDParams_t pDParams_str = DCLASS_PARAM;
+    451            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    452            
+    453            uint16_t hAngleCounts;
+    454            uint16_t hMecAngleuint;
+    455            
+    456            if (hMecAngle < 0)
+    457            {
+    458              hMecAngle *= -1;
+    459              hMecAngleuint = 65535u - (uint16_t)hMecAngle;
+    460            }
+    461            else
+    462            {
+    463              hMecAngleuint = (uint16_t)hMecAngle;
+    464            }
+    465            
+    466            hAngleCounts = (uint16_t)(((uint32_t)hMecAngleuint *
+    467                              (uint32_t)pDParams_str->hPulseNumber)/65535u);
+    468             
+    469            TIMx->CNT = (uint16_t)(hAngleCounts);
+    470          }
+    471          
+    472          /**
+    473            * @brief  Example of private method of the class ENCODER to implement an MC IRQ function
+    474            * @param  this related object
+    475            * @param  flag used to distinguish between various IRQ sources
+    476            * @retval none
+    477            */
+    478          static void ENC_IRQHandler(void *this, unsigned char flag)
+    479          {
+    480            pDVars_t pDVars_str = DCLASS_VARS;
+    481            pDParams_t pDParams_str = DCLASS_PARAM;
+    482            TIM_TypeDef* TIMx = pDParams_str->TIMx;
+    483            uint16_t hOverflowsOccurred;
+    484            uint16_t hNewCapture;
+    485            uint32_t wNewCapture;
+    486            uint32_t wNewCounter;
+    487            
+    488            /*TIMx Capture IRQ*/
+    489            if ((TIMx->SR & pDVars_str->hTIM_FLAG_CCx) == pDVars_str->hTIM_FLAG_CCx) 
+    490            {
+    491              wNewCapture = *(pDVars_str->wTIMxCCRAddress);
+    492              hNewCapture = (uint16_t)wNewCapture;
+    493              /* Computation of overflows occurred (pending flags at capture time to account)*/
+    494              if ((pDVars_str->wTimerStatusRegisterCopy & TIM_FLAG_Update) == TIM_FLAG_Update)
+    495              {
+    496                wNewCounter = TIMx->CNT;
+    497                hNewCapture = (uint16_t)wNewCounter;
+    498                hOverflowsOccurred = pDVars_str->hTimerOverflowNb + 1u;
+    499                pDVars_str->hTimerOverflowNb = 0u;
+    500              }
+    501              else
+    502              {
+    503                hOverflowsOccurred = pDVars_str->hTimerOverflowNb;
+    504                pDVars_str->hTimerOverflowNb = 1u;
+    505              }
+    506              
+    507              /*Calculation of delta angle*/
+    508              if ((TIMx->CR1 & TIM_CounterMode_Down) == TIM_CounterMode_Down)  
+    509              {/* encoder timer down-counting*/
+    510                pDVars_str->wDeltaCapturesBuffer[pDVars_str->bDeltaCapturesIndex]= 
+    511                  (int32_t)(hNewCapture) - (int32_t)(pDVars_str->hPreviousCapture) -
+    512                    ((int32_t)(hOverflowsOccurred) - 1) * (int32_t)(pDParams_str->hPulseNumber);
+    513              }
+    514              else  
+    515              {/* encoder timer up-counting*/
+    516                pDVars_str->wDeltaCapturesBuffer[pDVars_str->bDeltaCapturesIndex]= 
+    517                  (int32_t)(hNewCapture) - (int32_t)(pDVars_str->hPreviousCapture) +
+    518                    ((int32_t)(hOverflowsOccurred) - 1) * (int32_t)(pDParams_str->hPulseNumber);
+    519              }
+    520              
+    521              /*last captured value update*/
+    522              pDVars_str->hPreviousCapture = hNewCapture;
+    523            }
+    524            
+    525            /* TIMx Update IRQ */
+    526            if ((TIMx->SR & TIM_FLAG_Update) == TIM_FLAG_Update)  
+    527            {
+    528              /* Clear the interrupt pending flag */
+    529              TIM_ClearFlag(TIMx, (uint16_t)(TIM_FLAG_Update));
+    530              
+    531              /*Updates the number of overflows occurred*/      
+    532              if (pDVars_str->hTimerOverflowNb != ENC_MAX_OVERFLOW_NB)  
+    533              {
+    534                (pDVars_str->hTimerOverflowNb)+=1u;
+    535              }
+    536              else
+    537              {
+    538                pDVars_str->TimerOverflowError = TRUE;
+    539              }
+    540            }
+    541          }
+    542          
+    543          /**
+    544            * @brief  It is an internal function used to compute the GPIO Source 
+    545            *         value starting from GPIO pin value. The GPIO Source value 
+    546            *         is used for AF remapping.
+    547            * @param  GPIO_Pin Pin value to be converted.
+    548            * @retval uint16_t The GPIO pin source value converted.
+    549            */
+    550          static uint16_t F30X_GPIOPin2Source(uint16_t GPIO_Pin)
+    551          {
+    552            uint16_t GPIO_Sourcex = 0u;
+    553            
+    554            while (GPIO_Pin != 0x01u)
+    555            {
+    556              GPIO_Pin = GPIO_Pin >> 1u;
+    557              GPIO_Sourcex++;
+    558            }
+    559            return GPIO_Sourcex;
+    560          }
+    561          /**
+    562            * @}
+    563            */
+    564            
+    565          /**
+    566            * @}
+    567            */
+    568          
+    569          /**
+    570            * @}
+    571            */
+    572          
+    573          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   ENC_CalcAngle
+      20   ENC_CalcAvrgMecSpeed01Hz
+       0   ENC_Clear
+      16   ENC_IRQHandler
+        16   -> TIM_ClearFlag
+     136   ENC_Init
+       136   -> DMA_Cmd
+       136   -> DMA_DeInit
+       136   -> DMA_Init
+       136   -> GPIO_Init
+       136   -> GPIO_PinAFConfig
+       136   -> GPIO_StructInit
+       136   -> NVIC_Init
+       136   -> RCC_AHBPeriphClockCmd
+       136   -> RCC_APB1PeriphClockCmd
+       136   -> TIM_ClearFlag
+       136   -> TIM_Cmd
+       136   -> TIM_DMACmd
+       136   -> TIM_DeInit
+       136   -> TIM_EncoderInterfaceConfig
+       136   -> TIM_ICInit
+       136   -> TIM_ICStructInit
+       136   -> TIM_ITConfig
+       136   -> TIM_TimeBaseInit
+       136   -> TIM_TimeBaseStructInit
+      16   ENC_NewObject
+        16   -> SPD_NewObject
+        16   -> Set_IRQ_Handler
+       0   ENC_SetMecAngle
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable2
+       4  ??DataTable2_1
+       4  ??DataTable2_2
+       4  ??DataTable2_3
+       4  ??DataTable2_4
+       4  ??DataTable2_5
+       4  ??DataTable2_6
+       4  ??DataTable2_7
+       4  ??DataTable2_8
+       4  ??DataTable2_9
+      42  ENC_CalcAngle
+     150  ENC_CalcAvrgMecSpeed01Hz
+       8  ENC_Clear
+     120  ENC_IRQHandler
+     652  ENC_Init
+      80  ENC_NewObject
+     104  ENC_SPD_Allocated
+          ENC_SPDpool
+      32  ENC_SetMecAngle
+
+ 
+   104 bytes in section .bss
+ 1 124 bytes in section .text
+ 
+ 1 124 bytes of CODE memory
+   104 bytes of DATA memory
+
+Errors: none
+Warnings: none

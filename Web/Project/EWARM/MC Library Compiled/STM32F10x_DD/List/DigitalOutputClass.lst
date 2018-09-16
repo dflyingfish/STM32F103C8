@@ -1,0 +1,219 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       13/Sep/2018  23:25:51
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\DigitalOutputClass.c
+#    Command line =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\DigitalOutputClass.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D MC_LIBRARY_DUAL -lcN
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List" -o
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj" --debug --endian=little --cpu=Cortex-M3 -e
+#        --fpu=None --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\ -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\inc\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\common\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F10x_StdPeriph_Driver\inc\
+#        -Oh --use_c++_inline -I "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List\DigitalOutputClass.lst
+#    Object file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj\DigitalOutputClass.o
+#
+###############################################################################
+
+D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\DigitalOutputClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    DigitalOutputClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of DigitalOutput class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "DigitalOutputClass.h"
+     30          #include "DigitalOutputPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #define CLASS_VARS   ((_CDOUT)this)->Vars_str
+     35          #define CLASS_PARAMS  ((_CDOUT)this)->pParams_str  
+     36          
+     37          #ifdef MC_CLASS_DYNAMIC
+     38            #include "stdlib.h" /* Used for dynamic allocation */
+     39          #else
+     40            _CDOUT_t DOUTpool[MAX_DOUT_NUM];
+     41            unsigned char DOUT_Allocated = 0u;
+     42          #endif
+     43          
+     44          /**
+     45            * @brief  Creates an object of the class DigitalOutput
+     46            * @param  pDigitalOutputParams pointer to an DigitalOutput parameters structure
+     47            * @retval CDOUT new instance of DigitalOutput object
+     48            */
+     49          CDOUT DOUT_NewObject(pDigitalOutputParams_t pDigitalOutputParams)
+     50          {
+     51            _CDOUT _oDOUT;
+     52            
+     53            #ifdef MC_CLASS_DYNAMIC
+     54              _oDOUT = (_CDOUT)calloc(1u,sizeof(_CDOUT_t));
+     55            #else
+     56              if (DOUT_Allocated  < MAX_DOUT_NUM)
+     57              {
+     58                _oDOUT = &DOUTpool[DOUT_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oDOUT = MC_NULL;
+     63              }
+     64            #endif
+     65            
+     66            _oDOUT->pParams_str = (pParams_t)pDigitalOutputParams;
+     67            
+     68            return ((CDOUT)_oDOUT);
+     69          }
+     70          
+     71          /**
+     72          * @brief  Initializes object variables, port and pin. It must be called only 
+     73          *         after PWMnCurrFdbk object initialization and DigitalOutput object 
+     74          *         creation. 
+     75          * @param this related object of class CDOUT.
+     76          * @retval none.
+     77          */
+     78          void DOUT_Init(CDOUT this)
+     79          {
+     80            GPIO_InitTypeDef GPIO_InitStructure;
+     81            
+     82            /* GPIOs configurations --------------------------------------------------*/
+     83            GPIO_StructInit(&GPIO_InitStructure);
+     84            
+     85            /* Configure GPIO port and pin, clock it's supposed to be enabled in 
+     86            PWMnCurrentFdbk object initialization */  
+     87            GPIO_InitStructure.GPIO_Pin = CLASS_PARAMS->hDOutputPin;  
+     88            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+     89            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+     90            GPIO_Init(CLASS_PARAMS->hDOutputPort, &GPIO_InitStructure);
+     91            DOUT_SetOutputState(this, INACTIVE);
+     92          }
+     93          
+     94          /**
+     95          * @brief Accordingly with selected polarity, it sets to active or inactive the
+     96          *        digital output
+     97          * @param this related object of class CDOUT.
+     98          * @param OutputState_t New requested state
+     99          * @retval none
+    100          */
+    101          void DOUT_SetOutputState(CDOUT this, DOutputState_t State)
+    102          {
+    103            
+    104            if(State == ACTIVE)
+    105            {
+    106              if(CLASS_PARAMS->bDOutputPolarity == DOutputActiveHigh)
+    107              {
+    108                GPIO_SetBits(CLASS_PARAMS->hDOutputPort,CLASS_PARAMS->hDOutputPin);
+    109              }
+    110              else
+    111              {
+    112                GPIO_ResetBits(CLASS_PARAMS->hDOutputPort,CLASS_PARAMS->hDOutputPin);     
+    113              }
+    114            }
+    115            else
+    116              if(CLASS_PARAMS->bDOutputPolarity == DOutputActiveHigh)
+    117              {
+    118                GPIO_ResetBits(CLASS_PARAMS->hDOutputPort,CLASS_PARAMS->hDOutputPin);
+    119              }
+    120              else
+    121              {
+    122                GPIO_SetBits(CLASS_PARAMS->hDOutputPort,CLASS_PARAMS->hDOutputPin);     
+    123              }   
+    124            CLASS_VARS.OutputState = State;
+    125          }
+    126          
+    127          /**
+    128          * @brief It returns the state of the digital output
+    129          * @param this object of class DOUT
+    130          * @retval OutputState_t Digital output state (ACTIVE or INACTIVE)
+    131          */
+    132          DOutputState_t DOUT_GetOutputState(CDOUT this)
+    133          {
+    134            return(CLASS_VARS.OutputState);
+    135          }
+    136          
+    137          
+    138          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   DOUT_GetOutputState
+      16   DOUT_Init
+        16   -> GPIO_Init
+        16   -> GPIO_ResetBits
+        16   -> GPIO_SetBits
+        16   -> GPIO_StructInit
+       0   DOUT_NewObject
+      16   DOUT_SetOutputState
+        16   -> GPIO_ResetBits
+        16   -> GPIO_SetBits
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      44  DOUT_Allocated
+          DOUTpool
+       4  DOUT_GetOutputState
+      70  DOUT_Init
+      28  DOUT_NewObject
+      44  DOUT_SetOutputState
+
+ 
+  44 bytes in section .bss
+ 150 bytes in section .text
+ 
+ 150 bytes of CODE memory
+  44 bytes of DATA memory
+
+Errors: none
+Warnings: none

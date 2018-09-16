@@ -1,0 +1,248 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:33
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\MotorPowerMeasurementClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\MotorPowerMeasurementClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4
+#        -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC
+#        Library Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj"
+#        --debug --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp
+#        --dlib_config "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\MotorPowerMeasurementClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\MotorPowerMeasurementClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\MotorPowerMeasurementClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    MotorPowerMeasurementClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of MotorPowerMeasurement class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "MotorPowerMeasurementClass.h"
+     30          #include "MotorPowerMeasurementPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CMPM_t MPMpool[MAX_MPM_NUM];
+     38            unsigned char MPM_Allocated = 0u;
+     39          #endif
+     40          
+     41          #define CLASS_VARS   &((_CMPM)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CMPM)this)->pParams_str
+     43          
+     44          /**
+     45            * @brief  Creates an object of the class MotorPowerMeasurement
+     46            * @param  pMotorPowerMeasurementParams pointer to an MotorPowerMeasurement 
+     47            *         parameters structure
+     48            * @retval CMPM new instance of MotorPowerMeasurement object
+     49            */
+     50          CMPM MPM_NewObject(void)
+     51          {
+     52            _CMPM _oMPM;
+     53            
+     54            #ifdef MC_CLASS_DYNAMIC
+     55              _oMPM = (_CMPM)calloc(1u,sizeof(_CMPM_t));
+     56            #else
+     57              if (MPM_Allocated  < MAX_MPM_NUM)
+     58              {
+     59                _oMPM = &MPMpool[MPM_Allocated++];
+     60              }
+     61              else
+     62              {
+     63                _oMPM = MC_NULL;
+     64              }
+     65            #endif
+     66              
+     67            return ((CMPM)_oMPM);
+     68          }
+     69          
+     70          /**
+     71            * @brief Initializes all the object variables, usually it has to be called 
+     72            *        once right after object creation.
+     73            * @param this related object of class CMPM.
+     74            * @param pMPMInitStruct the pointer of the init structure, required by derived
+     75            *       class, up-casted to pMPMInitStruct_t.
+     76            * @retval none.
+     77            */
+     78          void MPM_Init(CMPM this, pMPMInitStruct_t pMPMInitStruct)
+     79          {
+     80            ((_CMPM)this)->Methods_str.pPQD_Init(this, pMPMInitStruct);
+     81            MPM_Clear(this);
+     82          }
+     83          
+     84          /**
+     85            * @brief  It should be called before each motor restart. It clears the 
+     86            *         measurement buffer and initialize the index.
+     87            * @param this related object of class CMPM.
+     88            * @retval none.
+     89            */
+     90          void MPM_Clear(CMPM this)
+     91          {
+     92            uint16_t i;
+     93            pVars_t pVars = CLASS_VARS;
+     94            for (i = 0u; i < MPM_BUFFER_LENGHT; i++)
+     95            {
+     96              pVars->hMeasBuffer[i] = 0;
+     97            }
+     98            pVars->hNextMeasBufferIndex = 0u;
+     99            pVars->hLastMeasBufferIndex = 0u;
+    100            ((_CMPM)this)->Methods_str.pPQD_Clear(this);
+    101          }
+    102          
+    103          /**
+    104            * @brief  This method should be called with periodicity. It computes and 
+    105            *         returns the measured motor power expressed in watt. It is also used
+    106            *         to fill, with that measure, the buffer used to compute the average
+    107            *         motor power. 
+    108            * @param this related object of class CMPM.
+    109            * @retval int16_t The measured motor power expressed in watt.
+    110            */
+    111          int16_t MPM_CalcElMotorPower(CMPM this)
+    112          {
+    113            uint16_t i;
+    114            int32_t wAux = 0;
+    115            pVars_t pVars = CLASS_VARS;
+    116            int16_t hMotorPower = 0;
+    117            hMotorPower = ((_CMPM)this)->Methods_str.pPQD_CalcElMotorPower(this);
+    118            /* Store the measured values in the buffer.*/
+    119            pVars->hMeasBuffer[pVars->hNextMeasBufferIndex] = hMotorPower;
+    120            pVars->hLastMeasBufferIndex = pVars->hNextMeasBufferIndex;
+    121            pVars->hNextMeasBufferIndex++;
+    122            if (pVars->hNextMeasBufferIndex >= MPM_BUFFER_LENGHT)
+    123            {
+    124              pVars->hNextMeasBufferIndex = 0u;
+    125            }
+    126            /* Compute the average measured motor power */
+    127            for (i = 0u; i < MPM_BUFFER_LENGHT; i++)
+    128            {
+    129              wAux += (int32_t)(pVars->hMeasBuffer[i]);
+    130            }
+    131            wAux /= (int32_t)MPM_BUFFER_LENGHT;
+    132            pVars->hAvrgElMotorPowerW = (int16_t)(wAux);
+    133            /* Return the last measured motor power */
+    134            return hMotorPower;
+    135          }
+    136          
+    137          /**
+    138            * @brief  This method is used to get the last measured motor power 
+    139            *         (instantaneous value) expressed in watt.
+    140            * @param this related object of class CMPM.
+    141            * @retval int16_t The last measured motor power (instantaneous value) 
+    142            *         expressed in watt.
+    143            */
+    144          int16_t MPM_GetElMotorPowerW(CMPM this)
+    145          {
+    146            pVars_t pVars = CLASS_VARS;
+    147            return pVars->hMeasBuffer[pVars->hLastMeasBufferIndex];
+    148          }
+    149          
+    150          /**
+    151            * @brief  This method is used to get the average measured motor power 
+    152            *         expressed in watt.
+    153            * @param this related object of class CMPM.
+    154            * @retval int16_t The average measured motor power expressed in watt.
+    155            */
+    156          int16_t MPM_GetAvrgElMotorPowerW(CMPM this)
+    157          {
+    158            pVars_t pVars = CLASS_VARS;
+    159            return pVars->hAvrgElMotorPowerW;
+    160          }
+    161          
+    162          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   MPM_CalcElMotorPower
+        16   -- Indirect call
+       8   MPM_Clear
+         0   -- Indirect call
+       0   MPM_GetAvrgElMotorPowerW
+       0   MPM_GetElMotorPowerW
+       8   MPM_Init
+         8   -- Indirect call
+         0   -> MPM_Clear
+       0   MPM_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+     284  MPM_Allocated
+          MPMpool
+      72  MPM_CalcElMotorPower
+      34  MPM_Clear
+       6  MPM_GetAvrgElMotorPowerW
+      14  MPM_GetElMotorPowerW
+      14  MPM_Init
+      18  MPM_NewObject
+
+ 
+ 284 bytes in section .bss
+ 162 bytes in section .text
+ 
+ 162 bytes of CODE memory
+ 284 bytes of DATA memory
+
+Errors: none
+Warnings: none

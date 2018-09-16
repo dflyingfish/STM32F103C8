@@ -1,0 +1,263 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:34
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PQD_MotorPowerMeasurementClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PQD_MotorPowerMeasurementClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4
+#        -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC
+#        Library Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj"
+#        --debug --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp
+#        --dlib_config "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\PQD_MotorPowerMeasurementClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\PQD_MotorPowerMeasurementClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\PQD_MotorPowerMeasurementClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    PQD_MotorPowerMeasurementClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of PQD class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "MotorPowerMeasurementClass.h"
+     30          #include "MotorPowerMeasurementPrivate.h"
+     31          #include "PQD_MotorPowerMeasurementClass.h"
+     32          #include "PQD_MotorPowerMeasurementPrivate.h"
+     33          #include "MCLibraryConf.h"
+     34          #include "MC_type.h"
+     35          
+     36          #ifdef MC_CLASS_DYNAMIC
+     37          	#include "stdlib.h" /* Used for dynamic allocation */
+     38          #else
+     39          	_DCPQD_MPM_t PQD_MPMpool[MAX_PQD_MPM_NUM];
+     40          	unsigned char PQD_MPM_Allocated = 0u;
+     41          #endif
+     42          
+     43          #define DCLASS_PARAM ((_DCPQD_MPM)(((_CMPM) this)->DerivedClass))->pDParams_str
+     44          #define DCLASS_VARS  &(((_DCPQD_MPM)(((_CMPM) this)->DerivedClass))->DVars_str)
+     45          #define  CLASS_VARS  &(((_CMPM)this)->Vars_str)
+     46          #define  CLASS_PARAM (((_CMPM)this)->pParams_str)
+     47          
+     48          /**
+     49            * @brief  Implementation of derived class init method.
+     50            * @param this related object of class CMPM.
+     51            * @param pMPMInitStruct the pointer of the init structure, required by derived class, up-casted to pMPMInitStruct_t.
+     52            * @retval none.
+     53            */
+     54          static void PQD_Init(CMPM this, pMPMInitStruct_t pMPMInitStruct);
+     55          
+     56          /**
+     57            * @brief Implementation of derived class init method. It should be called before each motor restart.
+     58            * @param this related object of class CMPM.
+     59            * @retval none.
+     60            */
+     61          static void PQD_Clear(CMPM this);
+     62          
+     63          /**
+     64            * @brief Implementation of derived class CalcElMotorPower.
+     65            * @param this related object of class CMPM.
+     66            * @retval int16_t The measured motor power expressed in watt.
+     67            */
+     68          static int16_t PQD_CalcElMotorPower(CMPM this);
+     69          
+     70          /**
+     71            * @brief  Creates an object of the class PQD
+     72            * @param  pMotorPowerMeasurementParams pointer to an MotorPowerMeasurement parameters structure
+     73            * @param  pPQDParams pointer to an PQD parameters structure
+     74            * @retval CPQD_MPM new instance of PQD object
+     75            */
+     76          CPQD_MPM PQD_NewObject(pPQDParams_t pPQDParams)
+     77          {
+     78          	_CMPM _oMotorPowerMeasurement;
+     79          	_DCPQD_MPM _oPQD;
+     80          
+     81          	_oMotorPowerMeasurement = (_CMPM)MPM_NewObject();
+     82          
+     83          	#ifdef MC_CLASS_DYNAMIC
+     84          		_oPQD = (_DCPQD_MPM)calloc(1u,sizeof(_DCPQD_MPM_t));
+     85          	#else
+     86          		if (PQD_MPM_Allocated  < MAX_PQD_MPM_NUM)
+     87          		{
+     88          			_oPQD = &PQD_MPMpool[PQD_MPM_Allocated++];
+     89          		}
+     90          		else
+     91          		{
+     92          			_oPQD = MC_NULL;
+     93          		}
+     94          	#endif
+     95            
+     96          	_oPQD->pDParams_str = pPQDParams;
+     97          	_oMotorPowerMeasurement->DerivedClass = (void*)_oPQD;
+     98            
+     99          	_oMotorPowerMeasurement->Methods_str.pPQD_Init = &PQD_Init;
+    100                  _oMotorPowerMeasurement->Methods_str.pPQD_Clear = &PQD_Clear;
+    101                  _oMotorPowerMeasurement->Methods_str.pPQD_CalcElMotorPower = &PQD_CalcElMotorPower;
+    102          
+    103          	return ((CPQD_MPM)_oMotorPowerMeasurement);
+    104          }
+    105          
+    106          /** @addtogroup STM32F10x_PMSM_MC_Library
+    107            * @{
+    108            */
+    109            
+    110          /** @addtogroup MotorPowerMeasurement_PQD
+    111            * @{
+    112            */
+    113          
+    114          /** @defgroup PQD_class_private_methods PQD class private methods
+    115          * @{
+    116          */
+    117          
+    118          /**
+    119            * @brief  Implementation of derived class init method.
+    120            * @param this related object of class CMPM.
+    121            * @param pMPMInitStruct the pointer of the init structure, required by derived class, up-casted to pMPMInitStruct_t.
+    122            * @retval none.
+    123            */
+    124          static void PQD_Init(CMPM this, pMPMInitStruct_t pMPMInitStruct)
+    125          {
+    126            pDVars_t pDVars = DCLASS_VARS;
+    127            pPQD_MPMInitStruct_t pPQD_MPMInitStruct = (pPQD_MPMInitStruct_t)pMPMInitStruct;
+    128            
+    129            pDVars->pFOCVars = pPQD_MPMInitStruct->pFOCVars;
+    130            pDVars->oVBS = pPQD_MPMInitStruct->oVBS;
+    131          }
+    132          
+    133          /**
+    134            * @brief Implementation of derived class init method. It should be called before each motor restart.
+    135            * @param this related object of class CMPM.
+    136            * @retval none.
+    137            */
+    138          static void PQD_Clear(CMPM this)
+    139          {
+    140          }
+    141          
+    142          /**
+    143            * @brief Implementation of derived class CalcElMotorPower.
+    144            * @param this related object of class CMPM.
+    145            * @retval int16_t The measured motor power expressed in watt.
+    146            */
+    147          static int16_t PQD_CalcElMotorPower(CMPM this)
+    148          {
+    149            int32_t wAux,wAux2,wAux3;
+    150            pDVars_t pDVars = DCLASS_VARS;
+    151            pDParams_t pDParams = DCLASS_PARAM;
+    152            Curr_Components Iqd = pDVars->pFOCVars->Iqd;
+    153            Volt_Components Vqd = pDVars->pFOCVars->Vqd;
+    154            wAux = ((int32_t)Iqd.qI_Component1 * (int32_t)Vqd.qV_Component1) + 
+    155              ((int32_t)Iqd.qI_Component2 * (int32_t)Vqd.qV_Component2);
+    156            wAux /= 65536;
+    157              
+    158            wAux2 = pDParams->wConvFact * (int32_t)VBS_GetAvBusVoltage_V(pDVars->oVBS);
+    159            wAux2 /= 600; /* 600 is max bus voltage expressed in volt.*/
+    160            
+    161            wAux3 = wAux * wAux2;
+    162            wAux3 *= 6; /* 6 is max bus voltage expressed in thousend of volt.*/
+    163            wAux3 /= 10;
+    164            wAux3 /= 65536;
+    165              
+    166            return (int16_t)(wAux3);
+    167          }
+    168          
+    169          /**
+    170            * @}
+    171            */
+    172            
+    173          /**
+    174            * @}
+    175            */
+    176          
+    177          /**
+    178            * @}
+    179            */
+    180          
+    181          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   PQD_CalcElMotorPower
+        16   -> VBS_GetAvBusVoltage_V
+       0   PQD_Clear
+       0   PQD_Init
+       8   PQD_NewObject
+         8   -> MPM_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       4  ??DataTable1_2
+      96  PQD_CalcElMotorPower
+       2  PQD_Clear
+      14  PQD_Init
+      16  PQD_MPM_Allocated
+          PQD_MPMpool
+      52  PQD_NewObject
+
+ 
+  16 bytes in section .bss
+ 176 bytes in section .text
+ 
+ 176 bytes of CODE memory
+  16 bytes of DATA memory
+
+Errors: none
+Warnings: none

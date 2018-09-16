@@ -1,0 +1,248 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:31
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\BusVoltageSensorClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\BusVoltageSensorClass.c" -D USE_STDPERIPH_DRIVER
+#        -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\BusVoltageSensorClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\BusVoltageSensorClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\BusVoltageSensorClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    BusVoltageSensorClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of Bus Voltage Sensor class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "BusVoltageSensorClass.h"
+     30          #include "BusVoltageSensorPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #define BCLASS_PARAMS ((_CVBS)this)->pParams_str
+     35          #define BCLASS_VARS   ((_CVBS)this)->Vars_str
+     36          
+     37          #ifdef MC_CLASS_DYNAMIC
+     38          #include "stdlib.h" /* Used for dynamic allocation */
+     39          #else
+     40          _CVBS_t VBSpool[MAX_VBS_NUM];
+     41          unsigned char VBS_Allocated = 0u;
+     42          #endif
+     43          
+     44          /**
+     45          * @brief  Creates an object of the class BusVoltageSensor
+     46          * @param  pBusVoltageSensorParams pointer to an BusVoltageSensor parameters structure
+     47          * @retval CVBS new instance of BusVoltageSensor object
+     48          */
+     49            CVBS VBS_NewObject(pBusVoltageSensorParams_t pBusVoltageSensorParams)
+     50            {
+     51              _CVBS _oVBS;
+     52              
+     53          #ifdef MC_CLASS_DYNAMIC
+     54              _oVBS = (_CVBS)calloc(1u,sizeof(_CVBS_t));
+     55          #else
+     56              if (VBS_Allocated  < MAX_VBS_NUM)
+     57              {
+     58                _oVBS = &VBSpool[VBS_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oVBS = MC_NULL;
+     63              }
+     64          #endif
+     65              
+     66              _oVBS->pParams_str = (pParams_t)pBusVoltageSensorParams;
+     67              
+     68              return ((CVBS)_oVBS);
+     69            }
+     70            
+     71          /**
+     72            * @brief  It initializes bus voltage conversion. It must be called only after 
+     73            *         current sensor initialization (PWMC_Init)
+     74            * @param  this related object of class CVBS
+     75            * @retval none
+     76            */
+     77            void VBS_Init(CVBS this, CPWMC oPWMnCurrentSensor)
+     78            { 
+     79              (((_CVBS)this)->Methods_str.pVBS_Init)(this, oPWMnCurrentSensor);
+     80            }
+     81            
+     82            
+     83          /**
+     84            * @brief  It clears bus voltage FW variable containing average bus voltage 
+     85            *         value
+     86            * @param  this related object of class CVBS
+     87            * @retval none
+     88            */
+     89            void VBS_Clear(CVBS this)
+     90            {
+     91              (((_CVBS)this)->Methods_str.pVBS_Clear)(this);
+     92            }
+     93            
+     94          /**
+     95            * @brief  It clocks the bus voltage reading, performes Vbus conversion 
+     96            *         and updates the average 
+     97            * @param  this related object of class CVBS
+     98            * @retval uint16_t Fault code error
+     99            */
+    100            uint16_t VBS_CalcAvVbus(CVBS this)
+    101            {
+    102              return((((_CVBS)this)->Methods_str.pVBS_CalcAvVbus)(this));
+    103            }
+    104            
+    105          /**
+    106            * @brief  It return latest Vbus conversion result expressed in u16Volt
+    107            * @param  this related object of class CVBS
+    108            * @retval uint16_t Latest Vbus conversion result in digit
+    109            */
+    110            uint16_t VBS_GetBusVoltage_d(CVBS this)
+    111            {
+    112              return(BCLASS_VARS.hLatestConv);
+    113            }
+    114          
+    115          #if defined (CCMRAM)
+    116          #if defined (__ICCARM__)
+    117          #pragma location = ".ccmram"
+    118          #elif defined (__CC_ARM)
+    119          __attribute__((section ("ccmram")))
+    120          #endif
+    121          #endif  
+    122          /**
+    123            * @brief  It return latest averaged Vbus measurement expressed in u16Volt
+    124            * @param  this related object of class CVBS
+    125            * @retval uint16_t Latest averaged Vbus measurement in digit
+    126            */
+    127            uint16_t VBS_GetAvBusVoltage_d(CVBS this)
+    128            {
+    129              return(BCLASS_VARS.hAvBusVoltage_d);
+    130            }
+    131            
+    132          /**
+    133            * @brief  It return latest averaged Vbus measurement expressed in Volts
+    134            * @param  this related object of class CVBS
+    135            * @retval uint16_t Latest averaged Vbus measurement in Volts
+    136            */
+    137            uint16_t VBS_GetAvBusVoltage_V(CVBS this)
+    138            {
+    139            uint32_t wTemp;
+    140            
+    141            wTemp = (uint32_t)(BCLASS_VARS.hAvBusVoltage_d);
+    142            wTemp *= BCLASS_PARAMS->hConversionFactor;
+    143            wTemp /= 65536u;
+    144            
+    145            return((uint16_t)wTemp);
+    146            }
+    147            
+    148          /**
+    149            * @brief  It returns MC_OVER_VOLT, MC_UNDER_VOLT or MC_NO_ERROR depending on
+    150            *         bus voltage and protection threshold values
+    151            * @param  this related object of class CVBS
+    152            * @retval uint16_t Fault code error
+    153            */
+    154            uint16_t VBS_CheckVbus(CVBS this)
+    155            {
+    156              return(BCLASS_VARS.hFaultState);
+    157            }
+    158            
+    159          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   VBS_CalcAvVbus
+         0   -- Indirect call
+       0   VBS_CheckVbus
+       0   VBS_Clear
+         0   -- Indirect call
+       0   VBS_GetAvBusVoltage_V
+       0   VBS_GetAvBusVoltage_d
+       0   VBS_GetBusVoltage_d
+       0   VBS_Init
+         0   -- Indirect call
+       0   VBS_NewObject
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      32  VBS_Allocated
+          VBSpool
+       4  VBS_CalcAvVbus
+       4  VBS_CheckVbus
+       4  VBS_Clear
+      12  VBS_GetAvBusVoltage_V
+       4  VBS_GetAvBusVoltage_d
+       4  VBS_GetBusVoltage_d
+       4  VBS_Init
+      22  VBS_NewObject
+
+ 
+ 32 bytes in section .bss
+ 62 bytes in section .text
+ 
+ 62 bytes of CODE memory
+ 32 bytes of DATA memory
+
+Errors: none
+Warnings: none

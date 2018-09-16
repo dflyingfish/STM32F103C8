@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Workspace>
+  <ConfigDictionary>
+    
+    
+    
+  <CurrentConfigs><Project>STM32F10x_MC Library/STM32F10x_DUAL_DRIVE</Project><Project>STM32F10x_UserProject/STM32F10x</Project></CurrentConfigs><CurrentProj>STM32F10x_UserProject</CurrentProj><OverviewSelected>1</OverviewSelected></ConfigDictionary>
+  <Desktop>
+    <Static>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>489</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
+      </Workspace>
+    <Build><ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1155</ColumnWidth1><ColumnWidth2>308</ColumnWidth2><ColumnWidth3>77</ColumnWidth3></Build><Find-in-Files><ColumnWidth0>1098</ColumnWidth0><ColumnWidth1>78</ColumnWidth1><ColumnWidth2>946</ColumnWidth2><ColumnWidth3>202</ColumnWidth3></Find-in-Files><TerminalIO/><Debug-Log><ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1221</ColumnWidth1></Debug-Log><Breakpoints><col-names><item>Breakpoint</item><item>_I0</item></col-names><col-widths><item>500</item><item>35</item></col-widths></Breakpoints></Static>
+    <Windows>
+      
+    <Wnd2>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-7594-3316</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>&lt;ws&gt;</ExpandedNode><ExpandedNode>&lt;ws&gt;/STM32F10x_MC Library</ExpandedNode><ExpandedNode>&lt;ws&gt;/STM32F10x_UserProject</ExpandedNode><ExpandedNode>&lt;ws&gt;/STM32F10x_UserProject/Motor control</ExpandedNode><ExpandedNode>&lt;ws&gt;/STM32F10x_UserProject/Motor control/MC Application</ExpandedNode><ExpandedNode>&lt;ws&gt;/STM32F10x_UserProject/Motor control/MC Application/private</ExpandedNode><ExpandedNode>STM32F10x_MC Library</ExpandedNode><ExpandedNode>STM32F10x_MC Library/Output</ExpandedNode><ExpandedNode>STM32F10x_UserProject</ExpandedNode><ExpandedNode>STM32F10x_UserProject/Motor control</ExpandedNode><ExpandedNode>STM32F10x_UserProject/Motor control/System &amp; Drive Params</ExpandedNode><ExpandedNode>STM32F10x_UserProject/Std project template</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd2><Wnd3><Tabs><Tab><Identity>TabID-7557-7747</Identity><TabName>Build</TabName><Factory>Build</Factory><Session/></Tab><Tab><Identity>TabID-16211-20354</Identity><TabName>Find in Files</TabName><Factory>Find-in-Files</Factory><Session/></Tab><Tab><Identity>TabID-4066-17963</Identity><TabName>Breakpoints</TabName><Factory>Breakpoints</Factory></Tab><Tab><Identity>TabID-26196-25103</Identity><TabName>Debug Log</TabName><Factory>Debug-Log</Factory><Session/></Tab></Tabs><SelectedTab>0</SelectedTab></Wnd3></Windows>
+    <Editor>
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\potentiometer_F1.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>66</YPos2><SelStart2>2436</SelStart2><SelEnd2>2436</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\main.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>62</YPos2><SelStart2>2082</SelStart2><SelEnd2>2082</SelEnd2></Tab><ActiveTab>1</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\inc\c\cmsis_iar.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>323</SelStart2><SelEnd2>323</SelEnd2></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-00CD6498><key>iaridepm.enu1</key></Toolbar-00CD6498></Sizes></Row0><Row1><Sizes/></Row1></Top><Left><Row0><Sizes><Wnd2><Rect><Top>-2</Top><Left>-2</Left><Bottom>410</Bottom><Right>580</Right><x>-2</x><y>-2</y><xscreen>192</xscreen><yscreen>119</yscreen><sizeHorzCX>150000</sizeHorzCX><sizeHorzCY>165738</sizeHorzCY><sizeVertCX>454688</sizeVertCX><sizeVertCY>573816</sizeVertCY></Rect></Wnd2></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd3><Rect><Top>-2</Top><Left>-2</Left><Bottom>263</Bottom><Right>1282</Right><x>-2</x><y>-2</y><xscreen>1284</xscreen><yscreen>265</yscreen><sizeHorzCX>1003125</sizeHorzCX><sizeHorzCY>369081</sizeHorzCY><sizeVertCX>134375</sizeVertCX><sizeVertCY>165738</sizeVertCY></Rect></Wnd3></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Workspace>
+
+

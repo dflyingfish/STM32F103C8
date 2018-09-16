@@ -1,0 +1,134 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:33
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\MCIRQHandlerClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\MCIRQHandlerClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\MCIRQHandlerClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\MCIRQHandlerClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\MCIRQHandlerClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    MCIRQClass.c.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of FOCDrive class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "MCIRQHandlerClass.h"
+     30          #include "MCIRQHandlerPrivate.h"
+     31          
+     32          /* Definition of MC IRQ Table */
+     33          #define MAX_MC_IRQ_NUM 4
+     34          _CMCIRQ MC_IRQTable[MAX_MC_IRQ_NUM];
+     35          
+     36          /**
+     37            * @brief  Insert the object oIRQ into the MC vector table
+     38            * @param  oIRQ MCIRQ object to be added to the MC vector list
+     39            * @param  bIRQAddr MC vector table position 
+     40            * @retval None
+     41            */
+     42          void Set_IRQ_Handler(unsigned char bIRQAddr, _CMCIRQ oIRQ)
+     43          {
+     44            MC_IRQTable[bIRQAddr] = oIRQ;
+     45          }
+     46          
+     47          /**
+     48            * @brief Start the execution of the MC_IRQ at bIRQAddr position inside MC 
+     49            *        vector table
+     50            * @param bIRQAddr MC IRQ position inside MC vector table
+     51            * @param flag parameter passed to the MC interrupt, for instance to identify 
+     52            *             the event request the MC ISR execution
+     53            * @retval pvoid pointer to Drive object related to the interrupt
+     54            */
+     55          void* Exec_IRQ_Handler(unsigned char bIRQAddr, unsigned char flag)
+     56          {  
+     57            return(MC_IRQTable[bIRQAddr]->pIRQ_Handler((void*)(MC_IRQTable)[bIRQAddr],flag));
+     58          }
+     59          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+     60          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   Exec_IRQ_Handler
+         0   -- Indirect call
+       0   Set_IRQ_Handler
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+      10  Exec_IRQ_Handler
+      16  MC_IRQTable
+       8  Set_IRQ_Handler
+
+ 
+ 16 bytes in section .bss
+ 22 bytes in section .text
+ 
+ 22 bytes of CODE memory
+ 16 bytes of DATA memory
+
+Errors: none
+Warnings: none

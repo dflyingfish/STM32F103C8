@@ -1,0 +1,632 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:41
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\VirtualSpeedSensor_SpeednPosFdbkClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\VirtualSpeedSensor_SpeednPosFdbkClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4
+#        -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC
+#        Library Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj"
+#        --debug --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp
+#        --dlib_config "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\VirtualSpeedSensor_SpeednPosFdbkClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\VirtualSpeedSensor_SpeednPosFdbkClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\VirtualSpeedSensor_SpeednPosFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    VirtualSpeedSensor_SpeednPosFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of VirtualSpeedSensor class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "SpeednPosFdbkClass.h"
+     30          #include "SpeednPosFdbkPrivate.h"
+     31          #include "VirtualSpeedSensor_SpeednPosFdbkClass.h"
+     32          #include "VirtualSpeedSensor_SpeednPosFdbkPrivate.h"
+     33          #include "MCLibraryConf.h"
+     34          #include "MC_type.h"
+     35          #ifdef STM32F0XX
+     36          #include "FastDivClass.h"
+     37          #endif
+     38          
+     39          /* Private Defines -----------------------------------------------------------*/
+     40          #define DCLASS_PARAM ((_DCVSS_SPD)(((_CSPD) this)->DerivedClass))->pDParams_str
+     41          #define DCLASS_VARS  &(((_DCVSS_SPD)(((_CSPD) this)->DerivedClass))->DVars_str)
+     42          #define  CLASS_VARS  &(((_CSPD)this)->Vars_str)
+     43          #define  CLASS_PARAM (((_CSPD)this)->pParams_str)
+     44          
+     45          #ifdef MC_CLASS_DYNAMIC
+     46          	#include "stdlib.h" /* Used for dynamic allocation */
+     47          #else
+     48          	_DCVSS_SPD_t VSS_SPDpool[MAX_VSS_SPD_NUM];
+     49          	unsigned char VSS_SPD_Allocated = 0u;
+     50          #endif
+     51          
+     52          static void VSS_Init(CSPD this);
+     53          static void VSS_Clear(CSPD this);
+     54          static int16_t VSS_CalcElAngle(CSPD this, void *pInputVars_str);
+     55          static bool VSS_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *hMecSpeed01Hz);
+     56          static void VSS_SetMecAngle(CSPD this, int16_t hMecAngle);
+     57          
+     58          /**
+     59            * @brief  Creates an object of the class VirtualSpeedSensor
+     60            * @param  pSpeednPosFdbkParams pointer to an SpeednPosFdbk parameters structure
+     61            * @param  pVirtualSpeedSensorParams pointer to an VirtualSpeedSensor parameters structure
+     62            * @retval CVSS_SPD new instance of VirtualSpeedSensor object
+     63            */
+     64          CVSS_SPD VSS_NewObject(pSpeednPosFdbkParams_t pSpeednPosFdbkParams, pVirtualSpeedSensorParams_t pVirtualSpeedSensorParams)
+     65          {
+     66          	_CSPD _oSpeednPosFdbk;
+     67          	_DCVSS_SPD _oVirtualSpeedSensor;
+     68          
+     69          	_oSpeednPosFdbk = (_CSPD)SPD_NewObject(pSpeednPosFdbkParams);
+     70          
+     71          	#ifdef MC_CLASS_DYNAMIC
+     72          		_oVirtualSpeedSensor = (_DCVSS_SPD)calloc(1u,sizeof(_DCVSS_SPD_t));
+     73          	#else
+     74          		if (VSS_SPD_Allocated  < MAX_VSS_SPD_NUM)
+     75          		{
+     76          			_oVirtualSpeedSensor = &VSS_SPDpool[VSS_SPD_Allocated++];
+     77          		}
+     78          		else
+     79          		{
+     80          			_oVirtualSpeedSensor = MC_NULL;
+     81          		}
+     82          	#endif
+     83            
+     84          	_oVirtualSpeedSensor->pDParams_str = pVirtualSpeedSensorParams;
+     85          	_oSpeednPosFdbk->DerivedClass = (void*)_oVirtualSpeedSensor;
+     86            
+     87            _oSpeednPosFdbk->Methods_str.pSPD_Init = &VSS_Init;
+     88            _oSpeednPosFdbk->Methods_str.pSPD_Clear = &VSS_Clear;
+     89            _oSpeednPosFdbk->Methods_str.pSPD_CalcAngle = &VSS_CalcElAngle;
+     90            _oSpeednPosFdbk->Methods_str.pSPD_CalcAvrgMecSpeed01Hz = 
+     91              &VSS_CalcAvrgMecSpeed01Hz;
+     92            _oSpeednPosFdbk->Methods_str.pSPD_SetMecAngle = &VSS_SetMecAngle;
+     93          
+     94          	return ((CVSS_SPD)_oSpeednPosFdbk);
+     95          }
+     96          
+     97          /** @addtogroup STM32F10x_PMSM_MC_Library
+     98            * @{
+     99            */
+    100            
+    101          /** @addtogroup SpeednPosFdbk_VirtualSpeedSensor
+    102            * @{
+    103            */
+    104          
+    105          /** @defgroup VirtualSpeedSensor_class_private_methods VirtualSpeedSensor class private methods
+    106          * @{
+    107          */
+    108          
+    109          /**
+    110            * @brief  Software initialization of VSS object.
+    111            * @param  this related object of class CSPD
+    112            * @param  InputVars_str not used by VSS.
+    113            * @retval none
+    114            */
+    115          static void VSS_Init(CSPD this)
+    116          {
+    117          #ifdef STM32F0XX
+    118            pDVars_t pDVars_str = DCLASS_VARS;
+    119            pDVars_str->fd = FD_NewObject();
+    120          #endif
+    121            
+    122            VSS_Clear(this);
+    123          }
+    124          
+    125          /**
+    126          * @brief  Software initializzation of VSS object to be performed at each restart
+    127          *         of the motor.
+    128          * @param  this related object of class CSPD
+    129          * @retval none
+    130          */
+    131          static void VSS_Clear(CSPD this)
+    132          {
+    133            pDVars_t pDVars_str = DCLASS_VARS;
+    134            pVars_t pVars_str = CLASS_VARS;
+    135            
+    136            pVars_str->hElAngle = 0;
+    137            pVars_str->hMecAngle = 0;
+    138            pVars_str->hAvrMecSpeed01Hz = 0;
+    139            pVars_str->hElSpeedDpp = 0;
+    140            pVars_str->hMecAccel01HzP = 0;
+    141            pVars_str->bSpeedErrorNumber = 0u;
+    142            
+    143            pDVars_str->wElAccDppP32 = 0;
+    144            pDVars_str->wElSpeedDpp32 = 0;
+    145            pDVars_str->hRemainingStep = 0u;
+    146            pDVars_str->hElAngleAccu = 0;
+    147            
+    148            pDVars_str->bTransitionStarted = FALSE;
+    149            pDVars_str->bTransitionEnded = FALSE;
+    150            pDVars_str->hTransitionRemainingSteps = DCLASS_PARAM->hTransitionSteps;
+    151            pDVars_str->bTransitionLocked = FALSE;
+    152            
+    153            pDVars_str->bCopyObserver = FALSE;
+    154            
+    155          #ifdef STM32F0XX
+    156            /* (Fast division optimization for cortex-M0 micros)*/
+    157            /* Dummy division to speed up next executions */
+    158            FD_FastDiv(pDVars_str->fd, 1 , (int32_t)(pVars_str->bElToMecRatio));
+    159            FD_FastDiv(pDVars_str->fd, 1 , (int32_t)(DCLASS_PARAM->hTransitionSteps));
+    160          #endif
+    161            
+    162          }
+    163          
+    164          #if defined (CCMRAM)
+    165          #if defined (__ICCARM__)
+    166          #pragma location = ".ccmram"
+    167          #elif defined (__CC_ARM)
+    168          __attribute__((section ("ccmram")))
+    169          #endif
+    170          #endif
+    171          /**
+    172          * @brief  Update the rotor electrical angle integrating the last setled 
+    173          *         instantaneous electrical speed express in dpp.
+    174          * @param  this related object of class CSPD.
+    175          * @retval int16_t Measured electrical angle in s16degree format.
+    176          */
+    177          static int16_t VSS_CalcElAngle(CSPD this, void *pInputVars_str)
+    178          {
+    179            pVars_t pVars_str = CLASS_VARS;
+    180            pDVars_t pDVars_str = DCLASS_VARS;  
+    181            int16_t hRetAngle;
+    182            int16_t hAngleDiff;
+    183            int16_t hAngleCorr;
+    184            int32_t wAux;
+    185            int16_t hSignCorr = 1;
+    186            
+    187            if (pDVars_str->bCopyObserver == TRUE)
+    188            {
+    189              hRetAngle = *(int16_t*)pInputVars_str;
+    190            }
+    191            else
+    192            {
+    193              pDVars_str->hElAngleAccu += pVars_str->hElSpeedDpp;
+    194              
+    195          #ifdef STM32F0XX
+    196              pVars_str->hMecAngle += (int16_t)(FD_FastDiv(pDVars_str->fd,
+    197                (int32_t)pVars_str->hElSpeedDpp, 
+    198                (int32_t)pVars_str->bElToMecRatio));
+    199          #else
+    200              pVars_str->hMecAngle += pVars_str->hElSpeedDpp / 
+    201                (int16_t)pVars_str->bElToMecRatio;
+    202          #endif
+    203              
+    204              if (pDVars_str->bTransitionStarted == TRUE)
+    205              {    
+    206                if (pDVars_str->hTransitionRemainingSteps == 0)
+    207                {
+    208                  hRetAngle = *(int16_t*)pInputVars_str;
+    209                  pDVars_str->bTransitionEnded = TRUE;
+    210                  pVars_str->bSpeedErrorNumber = 0u;
+    211                }
+    212                else
+    213                {
+    214                  pDVars_str->hTransitionRemainingSteps--;
+    215                  
+    216                  if (pVars_str->hElSpeedDpp >= 0)
+    217                  {
+    218                    hAngleDiff = *(int16_t*)pInputVars_str - pDVars_str->hElAngleAccu;
+    219                  }
+    220                  else
+    221                  {
+    222                    hAngleDiff = pDVars_str->hElAngleAccu - *(int16_t*)pInputVars_str;
+    223                    hSignCorr = -1;
+    224                  }        
+    225                  
+    226                  wAux = (int32_t)hAngleDiff * pDVars_str->hTransitionRemainingSteps;
+    227                  
+    228          #ifdef STM32F0XX
+    229                  hAngleCorr = (int16_t)(FD_FastDiv(pDVars_str->fd,
+    230                                         wAux,
+    231                                         (int32_t)(DCLASS_PARAM->hTransitionSteps)));
+    232          #else
+    233                  hAngleCorr = (int16_t)(wAux/DCLASS_PARAM->hTransitionSteps);
+    234          #endif
+    235                  
+    236                  hAngleCorr *= hSignCorr;
+    237                  
+    238                  if (hAngleDiff >= 0)
+    239                  {
+    240                    pDVars_str->bTransitionLocked = TRUE;
+    241                    hRetAngle = *(int16_t*)pInputVars_str - hAngleCorr;
+    242                  }
+    243                  else
+    244                  {
+    245                    if (pDVars_str->bTransitionLocked == FALSE)
+    246                    {
+    247                      hRetAngle = pDVars_str->hElAngleAccu;
+    248                    }
+    249                    else
+    250                    {          
+    251                      hRetAngle = *(int16_t*)pInputVars_str + hAngleCorr;
+    252                    }
+    253                  }
+    254                }
+    255              }
+    256              else
+    257              {
+    258                hRetAngle = pDVars_str->hElAngleAccu;
+    259              }
+    260            }
+    261          
+    262            pVars_str->hElAngle = hRetAngle;
+    263            return hRetAngle;
+    264          }
+    265          
+    266          /**
+    267            * @brief  This method must be called with the same periodicity
+    268            *         on which speed control is executed.
+    269            *         This method compute and store rotor istantaneous el speed (express 
+    270            *         in dpp considering the measurement frequency) in order to provide it
+    271            *         to SPD_CalcElAngle function and SPD_GetElAngle. 
+    272            *         Then compute store and return - through parameter 
+    273            *         hMecSpeed01Hz - the rotor average mech speed, expressed in 01Hz.
+    274            *         Then return the reliability state of the sensor (allways TRUE).
+    275            * @param  this related object of class CSPD
+    276            * @param  hMecSpeed01Hz pointer to int16_t, used to return the rotor average
+    277            *         mechanical speed (01Hz)
+    278            * @retval TRUE = sensor information is reliable
+    279            *         FALSE = sensor information is not reliable
+    280            */
+    281          static bool VSS_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *hMecSpeed01Hz)
+    282          {
+    283            pDVars_t pDVars_str = DCLASS_VARS;
+    284            pVars_t pVars_str = CLASS_VARS;
+    285            pParams_t pParams_str = CLASS_PARAM;
+    286            
+    287            if (pDVars_str->hRemainingStep > 1u)
+    288            {
+    289              pDVars_str->wElSpeedDpp32 += pDVars_str->wElAccDppP32;
+    290              pVars_str->hElSpeedDpp = (int16_t)(pDVars_str->wElSpeedDpp32 / 65536);
+    291            
+    292              /* Converto el_dpp to Mec01Hz */
+    293              *hMecSpeed01Hz = (int16_t)((pVars_str->hElSpeedDpp * 
+    294                                 (int32_t)pParams_str->hMeasurementFrequency * 10)/
+    295                                (65536 * (int32_t)pVars_str->bElToMecRatio));
+    296              
+    297              pVars_str->hAvrMecSpeed01Hz = *hMecSpeed01Hz;
+    298              
+    299              pDVars_str->hRemainingStep--;
+    300            }
+    301            else if (pDVars_str->hRemainingStep == 1u)
+    302            {
+    303              *hMecSpeed01Hz = pDVars_str->hFinalMecSpeed01Hz;
+    304              
+    305              pVars_str->hAvrMecSpeed01Hz = *hMecSpeed01Hz;
+    306              
+    307              pVars_str->hElSpeedDpp = (int16_t)(((int32_t)(*hMecSpeed01Hz) * 
+    308                             (int32_t)65536)/
+    309                             ((int32_t)10 * (int32_t)pParams_str->hMeasurementFrequency)); 
+    310              
+    311              pVars_str->hElSpeedDpp *= (int16_t)(pVars_str->bElToMecRatio);
+    312              
+    313              pDVars_str->hRemainingStep = 0u;
+    314            }
+    315            else
+    316            {
+    317              *hMecSpeed01Hz = pVars_str->hAvrMecSpeed01Hz;
+    318            }
+    319              
+    320            return (pDVars_str->bTransitionEnded);
+    321          }
+    322          
+    323          /**
+    324            * @brief  It is used to set istantaneous information on VSS mechanical and
+    325            *         electrical angle.
+    326            * @param  this related object of class CSPD
+    327            * @param  hMecAngle istantaneous measure of rotor mechanical angle
+    328            * @retval none
+    329            */
+    330          static void VSS_SetMecAngle(CSPD this, int16_t hMecAngle)
+    331          {
+    332            pVars_t pVars_str = CLASS_VARS;
+    333            pDVars_t pDVars_str = DCLASS_VARS;
+    334            
+    335            pDVars_str->hElAngleAccu = hMecAngle;
+    336            pVars_str->hMecAngle = pDVars_str->hElAngleAccu/(int16_t)pVars_str->bElToMecRatio;
+    337            pVars_str->hElAngle = hMecAngle;
+    338          }
+    339          
+    340          /**
+    341            * @brief  Set the mechanical acceleration of virtual sensor. This acceleration
+    342                      is defined starting from current mechanical speed, final mechanical
+    343                      speed expressed in 0.1Hz and duration expressed in milliseconds.
+    344            * @param  this related object of class CSPD.
+    345            * @param  hFinalMecSpeed01Hz mechanical speed expressed in 0.1Hz assumed by 
+    346                      the virtual sensor at the end of the duration.
+    347            * @param  hDurationms Duration expressed in ms. It can be 0 to apply 
+    348                      instantaneous the final speed. 
+    349            * @retval none
+    350            */
+    351          void  VSPD_SetMecAcceleration(CSPD this, int16_t  hFinalMecSpeed01Hz, 
+    352                                        uint16_t hDurationms)
+    353          {
+    354            pDVars_t pDVars_str = DCLASS_VARS;
+    355            pDParams_t pDParams_str = DCLASS_PARAM;
+    356            pVars_t pVars_str = CLASS_VARS;
+    357            pParams_t pParams_str = CLASS_PARAM;
+    358            
+    359            uint16_t hNbrStep;
+    360            int16_t hCurrentMecSpeedDpp;
+    361            int32_t wMecAccDppP32;
+    362            int16_t hFinalMecSpeedDpp;
+    363            
+    364            if (pDVars_str->bTransitionStarted == FALSE)
+    365            {    
+    366              if (hDurationms == 0u)
+    367              {      
+    368                pVars_str->hAvrMecSpeed01Hz = hFinalMecSpeed01Hz;
+    369                
+    370                pVars_str->hElSpeedDpp = (int16_t)(((int32_t)(hFinalMecSpeed01Hz) * 
+    371                                                    (int32_t)65536)/
+    372                                                   ((int32_t)10 * (int32_t)pParams_str->hMeasurementFrequency)); 
+    373                
+    374                pVars_str->hElSpeedDpp *= (int16_t)(pVars_str->bElToMecRatio);
+    375                
+    376                pDVars_str->hRemainingStep = 0u;
+    377                
+    378                pDVars_str->hFinalMecSpeed01Hz = hFinalMecSpeed01Hz;
+    379              }
+    380              else
+    381              {
+    382                hNbrStep = (uint16_t)(((uint32_t)hDurationms * 
+    383                                       (uint32_t)pDParams_str->hSpeedSamplingFreqHz) / 
+    384                                      1000u);
+    385                
+    386                hNbrStep++;
+    387                
+    388                pDVars_str->hRemainingStep = hNbrStep;
+    389                
+    390                hCurrentMecSpeedDpp = pVars_str->hElSpeedDpp / 
+    391                  (int16_t)pVars_str->bElToMecRatio;
+    392                
+    393                hFinalMecSpeedDpp = (int16_t)(((int32_t)hFinalMecSpeed01Hz * (int32_t)65536)/
+    394                                              ((int32_t)10 * (int32_t)pParams_str->hMeasurementFrequency)); 
+    395                
+    396                wMecAccDppP32 = (((int32_t)hFinalMecSpeedDpp - (int32_t)hCurrentMecSpeedDpp) * 
+    397                                 (int32_t)65536) /
+    398                  (int32_t)hNbrStep;
+    399                
+    400                pDVars_str->wElAccDppP32 = wMecAccDppP32 * (int16_t)pVars_str->bElToMecRatio;
+    401                
+    402                pDVars_str->hFinalMecSpeed01Hz = hFinalMecSpeed01Hz;
+    403                
+    404                pDVars_str->wElSpeedDpp32 = (int32_t)pVars_str->hElSpeedDpp * (int32_t)65536;
+    405              }
+    406            }
+    407          }
+    408          
+    409          /**
+    410            * @brief  Checks if the ramp executed after a VSPD_SetMecAcceleration command
+    411            *         has been completed.
+    412            * @param  this related object of class CSPD.
+    413            * @retval bool TRUE if the ramp is completed, otherwise FALSE.
+    414            */
+    415          bool VSPD_RampCompleted(CSPD this)
+    416          {
+    417            pDVars_t pDVars_str = DCLASS_VARS;
+    418            bool retVal = FALSE;
+    419            if (pDVars_str->hRemainingStep == 0u)
+    420            {
+    421              retVal = TRUE;
+    422            }
+    423            return retVal;
+    424          }
+    425          
+    426          /**
+    427            * @brief  Get the final speed of last setled ramp of virtual sensor expressed 
+    428                      in 0.1Hz.
+    429            * @param  this related object of class CSTC.
+    430            * @param  hFinalMecSpeed01Hz mechanical speed expressed in 0.1Hz assumed by 
+    431                      the virtual sensor at the end of the duration.
+    432            * @param  hDurationms Duration expressed in ms. It can be 0 to apply 
+    433                      instantaneous the final speed. 
+    434            * @retval none
+    435            */
+    436          int16_t  VSPD_GetLastRampFinalSpeed(CSPD this)
+    437          {
+    438            pDVars_t pDVars_str = DCLASS_VARS;
+    439            return pDVars_str->hFinalMecSpeed01Hz;
+    440          }
+    441          
+    442          /**
+    443            * @brief  Set the command to Start the transition phase from CVSS_SPD to other CSPD.
+    444                      Transition is to be considered ended when Sensor information is
+    445                      declared 'Reliable' or if function returned value is FALSE
+    446            * @param  this related object of class CSPD.
+    447            * @param  bool TRUE to Start the transition phase, FALSE has no effect
+    448            * @retval bool TRUE if Transition phase is enabled (started or not), FALSE if
+    449                      transition has been triggered but it's actually disabled
+    450                      (parameter hTransitionSteps = 0)
+    451            */
+    452          bool VSPD_SetStartTransition(CSPD this, bool bCommand)
+    453          {
+    454            bool bAux = TRUE;
+    455            if (bCommand == TRUE)
+    456            {
+    457              (DCLASS_VARS)->bTransitionStarted = TRUE;
+    458              
+    459              if (DCLASS_PARAM->hTransitionSteps == 0)
+    460              {
+    461                (DCLASS_VARS)->bTransitionEnded = TRUE;
+    462                (CLASS_VARS)->bSpeedErrorNumber = 0u;
+    463                bAux = FALSE;
+    464              }
+    465            }
+    466            return bAux;
+    467          }
+    468          
+    469          /**
+    470            * @brief  Return the status of the transition phase.
+    471            * @param  this related object of class CSPD.
+    472            * @retval bool TRUE if Transition phase is ongoing, FALSE otherwise.
+    473            */
+    474          bool VSPD_IsTransitionOngoing(CSPD this)
+    475          {
+    476            uint16_t hTS = 0u, hTE = 0u, hAux;
+    477            bool retVal = FALSE;
+    478            if ((DCLASS_VARS)->bTransitionStarted == TRUE)
+    479            {
+    480              hTS = 1u;
+    481            }
+    482            if ((DCLASS_VARS)->bTransitionEnded == TRUE)
+    483            {
+    484              hTE = 1u;
+    485            }
+    486            hAux = hTS ^ hTE;
+    487            if (hAux != 0u)
+    488            {
+    489              retVal = TRUE;
+    490            }
+    491            return (retVal);
+    492          }
+    493          
+    494          /**
+    495            * @brief  It could be used to set istantaneous information on rotor electrical
+    496            *         angle copied by state observer;
+    497            * @param  this related object of class CSPD
+    498            * @retval none
+    499            */
+    500          void VSPD_SetCopyObserver(CSPD this)
+    501          { 
+    502              (DCLASS_VARS)->bCopyObserver = TRUE;
+    503          }
+    504          
+    505          /**
+    506            * @brief  It could be used to set istantaneous information on rotor electrical
+    507            *         angle.
+    508            * @param  this related object of class CSPD
+    509            * @param  hElAngle istantaneous measure of rotor electrical angle (s16degrees)
+    510            * @retval none
+    511            */
+    512          void VSPD_SetElAngle(CSPD this, int16_t hElAngle)
+    513          {  
+    514            pVars_t pVars_str = CLASS_VARS;
+    515            pDVars_t pDVars_str = DCLASS_VARS; 
+    516            
+    517            pVars_str->hElAngle = hElAngle;
+    518            pDVars_str->hElAngleAccu = hElAngle;
+    519          }
+    520          
+    521          /**
+    522            * @}
+    523            */
+    524            
+    525          /**
+    526            * @}
+    527            */
+    528          
+    529          /**
+    530            * @}
+    531            */
+    532          
+    533          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   VSPD_GetLastRampFinalSpeed
+       0   VSPD_IsTransitionOngoing
+       0   VSPD_RampCompleted
+       0   VSPD_SetCopyObserver
+       0   VSPD_SetElAngle
+      16   VSPD_SetMecAcceleration
+       0   VSPD_SetStartTransition
+       8   VSS_CalcAvrgMecSpeed01Hz
+      16   VSS_CalcElAngle
+       0   VSS_Clear
+       0   VSS_Init
+         0   -> VSS_Clear
+       8   VSS_NewObject
+         8   -> SPD_NewObject
+       0   VSS_SetMecAngle
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       8  VSPD_GetLastRampFinalSpeed
+      40  VSPD_IsTransitionOngoing
+      14  VSPD_RampCompleted
+       8  VSPD_SetCopyObserver
+       8  VSPD_SetElAngle
+     122  VSPD_SetMecAcceleration
+      34  VSPD_SetStartTransition
+     120  VSS_CalcAvrgMecSpeed01Hz
+     162  VSS_CalcElAngle
+      46  VSS_Clear
+       4  VSS_Init
+      60  VSS_NewObject
+      28  VSS_SPD_Allocated
+          VSS_SPDpool
+      20  VSS_SetMecAngle
+
+ 
+  28 bytes in section .bss
+ 654 bytes in section .text
+ 
+ 654 bytes of CODE memory
+  28 bytes of DATA memory
+
+Errors: none
+Warnings: none

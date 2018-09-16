@@ -1,0 +1,565 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:32
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PWMnCurrFdbkClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\PWMnCurrFdbkClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\PWMnCurrFdbkClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\PWMnCurrFdbkClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\PWMnCurrFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    PWMnCurrFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of PI Regulator class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "PWMnCurrFdbkClass.h"
+     30          #include "PWMnCurrFdbkPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35          #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37          _CPWMC_t PWMCpool[MAX_PWMC_NUM];
+     38          unsigned char PWMC_Allocated = 0u;
+     39          #endif
+     40          
+     41          #define CLASS_VARS   &((_CPWMC)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_CPWMC)this)->pParams_str
+     43          #define CLASS_METHODS ((_CPWMC)this)->Methods_str
+     44          
+     45          #define SQRT3FACTOR (uint16_t) 0xDDB4 /* = (16384 * 1.732051 * 2)*/
+     46          
+     47          /**
+     48          * @brief  Creates an object of the class PWMnCurrFdbk
+     49          * @param  pPWMnCurrFdbkParams pointer to an PWMnCurrFdbk parameters structure
+     50          * @retval CPWMC new instance of PWMnCurrFdbk object
+     51          */
+     52          CPWMC PWMC_NewObject(pPWMnCurrFdbkParams_t pPWMnCurrFdbkParams)
+     53          {
+     54            _CPWMC _oPWMC;
+     55            
+     56          #ifdef MC_CLASS_DYNAMIC
+     57            _oPWMC = (_CPWMC)calloc(1u,sizeof(_CPWMC_t));
+     58          #else
+     59            if (PWMC_Allocated  < MAX_PWMC_NUM)
+     60            {
+     61              _oPWMC = &PWMCpool[PWMC_Allocated++];
+     62            }
+     63            else
+     64            {
+     65              _oPWMC = MC_NULL;
+     66            }
+     67          #endif
+     68            
+     69            _oPWMC->pParams_str = (pParams_t)pPWMnCurrFdbkParams;
+     70            
+     71            _oPWMC->Methods_str.pPWMC_OCPSetReferenceVoltage = MC_NULL;
+     72            
+     73            return ((CPWMC)_oPWMC);
+     74          }
+     75          
+     76          /**
+     77            * @brief  Initiliaze all the object variables and MCU peripherals, usually 
+     78            *         it has to be called once right after object creation.
+     79            *         Note: All the GPIOx port peripherals clocks are here enabled.
+     80            *         Note: If the derived class is IHD2, R1HD2 or R3HD2 it is required
+     81            *               to call the specific xxx_StartTimers method after the
+     82            *               PWMC_Init call.
+     83            * @param  this PWM 'n Current feedback object
+     84            * @retval none
+     85            */
+     86          void PWMC_Init(CPWMC this)
+     87          {
+     88            pVars_t pVars = CLASS_VARS;
+     89            pParams_t pParams = CLASS_PARAMS;
+     90            pVars->hT_Sqrt3= (pParams->hPWMperiod*SQRT3FACTOR)/16384u; 
+     91            pVars->bTurnOnLowSidesAction = FALSE;
+     92            (CLASS_METHODS.pPWMC_Init)(this);
+     93            
+     94            pVars->DTTest = 0u;
+     95            pVars->DTCompCnt = pParams->hDTCompCnt;
+     96          }
+     97          
+     98          #if defined (CCMRAM)
+     99          #if defined (__ICCARM__)
+    100          #pragma location = ".ccmram"
+    101          #elif defined (__CC_ARM)
+    102          __attribute__((section ("ccmram")))
+    103          #endif
+    104          #endif
+    105          /**
+    106          * @brief  It is used to get the motor phase current in Curr_Components format 
+    107                    as read by AD converter.
+    108          * @param  this: PWM 'n Current feedback object
+    109          * @param  pStator_Currents Pointer to the struct that will receive motor current
+    110          *         of phase A and B in Curr_Components format.
+    111          * @retval none.
+    112          */
+    113          void PWMC_GetPhaseCurrents(CPWMC this,Curr_Components* pStator_Currents)
+    114          {
+    115            int16_t hIa, hIb;
+    116            pVars_t pVars = CLASS_VARS;
+    117            (CLASS_METHODS.pPWMC_GetPhaseCurrents)(this, pStator_Currents);
+    118            hIa = pStator_Currents->qI_Component1;
+    119            hIb = pStator_Currents->qI_Component2;
+    120            pVars->hIa = hIa;
+    121            pVars->hIb = hIb;
+    122            pVars->hIc = -hIa - hIb;
+    123          }
+    124          
+    125          #if defined (CCMRAM)
+    126          #if defined (__ICCARM__)
+    127          #pragma location = ".ccmram"
+    128          #elif defined (__CC_ARM)
+    129          __attribute__((section ("ccmram")))
+    130          #endif
+    131          #endif  
+    132          /**
+    133            * @brief  It converts input voltage components Valfa, beta into duty cycles 
+    134            *         and feed it to the inverter
+    135            * @param  this: PWM 'n Current feedback object
+    136            * @param  Valfa_beta: Voltage Components in alfa beta reference frame
+    137            * @retval It returns the code error 'MC_FOC_DURATION' if any, 'MC_NO_ERROR' 
+    138            *         otherwise. These error codes are defined in MC_type.h
+    139            */
+    140          uint16_t PWMC_SetPhaseVoltage(CPWMC this, Volt_Components Valfa_beta)
+    141          {
+    142            pVars_t pVars = CLASS_VARS;
+    143            int32_t wX, wY, wZ, wUAlpha, wUBeta, wTimePhA, wTimePhB, wTimePhC;
+    144            uint16_t (*pSetADCSamplingPoint)(CPWMC Localthis);
+    145              
+    146            wUAlpha = Valfa_beta.qV_Component1 * (int32_t)pVars->hT_Sqrt3;
+    147            wUBeta = -(Valfa_beta.qV_Component2 * 
+    148                       (int32_t)(CLASS_PARAMS->hPWMperiod))*2;
+    149           
+    150            wX = wUBeta;
+    151            wY = (wUBeta + wUAlpha)/2;
+    152            wZ = (wUBeta - wUAlpha)/2;
+    153            
+    154            /* Sector calculation from wX, wY, wZ */
+    155            if (wY<0)
+    156            {
+    157              if (wZ<0)
+    158              {
+    159                pVars->hSector = SECTOR_5;
+    160                wTimePhA = (int32_t)(CLASS_PARAMS->hPWMperiod)/4 + ((wY - wZ)/(int32_t)262144);  
+    161                wTimePhB = wTimePhA + wZ/131072;
+    162                wTimePhC = wTimePhA - wY/131072;
+    163                pSetADCSamplingPoint = CLASS_METHODS.pPWMC_SetADCSampPointSect5;    
+    164              }
+    165              else /* wZ >= 0 */
+    166                if (wX<=0)
+    167                {
+    168                  pVars->hSector = SECTOR_4;
+    169                  wTimePhA = (int32_t)(CLASS_PARAMS->hPWMperiod)/4 + ((wX - wZ)/(int32_t)262144);       
+    170                  wTimePhB = wTimePhA + wZ/131072;
+    171                  wTimePhC = wTimePhB - wX/131072;
+    172                  pSetADCSamplingPoint = CLASS_METHODS.pPWMC_SetADCSampPointSect4;      
+    173                  
+    174                }
+    175                else /* wX > 0 */
+    176                {
+    177                  pVars->hSector = SECTOR_3;
+    178                  wTimePhA = (int32_t)(CLASS_PARAMS->hPWMperiod)/4 + ((wY - wX)/(int32_t)262144);  
+    179                  wTimePhC = wTimePhA - wY/131072;
+    180                  wTimePhB = wTimePhC + wX/131072;
+    181                  pSetADCSamplingPoint = CLASS_METHODS.pPWMC_SetADCSampPointSect3;            
+    182                  
+    183                }
+    184            }
+    185            else /* wY > 0 */
+    186            {
+    187              if (wZ>=0)
+    188              {
+    189                pVars->hSector = SECTOR_2;
+    190                wTimePhA = (int32_t)(CLASS_PARAMS->hPWMperiod)/4 + ((wY - wZ)/(int32_t)262144);            
+    191                wTimePhB = wTimePhA + wZ/131072;
+    192                wTimePhC = wTimePhA - wY/131072;             
+    193                pSetADCSamplingPoint = CLASS_METHODS.pPWMC_SetADCSampPointSect2;    
+    194              }
+    195              else /* wZ < 0 */
+    196                if (wX<=0)
+    197                {  
+    198                  pVars->hSector = SECTOR_6;
+    199                  wTimePhA = (int32_t)(CLASS_PARAMS->hPWMperiod)/4 + ((wY - wX)/(int32_t)262144);  
+    200                  wTimePhC = wTimePhA - wY/131072;
+    201                  wTimePhB = wTimePhC + wX/131072;
+    202                  pSetADCSamplingPoint = CLASS_METHODS.pPWMC_SetADCSampPointSect6;            
+    203                }
+    204                else /* wX > 0 */
+    205                {
+    206                  pVars->hSector = SECTOR_1;
+    207                  wTimePhA = (int32_t)(CLASS_PARAMS->hPWMperiod)/4 + ((wX - wZ)/(int32_t)262144);       
+    208                  wTimePhB = wTimePhA + wZ/131072;
+    209                  wTimePhC = wTimePhB - wX/131072;
+    210                  pSetADCSamplingPoint = CLASS_METHODS.pPWMC_SetADCSampPointSect1;
+    211                  
+    212                }
+    213            }
+    214            
+    215            pVars->hCntPhA = (uint16_t)wTimePhA;
+    216            pVars->hCntPhB = (uint16_t)wTimePhB;
+    217            pVars->hCntPhC = (uint16_t)wTimePhC;
+    218            
+    219            if (pVars->DTTest == 1u)
+    220            {
+    221            /* Dead time compensation */
+    222            if (pVars->hIa > 0)
+    223            {
+    224              pVars->hCntPhA += pVars->DTCompCnt;
+    225            }
+    226            else
+    227            {
+    228              pVars->hCntPhA -= pVars->DTCompCnt;
+    229            }
+    230            
+    231            if (pVars->hIb > 0)
+    232            {
+    233              pVars->hCntPhB += pVars->DTCompCnt;
+    234            }
+    235            else
+    236            {
+    237              pVars->hCntPhB -= pVars->DTCompCnt;
+    238            }
+    239            
+    240            if (pVars->hIc > 0)
+    241            {
+    242              pVars->hCntPhC += pVars->DTCompCnt;
+    243            }
+    244            else
+    245            {
+    246              pVars->hCntPhC -= pVars->DTCompCnt;
+    247            }
+    248            }
+    249            
+    250            return(pSetADCSamplingPoint(this));
+    251          }
+    252          
+    253          /**
+    254          * @brief  It switch off the PWM generation, setting to inactive the outputs
+    255          * @param  this: PWM 'n Current feedback object
+    256          * @retval none
+    257          */
+    258          void PWMC_SwitchOffPWM(CPWMC this)
+    259          {
+    260            pVars_t pVars = CLASS_VARS;
+    261            pVars->bTurnOnLowSidesAction = FALSE;
+    262            (CLASS_METHODS.pPWMC_SwitchOffPWM)(this);
+    263          }
+    264          
+    265          
+    266          /**
+    267          * @brief  It switch on the PWM generation
+    268          * @param  this: PWM 'n Current feedback object
+    269          * @retval None
+    270          */
+    271          void PWMC_SwitchOnPWM(CPWMC this)
+    272          {
+    273            pVars_t pVars = CLASS_VARS;
+    274            pVars->bTurnOnLowSidesAction = FALSE;
+    275            (CLASS_METHODS.pPWMC_SwitchOnPWM)(this);
+    276          }
+    277          
+    278          /**
+    279          * @brief  It calibrates ADC current conversions by reading the offset voltage
+    280          *         present on ADC pins when no motor current is flowing. It's suggested
+    281          *         to call this function before each motor start-up
+    282          * @param  this: PWM 'n Current feedback object
+    283          * @param  action: it can be CRC_START to initialize the offset calibration or
+    284          *         CRC_EXEC to execute the offset calibration.
+    285          * @retval bool It returns TRUE if the current calibration has been completed
+    286          *         otherwise if is ongoing it returns FALSE.
+    287          */
+    288          bool PWMC_CurrentReadingCalibr(CPWMC this, CRCAction_t action)
+    289          {
+    290            pVars_t pVars = CLASS_VARS;
+    291            bool retVal = FALSE;
+    292            if (action == CRC_START)
+    293            {
+    294              PWMC_SwitchOffPWM(this);
+    295              pVars->hOffCalibrWaitTimeCounter = CLASS_PARAMS->hOffCalibrWaitTicks;
+    296              if (CLASS_PARAMS->hOffCalibrWaitTicks == 0u)
+    297              {
+    298                (CLASS_METHODS.pPWMC_CurrentReadingCalibr)(this);
+    299                retVal = TRUE;
+    300              }
+    301            }
+    302            else if (action == CRC_EXEC)
+    303            {
+    304              if (pVars->hOffCalibrWaitTimeCounter > 0u)
+    305              {
+    306                pVars->hOffCalibrWaitTimeCounter--;
+    307                if (pVars->hOffCalibrWaitTimeCounter == 0u)
+    308                {
+    309                  (CLASS_METHODS.pPWMC_CurrentReadingCalibr)(this);
+    310                  retVal = TRUE;
+    311                }
+    312              }
+    313              else
+    314              {
+    315                retVal = TRUE;
+    316              }
+    317            }
+    318            else
+    319            {
+    320            }
+    321            return retVal;
+    322          }
+    323          
+    324          /**
+    325          * @brief  It switch on low sides. This function is intended to be used for
+    326          *         charging boot capacitors of driving section. It has to be called each 
+    327          *         motor start-up when using high voltage drivers
+    328          * @param  this: PWM 'n Current feedback object
+    329          * @retval None
+    330          */
+    331          void PWMC_TurnOnLowSides(CPWMC this)
+    332          {
+    333            pVars_t pVars = CLASS_VARS;
+    334            pVars->bTurnOnLowSidesAction = TRUE;
+    335            (CLASS_METHODS.pPWMC_TurnOnLowSides)(this);
+    336          }
+    337          
+    338          /**
+    339          * @brief  Execute a regular conversion. User must guarantee by 
+    340          *         design (i.e. properly selecting tasks priorities) that this function 
+    341          *         can only be interrupted by TIMx_UP_ISR and ADC1_2_ISR. 
+    342          *         The function is not re-entrant (can't executed twice at the same time)
+    343          *         It returns 0xFFFF in case of conversion error.
+    344          * @param  this related object of class CPWMC, ADC channel to be converted
+    345          * @param  bChannel ADC channel used for the regular conversion
+    346          * @retval It returns converted value or oxFFFF for conversion error
+    347          */
+    348          uint16_t PWMC_ExecRegularConv(CPWMC this, uint8_t bChannel)
+    349          { 
+    350            uint16_t hConvValue;
+    351            hConvValue=(CLASS_METHODS.pPWMC_ExecRegularConv)(this, bChannel);
+    352            return(hConvValue);
+    353          }
+    354          
+    355          /**
+    356          * @brief  It sets the specified sampling time for the specified ADC channel
+    357          *         on ADC1. It must be called once for each channel utilized by user
+    358          * @param  this related object of class CPWMC
+    359          * @param  ADConv_struct struct containing ADC channel and sampling time
+    360          * @retval none
+    361          */
+    362          void PWMC_ADC_SetSamplingTime(CPWMC this, ADConv_t ADConv_struct)
+    363          {
+    364            (CLASS_METHODS.pPWMC_SetSamplingTime)(this, ADConv_struct);
+    365          }
+    366          
+    367          /**
+    368          * @brief  It is used to check if an overcurrent occurred since last call.
+    369          * @param  this related object of class CPWMC
+    370          * @retval uint16_t It returns MC_BREAK_IN whether an overcurrent has been 
+    371          *                  detected since last method call, MC_NO_FAULTS otherwise.
+    372          */
+    373          uint16_t PWMC_CheckOverCurrent(CPWMC this)
+    374          {
+    375            return (CLASS_METHODS.pPWMC_IsOverCurrentOccurred)(this);
+    376          }
+    377          
+    378          /**
+    379          * @brief  It is used to set the overcurrent threshold through the DAC reference 
+    380          *         voltage.
+    381          * @param  this related object of class CPWMC
+    382          * @param  hDACVref Value of DAC reference expressed as 16bit unsigned integer.
+    383          *         Ex. 0 = 0V 65536 = VDD_DAC.
+    384          * @retval none
+    385          */
+    386          void PWMC_OCPSetReferenceVoltage(CPWMC this,uint16_t hDACVref)
+    387          {
+    388            if (CLASS_METHODS.pPWMC_OCPSetReferenceVoltage)
+    389            {
+    390              (CLASS_METHODS.pPWMC_OCPSetReferenceVoltage)(this, hDACVref);
+    391            }
+    392          }
+    393          
+    394          /**
+    395          * @brief  It is used to retrieve the satus of TurnOnLowSides action.
+    396          * @param  this related object of class CPWMC
+    397          * @retval bool It returns the state of TurnOnLowSides action: 
+    398          *         TRUE if TurnOnLowSides action is active, FALSE otherwise.
+    399          */
+    400          bool PWMC_GetTurnOnLowSidesAction(CPWMC this)
+    401          {
+    402            pVars_t pVars = CLASS_VARS;
+    403            return pVars->bTurnOnLowSidesAction;
+    404          }
+    405          
+    406          /**
+    407          * @brief  It is used to set the RL Detection mode.
+    408          * @param  this related object of class CPWMC
+    409          * @retval none
+    410          */
+    411          void PWMC_RLDetectionModeEnable(CPWMC this)
+    412          {
+    413            if (CLASS_METHODS.pRLDetectionModeEnable)
+    414            {
+    415              (CLASS_METHODS.pRLDetectionModeEnable)(this);
+    416            }
+    417          }
+    418          
+    419          /**
+    420          * @brief  It is used to disable the RL Detection mode and set the standard PWM.
+    421          * @param  this related object of class CPWMC
+    422          * @retval none
+    423          */
+    424          void PWMC_RLDetectionModeDisable(CPWMC this)
+    425          {
+    426            if (CLASS_METHODS.pRLDetectionModeDisable)
+    427            {
+    428              (CLASS_METHODS.pRLDetectionModeDisable)(this);
+    429            }
+    430          }
+    431          
+    432          /**
+    433          * @brief  It is used to set the PWM dutycycle in the RL Detection mode.
+    434          * @param  this related object of class CPWMC
+    435          * @param  hDuty to be applied in u16
+    436          * @retval It returns the code error 'MC_FOC_DURATION' if any, 'MC_NO_ERROR' 
+    437          *         otherwise. These error codes are defined in MC_type.h
+    438          */
+    439          uint16_t PWMC_RLDetectionModeSetDuty(CPWMC this, uint16_t hDuty)
+    440          {
+    441            uint16_t hRetVal = MC_FOC_DURATION;
+    442            if (CLASS_METHODS.pRLDetectionModeSetDuty)
+    443            {
+    444              hRetVal = (CLASS_METHODS.pRLDetectionModeSetDuty)(this, hDuty);
+    445            }
+    446            return hRetVal;
+    447          }
+    448          
+    449          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   PWMC_ADC_SetSamplingTime
+         0   -- Indirect call
+       0   PWMC_CheckOverCurrent
+         0   -- Indirect call
+      16   PWMC_CurrentReadingCalibr
+        16   -- Indirect call
+       0   PWMC_ExecRegularConv
+         0   -- Indirect call
+      16   PWMC_GetPhaseCurrents
+        16   -- Indirect call
+       0   PWMC_GetTurnOnLowSidesAction
+      16   PWMC_Init
+        16   -- Indirect call
+       0   PWMC_NewObject
+       0   PWMC_OCPSetReferenceVoltage
+         0   -- Indirect call
+       0   PWMC_RLDetectionModeDisable
+         0   -- Indirect call
+       0   PWMC_RLDetectionModeEnable
+         0   -- Indirect call
+       8   PWMC_RLDetectionModeSetDuty
+         0   -- Indirect call
+      24   PWMC_SetPhaseVoltage
+         0   -- Indirect call
+       0   PWMC_SwitchOffPWM
+         0   -- Indirect call
+       0   PWMC_SwitchOnPWM
+         0   -- Indirect call
+       0   PWMC_TurnOnLowSides
+         0   -- Indirect call
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       4  PWMC_ADC_SetSamplingTime
+     120  PWMC_Allocated
+          PWMCpool
+       4  PWMC_CheckOverCurrent
+      74  PWMC_CurrentReadingCalibr
+       4  PWMC_ExecRegularConv
+      34  PWMC_GetPhaseCurrents
+       6  PWMC_GetTurnOnLowSidesAction
+      38  PWMC_Init
+      26  PWMC_NewObject
+      10  PWMC_OCPSetReferenceVoltage
+      10  PWMC_RLDetectionModeDisable
+      10  PWMC_RLDetectionModeEnable
+      22  PWMC_RLDetectionModeSetDuty
+     402  PWMC_SetPhaseVoltage
+      10  PWMC_SwitchOffPWM
+      10  PWMC_SwitchOnPWM
+      10  PWMC_TurnOnLowSides
+
+ 
+ 120 bytes in section .bss
+ 678 bytes in section .text
+ 
+ 678 bytes of CODE memory
+ 120 bytes of DATA memory
+
+Errors: none
+Warnings: none

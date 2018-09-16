@@ -1,0 +1,301 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:33
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\RampMngrClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\RampMngrClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\RampMngrClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\RampMngrClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\RampMngrClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    RampMngrClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of RampMngr class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "RampMngrClass.h"
+     30          #include "RampMngrPrivate.h"
+     31          #include "MC_type.h"
+     32          
+     33          #ifdef MC_CLASS_DYNAMIC
+     34            #include "stdlib.h" /* Used for dynamic allocation */
+     35          #else
+     36            #define MAX_RMNG_NUM 4u
+     37          
+     38            _CRMNG_t RMNGpool[MAX_RMNG_NUM];
+     39            unsigned char RMNG_Allocated = 0u;
+     40          #endif
+     41          
+     42          #define CLASS_VARS   &((_CRMNG)this)->Vars_str
+     43          #define CLASS_PARAMS  ((_CRMNG)this)->pParams_str
+     44          
+     45          /**
+     46            * @brief  Creates an object of the class RampMngr
+     47            * @param  pRampMngrParams pointer to an RampMngr parameters structure
+     48            * @retval CRMNG new instance of RampMngr object
+     49            */
+     50          CRMNG RMNG_NewObject(pRampMngrParams_t pRampMngrParams)
+     51          {
+     52            _CRMNG _oRMNG;
+     53            
+     54            #ifdef MC_CLASS_DYNAMIC
+     55              _oRMNG = (_CRMNG)calloc(1u,sizeof(_CRMNG_t));
+     56            #else
+     57              if (RMNG_Allocated  < MAX_RMNG_NUM)
+     58              {
+     59                _oRMNG = &RMNGpool[RMNG_Allocated++];
+     60              }
+     61              else
+     62              {
+     63                _oRMNG = MC_NULL;
+     64              }
+     65            #endif
+     66            
+     67            _oRMNG->pParams_str = (pParams_t)pRampMngrParams;
+     68            
+     69            RMNG_Init((CRMNG)_oRMNG);
+     70            
+     71            return ((CRMNG)_oRMNG);
+     72          }
+     73          
+     74          /**
+     75            * @brief  It reset the state variable to zero.
+     76            * @param  this related object of class CRMNG
+     77            * @retval none.
+     78            */
+     79          void RMNG_Init(CRMNG this)
+     80          {
+     81            pVars_t pVars = CLASS_VARS;
+     82            pVars->wExt = 0;
+     83            pVars->hTargetFinal = 0;
+     84            pVars->wRampRemainingStep = 0u;
+     85            pVars->wIncDecAmount = 0;
+     86          }
+     87          
+     88          /**
+     89            * @brief  Exec the ramp calculations and returns the current value of the 
+     90                      state variable. 
+     91                      It must be called at fixed interval defined in the hExecFreq.
+     92            * @param  this related object of class CRMNG
+     93            * @retval int16_t value of the state variable
+     94            */
+     95          int16_t RMNG_Calc(CRMNG this)
+     96          {
+     97            int16_t hRetVal;
+     98            pVars_t pVars = CLASS_VARS;
+     99            int32_t wCurrentReference;
+    100            
+    101            wCurrentReference = pVars->wExt;
+    102            
+    103            /* Update the speed reference or the torque reference according to the mode 
+    104               and terminates the ramp if needed. */
+    105            if (pVars->wRampRemainingStep > 1u)
+    106            {
+    107              /* Increment/decrement the reference value. */
+    108              wCurrentReference += pVars->wIncDecAmount;
+    109              
+    110              /* Decrement the number of remaining steps */
+    111              pVars->wRampRemainingStep--;
+    112            }
+    113            else if (pVars->wRampRemainingStep == 1u)
+    114            {
+    115              /* Set the backup value of hTargetFinal. */
+    116              wCurrentReference = (int32_t)pVars->hTargetFinal * 32768;
+    117              pVars->wRampRemainingStep = 0u;
+    118            }
+    119            else
+    120            {
+    121              /* Do nothing. */
+    122            }
+    123            
+    124            pVars->wExt = wCurrentReference;
+    125            
+    126            hRetVal = (int16_t)(pVars->wExt / 32768);
+    127            return hRetVal;
+    128          }
+    129          
+    130          /**
+    131            * @brief  Setup the ramp to be executed
+    132            * @param  this related object of class CRMNG
+    133            * @param  hTargetFinal final value of state variable at the end of the ramp.
+    134            * @param  hDurationms the duration of the ramp expressed in milliseconds. It
+    135            *         is possible to set 0 to perform an instantaneous change in the value.
+    136            * @retval none
+    137            */
+    138          void RMNG_ExecRamp(CRMNG this, int16_t hTargetFinal, uint16_t hDurationms)
+    139          {
+    140            pVars_t pVars = CLASS_VARS;
+    141            pParams_t pParams = CLASS_PARAMS;
+    142            uint32_t wAux;
+    143            int32_t wAux1;
+    144            int16_t hCurrentReference;
+    145            
+    146            hCurrentReference = (int16_t)(pVars->wExt / 32768);
+    147            
+    148            if (hDurationms == 0u)
+    149            {
+    150              pVars->wExt = (int32_t)hTargetFinal * 32768;
+    151              pVars->wRampRemainingStep = 0u;
+    152              pVars->wIncDecAmount = 0;
+    153            }
+    154            else
+    155            {
+    156              /* Store the hTargetFinal to be applied in the last step */
+    157              pVars->hTargetFinal = hTargetFinal;
+    158              
+    159              /* Compute the (wRampRemainingStep) number of steps remaining to complete 
+    160              the ramp. */
+    161              wAux = (uint32_t)hDurationms * (uint32_t)pParams->hFrequencyHz;
+    162              wAux /= 1000u;
+    163              pVars->wRampRemainingStep = wAux;
+    164              pVars->wRampRemainingStep++;
+    165              
+    166              /* Compute the increment/decrement amount (wIncDecAmount) to be applied to 
+    167              the reference value at each CalcTorqueReference. */
+    168              wAux1 = ((int32_t)hTargetFinal - (int32_t)hCurrentReference) * 32768;
+    169              wAux1 /= (int32_t)pVars->wRampRemainingStep;
+    170              pVars->wIncDecAmount = wAux1;
+    171            }
+    172          }
+    173          
+    174          /**
+    175            * @brief  Returns the current value of the state variable.
+    176            * @param  this related object of class CRMNG
+    177            * @retval int16_t value of the state variable
+    178            */
+    179          int16_t RMNG_GetValue(CRMNG this)
+    180          {
+    181            int16_t hRetVal;
+    182            pVars_t pVars = CLASS_VARS;
+    183            hRetVal = (int16_t)(pVars->wExt / 32768);
+    184            return hRetVal;
+    185          }
+    186          
+    187          /**
+    188            * @brief  Check if the settled ramp has been completed.
+    189            * @param  this related object of class CRMNG.
+    190            * @retval bool It returns TRUE if the ramp is completed, FALSE otherwise.
+    191            */
+    192          bool RMNG_RampCompleted(CRMNG this)
+    193          {
+    194            pVars_t pVars = CLASS_VARS;
+    195            bool retVal = FALSE;
+    196            if (pVars->wRampRemainingStep == 0u)
+    197            {
+    198              retVal = TRUE;
+    199            }
+    200            return retVal;
+    201          }
+    202          
+    203          /**
+    204            * @brief  Stop the execution of the ramp keeping the last reached value.
+    205            * @param  this related object of class CRMNG.
+    206            * @retval none
+    207            */
+    208          void RMNG_StopRamp(CRMNG this)
+    209          {
+    210            pVars_t pVars = CLASS_VARS;
+    211            pVars->wRampRemainingStep = 0u;
+    212            pVars->wIncDecAmount = 0;
+    213          }
+    214          
+    215          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   RMNG_Calc
+      12   RMNG_ExecRamp
+       0   RMNG_GetValue
+       0   RMNG_Init
+       0   RMNG_NewObject
+       0   RMNG_RampCompleted
+       0   RMNG_StopRamp
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+      12  ?Subroutine0
+       6  ?Subroutine1
+     100  RMNG_Allocated
+          RMNGpool
+      36  RMNG_Calc
+      64  RMNG_ExecRamp
+       2  RMNG_GetValue
+       8  RMNG_Init
+      42  RMNG_NewObject
+      12  RMNG_RampCompleted
+       2  RMNG_StopRamp
+
+ 
+ 100 bytes in section .bss
+ 192 bytes in section .text
+ 
+ 192 bytes of CODE memory
+ 100 bytes of DATA memory
+
+Errors: none
+Warnings: none

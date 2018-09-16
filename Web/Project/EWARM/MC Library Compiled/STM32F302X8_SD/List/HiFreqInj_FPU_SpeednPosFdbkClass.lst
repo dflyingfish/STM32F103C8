@@ -1,0 +1,493 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:30
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\HiFreqInj_FPU_SpeednPosFdbkClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\HiFreqInj_FPU_SpeednPosFdbkClass.c" -D
+#        USE_STDPERIPH_DRIVER -D STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE
+#        -D ARM_MATH_CM4 -lcN "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\List" -o
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj" --debug --endian=little --cpu=Cortex-M4
+#        -e --fpu=VFPv4_sp --dlib_config "D:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\..\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\HiFreqInj_FPU_SpeednPosFdbkClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\HiFreqInj_FPU_SpeednPosFdbkClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\HiFreqInj_FPU_SpeednPosFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    HiFreqInj_FPU_SpeednPosFdbkClass.c
+      4            * @author  IMS Systems Lab and Technical Marketing - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private impelementation of HiFreqInj_FPU class      
+      8            ******************************************************************************
+      9            * <br>
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "SpeednPosFdbkClass.h"
+     23          #include "SpeednPosFdbkPrivate.h"
+     24          #include "HiFreqInj_FPU_SpeednPosFdbkClass.h"
+     25          #include "HiFreqInj_FPU_SpeednPosFdbkPrivate.h"
+     26          #include "MCLibraryConf.h"
+     27          #include "MC_type.h"
+     28          
+     29          #ifdef MC_CLASS_DYNAMIC
+     30            #include "stdlib.h" /* Used for dynamic allocation */
+     31          #else
+     32            _DCHFI_FP_SPD_t HFI_FP_SPDpool[MAX_HFI_FP_SPD_NUM];
+     33            unsigned char HFI_FP_SPD_Allocated = 0u;
+     34          #endif
+     35          
+     36          #define DCLASS_PARAMS ((_DCHFI_FP_SPD)(((_CSPD) this)->DerivedClass))->pDParams_str
+     37          #define DCLASS_VARS  &(((_DCHFI_FP_SPD)(((_CSPD) this)->DerivedClass))->DVars_str)
+     38          #define  CLASS_VARS  &(((_CSPD)this)->Vars_str)
+     39          #define  CLASS_PARAMS (((_CSPD)this)->pParams_str)
+     40          
+     41          static void HFI_FP_SPD_Init(CSPD this);
+     42          static void HFI_FP_SPD_Clear(CSPD this);
+     43          static int16_t HFI_FP_SPD_CalcElAngle(CSPD this, void *pInputVars_str);
+     44          static bool HFI_FP_SPD_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *hMecSpeed01Hz);
+     45          static void HFI_FP_SPD_SetMecAngle(CSPD this, int16_t hMecAngle);
+     46          static void HFI_FP_SPD_InitSpeedBuffer(CHFI_FP_SPD this, int16_t hVal);
+     47          
+     48          /**
+     49            * @brief  Creates an object of the class HiFreqInj_FPU
+     50            * @param  pSpeednPosFdbkParams pointer to an SpeednPosFdbk parameters structure
+     51            * @param  pHiFreqInj_FPUParams pointer to an HiFreqInj_FPU parameters structure
+     52            * @retval CHFI_FP_SPD new instance of HiFreqInj_FPU object
+     53            */
+     54          CHFI_FP_SPD HFI_FP_SPD_NewObject(pSpeednPosFdbkParams_t pSpeednPosFdbkParams, pHiFreqInj_FPUParams_t pHiFreqInj_FPUParams)
+     55          {
+     56            _CSPD _oSpeednPosFdbk;
+     57            _DCHFI_FP_SPD _oHiFreqInj_FPU;
+     58            
+     59            _oSpeednPosFdbk = (_CSPD)SPD_NewObject(pSpeednPosFdbkParams);
+     60            
+     61          #ifdef MC_CLASS_DYNAMIC
+     62            _oHiFreqInj_FPU = (_DCHFI_FP_SPD)calloc(1u,sizeof(_DCHFI_FP_SPD_t));
+     63          #else
+     64            if (HFI_FP_SPD_Allocated  < MAX_HFI_FP_SPD_NUM)
+     65            {
+     66              _oHiFreqInj_FPU = &HFI_FP_SPDpool[HFI_FP_SPD_Allocated++];
+     67            }
+     68            else
+     69            {
+     70              _oHiFreqInj_FPU = MC_NULL;
+     71            }
+     72          #endif
+     73            
+     74            _oHiFreqInj_FPU->pDParams_str = pHiFreqInj_FPUParams;
+     75            _oSpeednPosFdbk->DerivedClass = (void*)_oHiFreqInj_FPU;
+     76            
+     77            _oSpeednPosFdbk->Methods_str.pSPD_Init = &HFI_FP_SPD_Init;
+     78            _oSpeednPosFdbk->Methods_str.pSPD_Clear = &HFI_FP_SPD_Clear;
+     79            _oSpeednPosFdbk->Methods_str.pSPD_CalcAngle = &HFI_FP_SPD_CalcElAngle;
+     80            _oSpeednPosFdbk->Methods_str.pSPD_CalcAvrgMecSpeed01Hz = 
+     81              &HFI_FP_SPD_CalcAvrgMecSpeed01Hz;
+     82            _oSpeednPosFdbk->Methods_str.pSPD_SetMecAngle = &HFI_FP_SPD_SetMecAngle;        
+     83            
+     84            return ((CHFI_FP_SPD)_oSpeednPosFdbk);
+     85          }
+     86          
+     87          /** @addtogroup STM32F10x_PMSM_MC_Library
+     88            * @{
+     89            */
+     90            
+     91          /** @addtogroup SpeednPosFdbk_HiFreqInj_FPU
+     92            * @{
+     93            */
+     94          
+     95          /** @defgroup HiFreqInj_FPU_class_private_methods HiFreqInj_FPU class private methods
+     96          * @{
+     97          */
+     98          
+     99          /**
+    100            * @brief  Software initialization of VSS object.
+    101            * @param  this related object of class CSPD
+    102            * @param  InputVars_str not used by VSS.
+    103            * @retval none
+    104            */
+    105          static void HFI_FP_SPD_Init(CSPD this)
+    106          {
+    107            HFI_FP_SPD_Clear(this);
+    108          }
+    109          
+    110          /**
+    111          * @brief  Software initializzation of VSS object to be performed at each restart
+    112          *         of the motor.
+    113          * @param  this related object of class CSPD
+    114          * @retval none
+    115          */
+    116          static void HFI_FP_SPD_Clear(CSPD this)
+    117          {
+    118            pVars_t pVars = CLASS_VARS;
+    119            pDVars_t pDVars = DCLASS_VARS;  
+    120            pVars->hElAngle = 0;
+    121            pVars->hMecAngle = 0;
+    122            pVars->hAvrMecSpeed01Hz = 0;
+    123            pVars->hElSpeedDpp = 0;
+    124            pVars->hMecAccel01HzP = 0;
+    125            pVars->bSpeedErrorNumber = 0u;
+    126            
+    127            pDVars->hHiFrTrSpeed = 0;
+    128            pDVars->Oriented = FALSE;
+    129            HFI_FP_SPD_InitSpeedBuffer((CHFI_FP_SPD)this,0); 
+    130          }
+    131          
+    132          /**
+    133          * @brief  Update the rotor electrical angle integrating the last setled 
+    134          *         instantaneous electrical speed express in dpp.
+    135          * @param  this related object of class CSPD.
+    136          * @retval int16_t Measured electrical angle in s16degree format.
+    137          */
+    138          static int16_t HFI_FP_SPD_CalcElAngle(CSPD this, void *pInputVars_str)
+    139          {
+    140            pVars_t pVars = CLASS_VARS;
+    141            pDVars_t pDVars = DCLASS_VARS;
+    142            int16_t hElAngle = pVars->hElAngle - pDVars->hHiFrTrSpeed;
+    143            pVars->hElAngle = hElAngle;
+    144            return hElAngle;
+    145          }
+    146          
+    147          /**
+    148            * @brief  This method must be called with the same periodicity
+    149            *         on which speed control is executed.
+    150            *         This method compute and store rotor istantaneous el speed (express 
+    151            *         in dpp considering the measurement frequency) in order to provide it
+    152            *         to SPD_CalcElAngle function and SPD_GetElAngle. 
+    153            *         Then compute store and return - through parameter 
+    154            *         hMecSpeed01Hz - the rotor average mech speed, expressed in 01Hz.
+    155            *         Then return the reliability state of the sensor (allways TRUE).
+    156            * @param  this related object of class CSPD
+    157            * @param  hMecSpeed01Hz pointer to int16_t, used to return the rotor average
+    158            *         mechanical speed (01Hz)
+    159            * @retval TRUE = sensor information is reliable
+    160            *         FALSE = sensor information is not reliable
+    161            */
+    162          static bool HFI_FP_SPD_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *hMecSpeed01Hz)
+    163          {
+    164            pParams_t pParams = CLASS_PARAMS;
+    165            pDParams_t pDParams = DCLASS_PARAMS;
+    166            pVars_t pVars = CLASS_VARS;
+    167            pDVars_t pDVars = DCLASS_VARS;
+    168            int32_t wAvrSpeed_dpp = (int32_t)0;
+    169            int32_t wAux;
+    170            uint8_t i, bSpeedBufferSize01Hz = pDParams->bSpeedBufferSize01Hz;
+    171            bool retVal = FALSE;
+    172            
+    173            for (i=0u; i<bSpeedBufferSize01Hz; i++)
+    174            {
+    175              wAvrSpeed_dpp -= (int32_t)(pDVars->hSpeed_Buffer[i]);
+    176            }
+    177            
+    178            wAvrSpeed_dpp = wAvrSpeed_dpp / (int16_t)bSpeedBufferSize01Hz;  
+    179            
+    180            /*Computation of Mechanical speed 01Hz*/
+    181            wAux = wAvrSpeed_dpp * (int32_t)(pParams->hMeasurementFrequency);
+    182            wAux = wAux * (int32_t) 10;
+    183            wAux = wAux/(int32_t)65536;
+    184            wAux = wAux /(int16_t)(pParams->bElToMecRatio);
+    185            
+    186            *hMecSpeed01Hz = (int16_t)wAux;
+    187            
+    188            pVars->hAvrMecSpeed01Hz = (int16_t)wAux;
+    189            
+    190            pVars->hElSpeedDpp = (int16_t)wAvrSpeed_dpp;
+    191            
+    192            if (pDVars->Oriented == TRUE)
+    193            {
+    194              retVal = TRUE;
+    195            }
+    196            
+    197            return retVal;
+    198          }
+    199          
+    200          /**
+    201            * @brief  It is used to set istantaneous information on mechanical and
+    202            *         electrical angle.
+    203            * @param  this related object of class CSPD
+    204            * @param  hMecAngle istantaneous measure of rotor mechanical angle
+    205            * @retval none
+    206            */
+    207          static void HFI_FP_SPD_SetMecAngle(CSPD this, int16_t hMecAngle)
+    208          {
+    209          }
+    210          
+    211          #if defined (CCMRAM)
+    212          #if defined (__ICCARM__)
+    213          #pragma location = ".ccmram"
+    214          #elif defined (__CC_ARM)
+    215          __attribute__((section ("ccmram")))
+    216          #endif
+    217          #endif
+    218          /**
+    219            * @brief  Set electrical speed
+    220            * @param  this related object of class CHFI_FP_SPD
+    221            * @retval none
+    222            */
+    223          void HFI_FP_SPD_SetElSpeedDpp(CHFI_FP_SPD this,int16_t hHiFrTrSpeed)
+    224          {
+    225            pDParams_t pDParams = DCLASS_PARAMS;
+    226            pDVars_t pDVars = DCLASS_VARS;
+    227            uint8_t bBuffer_index = pDVars->bSpeed_Buffer_Index;
+    228            
+    229            bBuffer_index++;
+    230            if (bBuffer_index == pDParams->bSpeedBufferSize01Hz) 
+    231            {
+    232              bBuffer_index = 0u;
+    233            } 
+    234            
+    235            pDVars->hSpeed_Buffer[bBuffer_index] = hHiFrTrSpeed;
+    236            pDVars->hHiFrTrSpeed = hHiFrTrSpeed;  
+    237            pDVars->bSpeed_Buffer_Index = bBuffer_index;  
+    238          }
+    239          
+    240          /**
+    241            * @brief  Set electrical angle
+    242            * @param  this related object of class CHFI_FP_SPD
+    243            * @retval none
+    244            */
+    245          void HFI_FP_SPD_SetElAngle(CHFI_FP_SPD this,int16_t hElAngle)
+    246          {
+    247            pVars_t pVars = CLASS_VARS;
+    248            pVars->hElAngle = hElAngle;
+    249          }
+    250          
+    251          /**
+    252            * @brief  Check that the motor speed has reached the minimum threshold
+    253            *         for swapping speed sensor from HF to STO
+    254            * @param  this related object of class CHFI_FP_SPD
+    255            * @retval bool It returns TRUE if the threshold has been reached, FALSE otherw
+    256            */
+    257          bool HFI_FP_SPD_AccelerationStageReached(CHFI_FP_SPD this)
+    258          {
+    259            pDParams_t pDParams = DCLASS_PARAMS;
+    260            pVars_t pVars = CLASS_VARS;
+    261            bool retVal = FALSE;
+    262            int16_t hAvrMecSpeed01Hz = pVars->hAvrMecSpeed01Hz; 
+    263            
+    264            if (hAvrMecSpeed01Hz < 0)
+    265            {
+    266              hAvrMecSpeed01Hz = -hAvrMecSpeed01Hz;
+    267            }  
+    268            
+    269            if (hAvrMecSpeed01Hz > pDParams->hSwapMecSpeed01Hz)
+    270            {
+    271              retVal = TRUE;
+    272            }
+    273            
+    274            return (retVal);
+    275          }
+    276          
+    277          /**
+    278            * @brief  Informs the speed sensor that the angle detection has been completed
+    279            * NOT TO BE CALLED CONTINUOUSLY but only when state changes
+    280            * @param  this related object of class CHFI_FP_SPD
+    281            * @param  TRUE if angle detection phase has been completed
+    282            * @retval none
+    283            */
+    284          void HFI_FP_SPD_SetHFState(CHFI_FP_SPD this, bool StateOriented)
+    285          {
+    286            pVars_t pVars = CLASS_VARS;
+    287            pDVars_t pDVars = DCLASS_VARS;
+    288            pDVars->Oriented = StateOriented;
+    289            pVars->bSpeedErrorNumber = 0u;
+    290          }
+    291          
+    292          /**
+    293            * @brief  Set mechanical speed
+    294            * @param  this related object of class CHFI_FP_SPD
+    295            * @retval none
+    296            */
+    297          void HFI_FP_SPD_SetAvrgMecSpeed01Hz(CHFI_FP_SPD this,int16_t hHiFrTrSpeed)
+    298          {
+    299            pVars_t pVars = CLASS_VARS;
+    300            pVars->hAvrMecSpeed01Hz = (int16_t)hHiFrTrSpeed;
+    301            HFI_FP_SPD_InitSpeedBuffer((CHFI_FP_SPD)this,hHiFrTrSpeed);
+    302          }
+    303          
+    304          /**
+    305            * @brief  It clears the estimated speed buffer 
+    306            * @param  this related object of class CSTO_SPD
+    307            * @retval none
+    308            */
+    309          static void HFI_FP_SPD_InitSpeedBuffer(CHFI_FP_SPD this,int16_t hVal)
+    310          {
+    311            pDParams_t pDParams = DCLASS_PARAMS;
+    312            pDVars_t pDVars = DCLASS_VARS;
+    313            uint8_t b_i;
+    314            
+    315            uint8_t bSpeedBufferSize01Hz = pDParams->bSpeedBufferSize01Hz;
+    316            
+    317            /*init speed buffer*/
+    318            for (b_i = 0u; b_i<bSpeedBufferSize01Hz; b_i++)
+    319            {
+    320              pDVars->hSpeed_Buffer[b_i] = hVal;
+    321            }
+    322            pDVars->bSpeed_Buffer_Index = 0u;
+    323            
+    324            return;
+    325          }
+    326          
+    327          /**
+    328            * @brief  It checks if the HFI shall be restarted acconding the speed 
+    329            *         measurement done by the OBS_PLL.
+    330            * @param  this related object of class CHFI_FP_SPD.
+    331            * @param  hObsSpeed01Hz Speed measured by OBS_PLL expressed in tenths of 
+    332            *         mechanical Hertz.
+    333            * @retval bool It returns TRUE if the HFI shall be restarted according the 
+    334            *         speed measurement done by the OBS_PLL.
+    335            */
+    336          bool HFI_FP_SPD_Restart(CHFI_FP_SPD this,int16_t hObsSpeed01Hz)
+    337          {
+    338            pDParams_t pDParams = DCLASS_PARAMS;
+    339            bool retVal = FALSE;
+    340            
+    341            if (hObsSpeed01Hz < 0)
+    342            {
+    343              hObsSpeed01Hz = -hObsSpeed01Hz;
+    344            }  
+    345            
+    346            if (hObsSpeed01Hz < pDParams->hHFIRestart01Hz)
+    347            {
+    348              retVal = TRUE;
+    349            }
+    350            
+    351            return (retVal);
+    352          }
+    353          
+    354          /**
+    355            * @brief  It checks if the speed threshold to switch from OBS_PLL to HFI has
+    356            *         been reached.
+    357            * @param  this related object of class CHFI_FP_SPD.
+    358            * @param  hObsSpeed01Hz Speed measured by OBS_PLL expressed in tenths of 
+    359            *         mechanical Hertz.
+    360            * @retval bool It returns TRUE if the speed threshold to switch from OBS_PLL
+    361            *         to HFI has been reached.
+    362            */
+    363          bool HFI_FP_SPD_IsConverged(CHFI_FP_SPD this,int16_t hObsSpeed01Hz)
+    364          {
+    365            pDParams_t pDParams = DCLASS_PARAMS;
+    366            bool retVal = FALSE;
+    367            
+    368            if (hObsSpeed01Hz < 0)
+    369            {
+    370              hObsSpeed01Hz = -hObsSpeed01Hz;
+    371            }  
+    372            
+    373            if (hObsSpeed01Hz < pDParams->hSTOHFI01Hz)
+    374            {
+    375              retVal = TRUE;
+    376            }
+    377            
+    378            return (retVal);
+    379          }
+    380          
+    381          /**
+    382            * @}
+    383            */
+    384            
+    385          /**
+    386            * @}
+    387            */
+    388          
+    389          /**
+    390            * @}
+    391            */
+    392          
+    393          
+    394          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   HFI_FP_SPD_AccelerationStageReached
+      20   HFI_FP_SPD_CalcAvrgMecSpeed01Hz
+       0   HFI_FP_SPD_CalcElAngle
+       0   HFI_FP_SPD_Clear
+       0   HFI_FP_SPD_Init
+         0   -> HFI_FP_SPD_Clear
+       0   HFI_FP_SPD_IsConverged
+       8   HFI_FP_SPD_NewObject
+         8   -> SPD_NewObject
+       0   HFI_FP_SPD_Restart
+       0   HFI_FP_SPD_SetAvrgMecSpeed01Hz
+       0   HFI_FP_SPD_SetElAngle
+       0   HFI_FP_SPD_SetElSpeedDpp
+       0   HFI_FP_SPD_SetHFState
+       0   HFI_FP_SPD_SetMecAngle
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      34  HFI_FP_SPD_AccelerationStageReached
+     144  HFI_FP_SPD_Allocated
+          HFI_FP_SPDpool
+      90  HFI_FP_SPD_CalcAvrgMecSpeed01Hz
+      14  HFI_FP_SPD_CalcElAngle
+      58  HFI_FP_SPD_Clear
+       4  HFI_FP_SPD_Init
+      28  HFI_FP_SPD_IsConverged
+      62  HFI_FP_SPD_NewObject
+      28  HFI_FP_SPD_Restart
+      38  HFI_FP_SPD_SetAvrgMecSpeed01Hz
+       4  HFI_FP_SPD_SetElAngle
+      40  HFI_FP_SPD_SetElSpeedDpp
+      12  HFI_FP_SPD_SetHFState
+       2  HFI_FP_SPD_SetMecAngle
+
+ 
+ 144 bytes in section .bss
+ 418 bytes in section .text
+ 
+ 418 bytes of CODE memory
+ 144 bytes of DATA memory
+
+Errors: none
+Warnings: none

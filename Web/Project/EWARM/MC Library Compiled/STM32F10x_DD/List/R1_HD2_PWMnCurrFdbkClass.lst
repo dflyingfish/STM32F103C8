@@ -1,0 +1,2140 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       13/Sep/2018  23:26:06
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\R1_HD2_PWMnCurrFdbkClass.c
+#    Command line =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\R1_HD2_PWMnCurrFdbkClass.c
+#        -D USE_STDPERIPH_DRIVER -D STM32F10X_MD -D MC_LIBRARY_DUAL -lcN
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List" -o
+#        "D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj" --debug --endian=little --cpu=Cortex-M3 -e
+#        --fpu=None --dlib_config "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\ -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\inc\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\MCLibrary\interface\common\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\
+#        -I
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F10x_StdPeriph_Driver\inc\
+#        -Oh --use_c++_inline -I "C:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\List\R1_HD2_PWMnCurrFdbkClass.lst
+#    Object file  =  
+#        D:\STM32\IAR_projects\stm32f103_demo_new\Web\Project\EWARM\MC Library
+#        Compiled\STM32F10x_DD\Obj\R1_HD2_PWMnCurrFdbkClass.o
+#
+###############################################################################
+
+D:\STM32\IAR_projects\stm32f103_demo_new\Web\MCLibrary\src\R1_HD2_PWMnCurrFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    R1_HD2_PWMnCurrFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains private implementation of R1_HD2_PWMnCurrFdbk IRQ      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          #if (STM32F10X_HD)
+     29          
+     30          /* Includes ------------------------------------------------------------------*/
+     31          #include "PWMnCurrFdbkClass.h"
+     32          #include "PWMnCurrFdbkPrivate.h"
+     33          #include "R1_HD2_PWMnCurrFdbkClass.h"
+     34          #include "R1_HD2_PWMnCurrFdbkPrivate.h"
+     35          #include "MCIRQHandlerClass.h"
+     36          #include "MCIRQHandlerPrivate.h"
+     37          #include "MCLibraryConf.h"
+     38          #include "MCLibraryISRPriorityConf.h"
+     39          #include "MC_type.h"
+     40          
+     41          /* Private Defines -----------------------------------------------------------*/
+     42          #define CLASS_VARS   ((_CPWMC)this)->Vars_str
+     43          #define DCLASS_VARS  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str
+     44          
+     45          #define PWM_PERIOD (((_CPWMC) this)->pParams_str->hPWMperiod)/2u
+     46          
+     47          /* Direct address of the registers used by DMA */
+     48          #define TIM1_CCR1_Address   0x40012C34u
+     49          #define TIM1_CCR2_Address   0x40012C38u
+     50          #define TIM1_CCR3_Address   0x40012C3Cu
+     51          #define TIM4_CCR3_Address   0x4000083Cu
+     52          
+     53          #define TIM8_CCR1_Address   0x40013434u
+     54          #define TIM8_CCR2_Address   0x40013438u
+     55          #define TIM8_CCR3_Address   0x4001343Cu
+     56          #define TIM5_CCR4_Address   0x40000C40u
+     57          
+     58          #define ADC1_DR_Address     0x4001244Cu
+     59          
+     60          #define NB_CONVERSIONS 16u
+     61          
+     62          #define REGULAR         ((uint8_t)0u)
+     63          #define BOUNDARY_1      ((uint8_t)1u)  /* Two small, one big */
+     64          #define BOUNDARY_2      ((uint8_t)2u)  /* Two big, one small */
+     65          #define BOUNDARY_3      ((uint8_t)3u)  /* Three equal        */
+     66          
+     67          #define INVERT_NONE 0u
+     68          #define INVERT_A 1u
+     69          #define INVERT_B 2u
+     70          #define INVERT_C 3u
+     71          
+     72          #define SAMP_NO 0u
+     73          #define SAMP_IA 1u
+     74          #define SAMP_IB 2u
+     75          #define SAMP_IC 3u
+     76          #define SAMP_NIA 4u
+     77          #define SAMP_NIB 5u
+     78          #define SAMP_NIC 6u
+     79          #define SAMP_OLDA 7u
+     80          #define SAMP_OLDB 8u
+     81          #define SAMP_OLDC 9u
+     82          
+     83          #define CH1NORMAL           0x0060u
+     84          #define CH2NORMAL           0x6000u
+     85          #define CH3NORMAL           0x0060u
+     86          #define CH4NORMAL           0x7000u
+     87          
+     88          #define CCMR1_PRELOAD_DISABLE_MASK 0xF7F7u
+     89          #define CCMR2_PRELOAD_DISABLE_MASK 0xFFF7u
+     90          
+     91          #define CCMR1_PRELOAD_ENABLE_MASK 0x0808u
+     92          #define CCMR2_PRELOAD_ENABLE_MASK 0x0008u
+     93          
+     94          /* DMA ENABLE mask */
+     95          #define CCR_ENABLE_Set          ((uint32_t)0x00000001u)
+     96          #define CCR_ENABLE_Reset        ((uint32_t)0xFFFFFFFEu)
+     97          
+     98          #define CR2_JEXTSEL_Reset       ((uint32_t)0xFFFF8FFFu)
+     99          #define CR2_JEXTTRIG_Set        ((uint32_t)0x00008000u)
+    100          #define CR2_JEXTTRIG_Reset      ((uint32_t)0xFFFF7FFFu)
+    101          
+    102          #define TIM_DMA_ENABLED_CC1 0x0200u
+    103          #define TIM_DMA_ENABLED_CC2 0x0400u
+    104          #define TIM_DMA_ENABLED_CC3 0x0800u
+    105          
+    106          #define CR2_ADON_Set                ((uint32_t)0x00000001u)
+    107          
+    108          /* ADC SMPx mask */
+    109          #define SMPR1_SMP_Set              ((uint32_t) (0x00000007u))
+    110          #define SMPR2_SMP_Set              ((uint32_t) (0x00000007u))
+    111          #define CR2_EXTTRIG_SWSTART_Set     ((u32)0x00500000)
+    112          
+    113          #define ADC1_CR2_EXTTRIG_SWSTART_BB 0x42248158u
+    114          
+    115          #define TIMxCCER_MASK              ((uint16_t)  ~0x1555u)
+    116          #define TIMx_CC4E_BIT              ((uint16_t)  0x1000u) 
+    117          
+    118          /* Constant values -----------------------------------------------------------*/
+    119          static const uint8_t REGULAR_SAMP_CUR1[6] = {SAMP_NIC,SAMP_NIC,SAMP_NIA,SAMP_NIA,SAMP_NIB,SAMP_NIB};
+    120          static const uint8_t REGULAR_SAMP_CUR2[6] = {SAMP_IA,SAMP_IB,SAMP_IB,SAMP_IC,SAMP_IC,SAMP_IA};
+    121          static const uint8_t BOUNDR1_SAMP_CUR2[6] = {SAMP_IB,SAMP_IB,SAMP_IC,SAMP_IC,SAMP_IA,SAMP_IA};
+    122          static const uint8_t BOUNDR2_SAMP_CUR1[6] = {SAMP_IA,SAMP_IB,SAMP_IB,SAMP_IC,SAMP_IC,SAMP_IA};
+    123          static const uint8_t BOUNDR2_SAMP_CUR2[6] = {SAMP_IC,SAMP_IA,SAMP_IA,SAMP_IB,SAMP_IB,SAMP_IC};
+    124          
+    125          #ifdef MC_CLASS_DYNAMIC
+    126          	#include "stdlib.h" /* Used for dynamic allocation */
+    127          #else
+    128          	_DCR1HD2_PWMC_t R1HD2_PWMCpool[MAX_DRV_PWMC_NUM];
+    129          	unsigned char R1HD2_PWMC_Allocated = 0u;
+    130          #endif
+    131          
+    132          static void* R1HD2_IRQHandler(void *this, unsigned char flag);
+    133          static void R1HD2_Init(CPWMC this);
+    134          static void R1HD2_TIMxInit(TIM_TypeDef* TIMx, TIM_TypeDef* TIMx_2, CPWMC this);
+    135          static void R1HD2_CurrentReadingCalibration(CPWMC this);
+    136          static void R1HD2_GetPhaseCurrents(CPWMC this,Curr_Components* pStator_Currents);
+    137          static void R1HD2_TurnOnLowSides(CPWMC this);
+    138          static void R1HD2_SwitchOnPWM(CPWMC this);
+    139          static void R1HD2_SwitchOffPWM(CPWMC this);
+    140          static void R1HD2_1ShuntMotorVarsInit(CPWMC this);
+    141          static void R1HD2_1ShuntMotorVarsRestart(CPWMC this);
+    142          static uint16_t R1HD2_CalcDutyCycles(CPWMC this);
+    143          static uint16_t R1HD2_ExecRegularConv(CPWMC this, uint8_t bChannel);
+    144          static void R1HD2_ADC_SetSamplingTime(CPWMC this, ADConv_t ADConv_struct);
+    145          static void R1HD2_HFCurrentsCalibration(CPWMC this,Curr_Components* pStator_Currents);
+    146          static uint16_t R1HD2_IsOverCurrentOccurred(CPWMC this);
+    147          
+    148          /**
+    149            * @brief  Creates an object of the class R1_HD2
+    150            * @param  pPWMnCurrFdbkParams pointer to an PWMnCurrFdbk parameters structure
+    151            * @param  pR1_DDParams pointer to an R1_DD parameters structure
+    152            * @retval CR1HD2_PWMC new instance of R1_HD2 object
+    153            */
+    154          CR1HD2_PWMC R1HD2_NewObject(pPWMnCurrFdbkParams_t pPWMnCurrFdbkParams, pR1_DDParams_t pR1_DDParams)
+    155          {
+    156          	_CPWMC _oPWMnCurrFdbk;
+    157          	_DCR1HD2_PWMC _oR1_HD2;
+    158          
+    159          	_oPWMnCurrFdbk = (_CPWMC)PWMC_NewObject(pPWMnCurrFdbkParams);
+    160          
+    161          	#ifdef MC_CLASS_DYNAMIC
+    162          		_oR1_HD2 = (_DCR1HD2_PWMC)calloc(1u,sizeof(_DCR1HD2_PWMC_t));
+    163          	#else
+    164          		if (R1HD2_PWMC_Allocated  < MAX_DRV_PWMC_NUM)
+    165          		{
+    166          			_oR1_HD2 = &R1HD2_PWMCpool[R1HD2_PWMC_Allocated++];
+    167          		}
+    168          		else
+    169          		{
+    170          			_oR1_HD2 = MC_NULL;
+    171          		}
+    172          	#endif
+    173            
+    174          	_oR1_HD2->pDParams_str = pR1_DDParams;
+    175          	_oPWMnCurrFdbk->DerivedClass = (void*)_oR1_HD2;
+    176          	
+    177          	_oPWMnCurrFdbk->Methods_str.pIRQ_Handler = &R1HD2_IRQHandler;
+    178          	Set_IRQ_Handler(pR1_DDParams->IRQnb, (_CMCIRQ)_oPWMnCurrFdbk);
+    179            
+    180            _oPWMnCurrFdbk->Methods_str.pPWMC_Init = &R1HD2_Init;
+    181            _oPWMnCurrFdbk->Methods_str.pPWMC_GetPhaseCurrents = &R1HD2_GetPhaseCurrents;
+    182            _oPWMnCurrFdbk->Methods_str.pPWMC_SwitchOffPWM = &R1HD2_SwitchOffPWM;
+    183            _oPWMnCurrFdbk->Methods_str.pPWMC_SwitchOnPWM = &R1HD2_SwitchOnPWM;        
+    184            _oPWMnCurrFdbk->Methods_str.pPWMC_CurrentReadingCalibr = 
+    185                                                           &R1HD2_CurrentReadingCalibration;         
+    186            _oPWMnCurrFdbk->Methods_str.pPWMC_TurnOnLowSides = &R1HD2_TurnOnLowSides;         
+    187            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect1 = 
+    188                                                                &R1HD2_CalcDutyCycles;        
+    189            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect2 = 
+    190                                                                &R1HD2_CalcDutyCycles; 
+    191            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect3 = 
+    192                                                                &R1HD2_CalcDutyCycles;        
+    193            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect4 = 
+    194                                                                &R1HD2_CalcDutyCycles;         
+    195            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect5 = 
+    196                                                                &R1HD2_CalcDutyCycles;        
+    197            _oPWMnCurrFdbk->Methods_str.pPWMC_SetADCSampPointSect6 = 
+    198                                                                &R1HD2_CalcDutyCycles;
+    199            _oPWMnCurrFdbk->Methods_str.pPWMC_ExecRegularConv= &R1HD2_ExecRegularConv;
+    200            _oPWMnCurrFdbk->Methods_str.pPWMC_SetSamplingTime= &R1HD2_ADC_SetSamplingTime;
+    201            _oPWMnCurrFdbk->Methods_str.pPWMC_IsOverCurrentOccurred = 
+    202              &R1HD2_IsOverCurrentOccurred;
+    203          
+    204          	return ((CR1HD2_PWMC)_oPWMnCurrFdbk);
+    205          }
+    206          
+    207          /** @addtogroup STM32F10x_PMSM_MC_Library
+    208            * @{
+    209            */
+    210            
+    211          /** @addtogroup PWMnCurrFdbk_R1_HD2
+    212            * @{
+    213            */
+    214          
+    215          /** @defgroup R1_HD2_class_private_methods R1_HD2 class private methods
+    216          * @{
+    217          */
+    218          
+    219          /**
+    220          * @brief  It initializes TIM, ADC, GPIO, DMA and NVIC for single shunt current 
+    221          *         reading configuration using STM32 High Density.
+    222          * @param  this related object of class CPWMC
+    223          * @retval none
+    224          */
+    225          static void R1HD2_Init(CPWMC this)
+    226          {
+    227            NVIC_InitTypeDef NVIC_InitStructure;
+    228            GPIO_InitTypeDef GPIO_InitStructure;
+    229            DMA_InitTypeDef DMA_InitStructure;
+    230            uint16_t hAux;
+    231            ADC_TypeDef* ADCx;
+    232            ADC_InitTypeDef ADC_InitStructure;
+    233            TIM_TypeDef* TIMx;
+    234            TIM_TypeDef* TIMx_2;
+    235            pVars_t pVars_str = &CLASS_VARS;
+    236            pDVars_t pDVars_str;
+    237            pDParams_t pDParams_str;
+    238            
+    239            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+    240            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+    241            
+    242            pVars_str->bMotor = (pDParams_str->bInstanceNbr==1u?M1:M2);
+    243            
+    244            R1HD2_1ShuntMotorVarsInit(this);
+    245            
+    246            /* Default value of ADC */
+    247            pDVars_str->ADCx = ADC3;
+    248            ADCx = ADC3;
+    249            
+    250            /* Auxiliary TIM Used to trigger ADC3 */
+    251            pDVars_str->TIMx_2 = TIM5;
+    252            TIMx_2 = TIM5;
+    253            
+    254            /* Enable DMA1 clock */
+    255            RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    256            
+    257            /* Enable the CCS */
+    258            RCC_ClockSecuritySystemCmd((FunctionalState)(ENABLE));
+    259            
+    260            if (pDParams_str->bInstanceNbr == 1u)
+    261            {    
+    262              /* Peripheral clocks enabling ---------------------------------------------*/
+    263              
+    264              RCC->AHBENR |= RCC_AHBPeriph_CRC;
+    265              
+    266              /* ADCCLK = PCLK2 */
+    267              RCC_ADCCLKConfig(pDParams_str->wADC_Clock_Divider);
+    268              
+    269              /* Enable GPIOA-GPIOF clock */
+    270              RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | 
+    271                                     RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | 
+    272                                       RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE | 
+    273                                         RCC_APB2Periph_GPIOF | RCC_APB2Periph_GPIOG, ENABLE);  
+    274              
+    275              /* Enable ADC1 clock - Used in any case for regular MC conversion */
+    276              RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); 
+    277            }
+    278            else
+    279            {    
+    280              if(pDParams_str->IsFirstR1DDInstance == FALSE)
+    281              {
+    282                /* ADC1 will be used since ADC3 is already used */
+    283                pDVars_str->ADCx = ADC1;
+    284                ADCx = ADC1;     
+    285                
+    286                /* Auxiliary TIM Used to trigger ADC1 */
+    287                pDVars_str->TIMx_2 = TIM4;
+    288                TIMx_2 = TIM4;           
+    289              }
+    290            }
+    291            
+    292            if (ADCx == ADC1)
+    293            {
+    294              /* ADC1 clock is always enabled */
+    295              
+    296              /* Set for enabling ADC1_2 IRQ */    
+    297              NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) ADC1_2_IRQn;
+    298            }
+    299            if (ADCx == ADC3)
+    300            {
+    301              /* Enable ADC3 clock */
+    302              RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC3, ENABLE);
+    303              
+    304              /* Set for enabling ADC3 IRQ */
+    305              NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) ADC3_IRQn;
+    306            }
+    307            
+    308            if (TIMx_2 == TIM5) /* Used to trigger ADC3 */
+    309            {
+    310              /* Enable TIM5 clock */
+    311              RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+    312              
+    313              /* Set timer in Debug MODE */
+    314              /* TIM5 Counter Clock stopped when the core is halted */
+    315              DBGMCU_Config(DBGMCU_TIM5_STOP, ENABLE);
+    316              
+    317              /* Enable DMA2 clock */
+    318              RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+    319              
+    320              /* Sets the ADC Trigger for ADC3*/
+    321              pDVars_str->hADCTrigger = ADC_ExternalTrigInjecConv_T5_TRGO;
+    322              
+    323              /* DMA Event related to TIM5 Channel 4 used for ADC3 trigger*/
+    324              /* DMA2 channel1 configuration */
+    325              DMA_DeInit(DMA2_Channel1);
+    326              DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)TIM5_CCR4_Address;
+    327              DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(pDVars_str->hCCDmaBuffCh4);
+    328              DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+    329              DMA_InitStructure.DMA_BufferSize = 3u;
+    330              DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    331              DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    332              DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    333              DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    334              DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    335              DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    336              DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    337              DMA_Init(DMA2_Channel1, &DMA_InitStructure);
+    338              /* Enable DMA2 Channel1 */
+    339              DMA_Cmd(DMA2_Channel1, ENABLE);
+    340            }
+    341            
+    342            if (TIMx_2 == TIM4) /* Used to trigger ADC1 */
+    343            {
+    344              /* Enable TIM4 clock */
+    345              RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+    346              
+    347              /* Set timer in Debug MODE */
+    348              /* TIM4 Counter Clock stopped when the core is halted */
+    349              DBGMCU_Config(DBGMCU_TIM4_STOP, ENABLE);
+    350                  
+    351              /* Sets the ADC Trigger for ADC1*/
+    352              pDVars_str->hADCTrigger = ADC_ExternalTrigInjecConv_T4_TRGO;
+    353              
+    354              /* DMA Event related to TIM4 Channel 3 used for ADC1 trigger*/
+    355              /* DMA1 channel5 configuration */
+    356              DMA_DeInit(DMA1_Channel5);
+    357              DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)TIM4_CCR3_Address;
+    358              DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(pDVars_str->hCCDmaBuffCh4);
+    359              DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+    360              DMA_InitStructure.DMA_BufferSize = 3u;
+    361              DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    362              DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    363              DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    364              DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    365              DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    366              DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    367              DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    368              DMA_Init(DMA1_Channel5, &DMA_InitStructure);
+    369              /* Enable DMA1 Channel5 */
+    370              DMA_Cmd(DMA1_Channel5, ENABLE);
+    371            }
+    372            
+    373            /* DMA Event related to ADC regular conversion*/
+    374            /* DMA1 channel1 configuration */
+    375            DMA_DeInit(DMA1_Channel1);
+    376            DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)ADC1_DR_Address;
+    377            DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(&(pDVars_str->hRegConv));
+    378            DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    379            DMA_InitStructure.DMA_BufferSize = 1u;
+    380            DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    381            DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+    382            DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    383            DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    384            DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    385            DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
+    386            DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    387            DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+    388            /* Enable DMA1 Channel1 */
+    389            DMA_Cmd(DMA1_Channel1, ENABLE);
+    390            
+    391            /* Enable the ADC Interrupt */
+    392            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = ADC_PRE_EMPTION_PRIORITY;
+    393            NVIC_InitStructure.NVIC_IRQChannelSubPriority = ADC_SUB_PRIORITY;
+    394            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    395            NVIC_Init(&NVIC_InitStructure);
+    396            
+    397            if (pDParams_str->TIMx == TIM1)
+    398            {
+    399              /* TIM Used*/
+    400              TIMx = TIM1;
+    401              
+    402              /* Enable TIM1 clock */
+    403              RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+    404                  
+    405              /* Enable DMA clock */
+    406              RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    407              
+    408              /* Set timer in Debug MODE */
+    409              /* TIM1 Counter Clock stopped when the core is halted */
+    410              DBGMCU_Config(DBGMCU_TIM1_STOP, ENABLE);
+    411              
+    412              /****** Timer1 alternate function full remapping ******/  
+    413              if(pDParams_str->wTIM1Remapping != GPIO_NoRemap_TIM1)
+    414              {   
+    415                GPIO_PinRemapConfig(pDParams_str->wTIM1Remapping, ENABLE);  
+    416              }  
+    417              
+    418              R1HD2_TIMxInit(TIMx, TIMx_2, this);
+    419              
+    420              /* DMA & NVIC Settings */
+    421              
+    422              /* DMA Event related to TIM1 Channel 4 */
+    423              /* DMA1 Channel4 configuration ----------------------------------------------*/
+    424              DMA_DeInit(DMA1_Channel4);
+    425              DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)TIM1_CCR1_Address;
+    426              DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(pDVars_str->hDmaBuff);
+    427              DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+    428              DMA_InitStructure.DMA_BufferSize = 2u;
+    429              DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    430              DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    431              DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    432              DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    433              DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    434              DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    435              DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    436              DMA_Init(DMA1_Channel4, &DMA_InitStructure);
+    437              /* Disable DMA1 Channel4 */
+    438              DMA_Cmd(DMA1_Channel4, ENABLE); 
+    439              
+    440              /* Enable the TIM1 Update interrupt */
+    441              NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) TIM1_UP_IRQn;
+    442              NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIMx_UP_PRE_EMPTION_PRIORITY;
+    443              NVIC_InitStructure.NVIC_IRQChannelSubPriority = TIMx_UP_SUB_PRIORITY;
+    444              NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    445              NVIC_Init(&NVIC_InitStructure);   
+    446                  
+    447              if (pDParams_str->bRepetitionCounter > 1u)
+    448              {
+    449                /* Only if REP RATE > 1 */
+    450                /* Enable the DMA1_CH5 TC interrupt */
+    451                NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) DMA1_Channel4_IRQn;
+    452                NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = DMAx_TC_PRE_EMPTION_PRIORITY;
+    453                NVIC_InitStructure.NVIC_IRQChannelSubPriority = DMAx_TC_SUB_PRIORITY;
+    454                NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    455                NVIC_Init(&NVIC_InitStructure);
+    456                
+    457                /* Enable DMA1 CH4 TC IRQ */
+    458                DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
+    459                
+    460                pDVars_str->bDMATot = (pDParams_str->bRepetitionCounter+1u)/2u;
+    461              }
+    462              else
+    463              {
+    464                /* REP RATE = 1 */
+    465                DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, DISABLE);
+    466                pDVars_str->bDMATot = 0u;
+    467              }
+    468            }
+    469            else
+    470            {
+    471              /* TIM Used*/
+    472              TIMx = TIM8;
+    473                  
+    474              /* Enable TIM8 clock */
+    475              RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
+    476                  
+    477              /* Enable DMA clock */
+    478              RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);  
+    479                  
+    480              /* Set timer in Debug MODE */
+    481              /* TIM8 Counter Clock stopped when the core is halted */
+    482              DBGMCU_Config(DBGMCU_TIM8_STOP, ENABLE);
+    483              
+    484              R1HD2_TIMxInit(TIMx, TIMx_2, this);
+    485              
+    486              /* DMA & NVIC Settings */
+    487              
+    488              /* DMA Event related to TIM8 Channel 4 */
+    489              /* DMA2 Channel2 configuration ----------------------------------------------*/
+    490              DMA_DeInit(DMA2_Channel2);
+    491              DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)TIM8_CCR1_Address;
+    492              DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)(pDVars_str->hDmaBuff);
+    493              DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+    494              DMA_InitStructure.DMA_BufferSize = 2u;
+    495              DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    496              DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    497              DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    498              DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    499              DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    500              DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    501              DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    502              DMA_Init(DMA2_Channel2, &DMA_InitStructure);
+    503              /* Disable DMA2 Channel2 */
+    504              DMA_Cmd(DMA2_Channel2, ENABLE);  
+    505              
+    506              /* Enable the TIM8 Update interrupt */
+    507              NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) TIM8_UP_IRQn;
+    508              NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIMx_UP_PRE_EMPTION_PRIORITY;
+    509              NVIC_InitStructure.NVIC_IRQChannelSubPriority = TIMx_UP_SUB_PRIORITY;
+    510              NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    511              NVIC_Init(&NVIC_InitStructure);
+    512              
+    513              if (pDParams_str->bRepetitionCounter > 1u)
+    514              {
+    515                /* Only if REP RATE > 1 */
+    516                /* Enable the DMA2_CH2 TC interrupt */
+    517                NVIC_InitStructure.NVIC_IRQChannel = (uint8_t) DMA2_Channel2_IRQn;
+    518                NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = DMAx_TC_PRE_EMPTION_PRIORITY;
+    519                NVIC_InitStructure.NVIC_IRQChannelSubPriority = DMAx_TC_SUB_PRIORITY;
+    520                NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    521                NVIC_Init(&NVIC_InitStructure);
+    522                
+    523                /* Enable DMA2 CH2 TC IRQ */
+    524                DMA_ITConfig(DMA2_Channel2, DMA_IT_TC, ENABLE);
+    525                
+    526                pDVars_str->bDMATot = (pDParams_str->bRepetitionCounter+1u)/2u;
+    527              }
+    528              else
+    529              {
+    530                /* REP RATE = 1 */
+    531                DMA_ITConfig(DMA2_Channel2, DMA_IT_TC, DISABLE);
+    532                pDVars_str->bDMATot = 0u;
+    533              }
+    534            }
+    535                  
+    536            /* GPIOs configurations --------------------------------------------------*/
+    537            GPIO_StructInit(&GPIO_InitStructure);
+    538            
+    539            /****** Configure phase ADC channel GPIO as analog input ****/
+    540            GPIO_InitStructure.GPIO_Pin = pDParams_str->hIPin;  
+    541            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    542            GPIO_Init(pDParams_str->hIPort, &GPIO_InitStructure);
+    543            GPIO_PinLockConfig(pDParams_str->hIPort, pDParams_str->hIPin);
+    544            
+    545            /****** Configure TIMx Channel 1, 2 and 3 Outputs ******/ 
+    546            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    547            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    548            
+    549            hAux = (pDParams_str->hCh1Pin) | pDParams_str->hCh2Pin;  
+    550            hAux = hAux | pDParams_str->hCh3Pin;  
+    551            GPIO_InitStructure.GPIO_Pin = hAux; 
+    552            GPIO_Init(pDParams_str->hCh1Port, &GPIO_InitStructure);
+    553            GPIO_PinLockConfig(pDParams_str->hCh1Port, hAux);
+    554            
+    555            /****** Configure TIMx Channel 1N, 2N and 3N Outputs, if enabled ******/    
+    556            if ((pDParams_str->LowSideOutputs)== LS_PWM_TIMER) 
+    557            { 
+    558              GPIO_InitStructure.GPIO_Pin = pDParams_str->hCh1NPin;  
+    559              GPIO_Init(pDParams_str->hCh1NPort, &GPIO_InitStructure);  
+    560              GPIO_PinLockConfig(pDParams_str->hCh1NPort, pDParams_str->hCh1NPin);
+    561              
+    562              hAux = (pDParams_str->hCh2NPin) | pDParams_str->hCh3NPin;
+    563              GPIO_InitStructure.GPIO_Pin = hAux; 
+    564              GPIO_Init(pDParams_str->hCh2NPort, &GPIO_InitStructure);    
+    565              GPIO_PinLockConfig(pDParams_str->hCh2NPort, hAux);
+    566            }  else if ((pDParams_str->LowSideOutputs)== ES_GPIO)
+    567            {
+    568              /* Only "active high" polarity is supported */
+    569              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    570              GPIO_InitStructure.GPIO_Pin = pDParams_str->hCh1NPin;  
+    571              GPIO_Init(pDParams_str->hCh1NPort, &GPIO_InitStructure);  
+    572              GPIO_PinLockConfig(pDParams_str->hCh1NPort, pDParams_str->hCh1NPin);
+    573              
+    574              hAux = (pDParams_str->hCh2NPin) | (pDParams_str->hCh3NPin);
+    575              GPIO_InitStructure.GPIO_Pin = hAux; 
+    576              GPIO_Init(pDParams_str->hCh2NPort, &GPIO_InitStructure);    
+    577              GPIO_PinLockConfig(pDParams_str->hCh2NPort, hAux);
+    578            }
+    579            else
+    580            {
+    581            }
+    582                
+    583            if ((pDParams_str->EmergencyStop)!= DISABLE)  
+    584            {
+    585              /****** Configure TIMx BKIN input, if enabled ******/   
+    586              GPIO_StructInit(&GPIO_InitStructure);
+    587              GPIO_InitStructure.GPIO_Pin = pDParams_str->hBKINPin;  
+    588              GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    589              GPIO_Init(pDParams_str->hBKINPort, &GPIO_InitStructure);
+    590              GPIO_PinLockConfig(pDParams_str->hBKINPort, pDParams_str->hBKINPin);
+    591            }
+    592            
+    593            ADC_StructInit(&ADC_InitStructure);
+    594            /* ADC registers configuration -----------------------------------*/
+    595            /* ADC registers reset */  
+    596            ADC_DeInit(ADCx);
+    597            
+    598            /* Enable ADC */
+    599            ADC_Cmd(ADCx, ENABLE);
+    600            
+    601            /* ADC Init */
+    602            ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+    603            ADC_InitStructure.ADC_ScanConvMode = DISABLE;
+    604            ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+    605            ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+    606            ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Left;
+    607            ADC_InitStructure.ADC_NbrOfChannel = 1u;
+    608            ADC_Init(ADCx, &ADC_InitStructure);
+    609            
+    610            /* Enable external trigger (it will be SW) for ADC1 regular conversions */ 
+    611            ADC_ExternalTrigConvCmd(ADCx, ENABLE);
+    612              
+    613            /* Start calibration of ADC1 */
+    614            ADC_StartCalibration(ADCx);
+    615            
+    616            /* Wait for the end of ADC calibration */
+    617            while (ADC_GetCalibrationStatus(ADCx))
+    618            {
+    619            }
+    620            
+    621            if (pDParams_str->bInstanceNbr == 1u)
+    622            {
+    623              /* Init ADC1 - Used in any case for regular conversion */
+    624              ADC_DeInit(ADC1);
+    625              ADC_Cmd(ADC1, ENABLE);
+    626              ADC_Init(ADC1, &ADC_InitStructure);
+    627              ADC_ExternalTrigConvCmd(ADC1, ENABLE);
+    628              ADC_StartCalibration(ADC1);
+    629              while (ADC_GetCalibrationStatus(ADC1))
+    630              {
+    631              }
+    632            }
+    633            /* Enable Discontinuos mode */
+    634            ADC_InjectedDiscModeCmd(ADCx,ENABLE);
+    635            
+    636            /* ADC Injected conversions configuration */     
+    637            ADC_InjectedSequencerLengthConfig(ADCx,2u); 
+    638          
+    639            ADC_InjectedChannelConfig(ADCx,
+    640            pDParams_str->hIChannel, 1u, pDParams_str->b_ISamplingTime);
+    641            ADC_InjectedChannelConfig(ADCx,
+    642            pDParams_str->hIChannel, 2u, pDParams_str->b_ISamplingTime);
+    643            
+    644            /* Enable ADC1 EOC DMA */
+    645            ADC_DMACmd(ADC1,ENABLE);
+    646            
+    647            R1HD2_1ShuntMotorVarsRestart(this);
+    648            
+    649            /*  Set TIMx_2 CCx start value */
+    650            if (TIMx_2 == TIM4)
+    651            {
+    652              TIMx_2->CCR3 = (PWM_PERIOD >> 1) - pDParams_str->hTbefore;
+    653              TIM_DMACmd(TIMx_2, TIM_DMA_CC3, ENABLE);
+    654            }
+    655            if (TIMx_2 == TIM5)
+    656            {
+    657              TIMx_2->CCR4 = (PWM_PERIOD >> 1) - pDParams_str->hTbefore;
+    658              TIM_DMACmd(TIMx_2, TIM_DMA_CC4, ENABLE);
+    659            }
+    660            
+    661            /* Neglect first JEOC */
+    662            ADC_ExternalTrigInjectedConvConfig(ADCx, ADC_ExternalTrigInjecConv_None);
+    663            ADC_ClearFlag(ADCx, ADC_FLAG_JEOC);    
+    664            ADC_SoftwareStartInjectedConvCmd(ADCx, ENABLE);
+    665            while (ADC_GetFlagStatus(ADCx,ADC_FLAG_JEOC)==RESET)
+    666            {
+    667            }
+    668            ADC_ClearFlag(ADCx, ADC_FLAG_JEOC);
+    669            
+    670            /* Disabling the Injectec conversion for ADC1*/
+    671            ADC_ExternalTrigInjectedConvCmd(ADCx,DISABLE);
+    672            
+    673            /* Select the Injected conversion trigger */
+    674            ADC_ExternalTrigInjectedConvConfig(ADCx, pDVars_str->hADCTrigger);
+    675            
+    676            ADC_ITConfig(ADCx, ADC_IT_JEOC, ENABLE);
+    677          }
+    678          
+    679          /**
+    680          * @brief  It initializes TIMx and TIMx_2 peripheral for PWM generation, 
+    681                    active vector insertion and adc triggering.
+    682          * @param  TIMx Timer to be initialized
+    683          * @param  TIMx_2 Auxiliary timer to be initialized used for adc triggering
+    684          * @param  this related object of class CPWMC
+    685          * @retval none
+    686          */
+    687          static void R1HD2_TIMxInit(TIM_TypeDef* TIMx, TIM_TypeDef* TIMx_2, CPWMC this)
+    688          {
+    689            TIM_TimeBaseInitTypeDef TIMx_TimeBaseStructure;
+    690            TIM_OCInitTypeDef TIMx_OCInitStructure;
+    691            TIM_BDTRInitTypeDef TIMx_BDTRInitStructure;
+    692            pDVars_t pDVars_str;
+    693            pDParams_t pDParams_str;
+    694            
+    695            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+    696            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+    697            
+    698            /* TIMx Peripheral Configuration -------------------------------------------*/
+    699            /* TIMx Registers reset */
+    700            TIM_DeInit(TIMx);
+    701            TIM_DeInit(TIMx_2);
+    702            TIM_TimeBaseStructInit(&TIMx_TimeBaseStructure);
+    703            /* Time Base configuration */
+    704            TIMx_TimeBaseStructure.TIM_Prescaler = (uint16_t)(pDParams_str->bTim_Clock_Divider) - 1u;
+    705            TIMx_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned3;
+    706            TIMx_TimeBaseStructure.TIM_Period = PWM_PERIOD;
+    707            TIMx_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV2;
+    708            TIMx_TimeBaseStructure.TIM_RepetitionCounter = pDParams_str->bRepetitionCounter;
+    709            TIM_TimeBaseInit(TIMx, &TIMx_TimeBaseStructure);
+    710            TIMx_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    711            TIMx_TimeBaseStructure.TIM_Period = (PWM_PERIOD * 2u) - 1u;
+    712            TIM_TimeBaseInit(TIMx_2, &TIMx_TimeBaseStructure);
+    713              
+    714            /* Channel 1, 2,3 Configuration in PWM mode */
+    715            TIM_OCStructInit(&TIMx_OCInitStructure);  
+    716            TIMx_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
+    717            TIMx_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
+    718            TIMx_OCInitStructure.TIM_Pulse = 0x0u; /* dummy value */
+    719            
+    720            /* Channel 1 */
+    721            TIMx_OCInitStructure.TIM_OCPolarity = pDParams_str->hCh1Polarity;      
+    722            TIMx_OCInitStructure.TIM_OCIdleState = pDParams_str->hCh1IdleState;    
+    723            if ((pDParams_str->LowSideOutputs)== LS_PWM_TIMER) 
+    724            {
+    725              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable; 
+    726              TIMx_OCInitStructure.TIM_OCNPolarity = pDParams_str->hCh1NPolarity; 
+    727              TIMx_OCInitStructure.TIM_OCNIdleState = pDParams_str->hCh1NIdleState;     
+    728            }    
+    729            else
+    730            {
+    731              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Disable;
+    732            }    
+    733            TIM_OC1Init(TIMx, &TIMx_OCInitStructure); 
+    734              
+    735            /* Channel 2 */
+    736            TIMx_OCInitStructure.TIM_OCPolarity = pDParams_str->hCh2Polarity;      
+    737            TIMx_OCInitStructure.TIM_OCIdleState = pDParams_str->hCh2IdleState;   
+    738            if ((pDParams_str->LowSideOutputs)== LS_PWM_TIMER) 
+    739            {
+    740              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+    741              TIMx_OCInitStructure.TIM_OCNPolarity = pDParams_str->hCh2NPolarity; 
+    742              TIMx_OCInitStructure.TIM_OCNIdleState = pDParams_str->hCh2NIdleState;         
+    743            }
+    744            else
+    745            {
+    746              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Disable;
+    747            }
+    748            TIM_OC2Init(TIMx, &TIMx_OCInitStructure); 
+    749              
+    750            /* Channel 3 */
+    751            TIMx_OCInitStructure.TIM_OCPolarity = pDParams_str->hCh3Polarity;      
+    752            TIMx_OCInitStructure.TIM_OCIdleState = pDParams_str->hCh3IdleState; 
+    753            if ((pDParams_str->LowSideOutputs)== LS_PWM_TIMER)
+    754            {
+    755              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+    756              TIMx_OCInitStructure.TIM_OCNPolarity = pDParams_str->hCh3NPolarity; 
+    757              TIMx_OCInitStructure.TIM_OCNIdleState = pDParams_str->hCh3NIdleState;         
+    758            }
+    759            else
+    760            {
+    761              TIMx_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Disable;
+    762            }
+    763            TIM_OC3Init(TIMx, &TIMx_OCInitStructure);   
+    764            
+    765            /* Channel 4 Configuration in PWM mode */
+    766            TIMx_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;  
+    767            TIMx_OCInitStructure.TIM_OutputState = TIM_OutputState_Disable; 
+    768            TIMx_OCInitStructure.TIM_Pulse = PWM_PERIOD-pDParams_str->hHTMin;
+    769            TIMx_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; 
+    770            TIMx_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Reset;
+    771            TIM_OC4Init(TIMx, &TIMx_OCInitStructure);
+    772              
+    773            /* Dead Time */
+    774            TIM_BDTRStructInit(&TIMx_BDTRInitStructure);
+    775            TIMx_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Enable;
+    776            TIMx_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Enable;
+    777            TIMx_BDTRInitStructure.TIM_LOCKLevel = TIM_LOCKLevel_1; 
+    778            TIMx_BDTRInitStructure.TIM_DeadTime = (pDParams_str->hDeadTime)/2u;
+    779            /* BKIN, if enabled */
+    780            if ((pDParams_str->EmergencyStop)!= DISABLE)  
+    781            {
+    782              TIMx_BDTRInitStructure.TIM_Break = TIM_Break_Enable;
+    783              TIMx_BDTRInitStructure.TIM_BreakPolarity = pDParams_str->hBKINPolarity;
+    784              TIMx_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Disable;
+    785              TIM_ClearITPendingBit(TIMx, TIM_IT_Break);
+    786              TIM_ITConfig(TIMx, TIM_IT_Break, ENABLE);
+    787            }  
+    788            TIM_BDTRConfig(TIMx, &TIMx_BDTRInitStructure);
+    789            
+    790            /* Disable update interrupt */
+    791            TIM_ITConfig(TIMx, TIM_IT_Update, DISABLE);
+    792            
+    793            TIM_SelectOutputTrigger(TIMx, TIM_TRGOSource_Update);
+    794          
+    795            /* TIMx_2 Init */
+    796            TIMx_OCInitStructure.TIM_Pulse =   PWM_PERIOD >> 2u - pDParams_str->hTMin - pDParams_str->hTbefore;
+    797            TIMx_OCInitStructure.TIM_OutputState = TIM_OutputState_Disable; /* Enable here for sampling point debug */
+    798            if (TIMx_2 == TIM4)
+    799            {
+    800              TIM_SelectOutputTrigger(TIMx_2, TIM_TRGOSource_OC3Ref);
+    801              TIM_OC3Init(TIMx_2, &TIMx_OCInitStructure);
+    802            }
+    803            if (TIMx_2 == TIM5)
+    804            {
+    805              TIM_SelectOutputTrigger(TIMx_2, TIM_TRGOSource_OC4Ref);
+    806              TIM_OC4Init(TIMx_2, &TIMx_OCInitStructure);
+    807            }
+    808                
+    809            TIM_SelectInputTrigger(TIMx,TIM_TS_ITR1);
+    810            TIM_SelectSlaveMode(TIMx,TIM_SlaveMode_Trigger);    
+    811            
+    812            TIM_SelectSlaveMode(TIMx_2,TIM_SlaveMode_Trigger);
+    813            if (TIMx_2 == TIM4)
+    814            {
+    815              TIM_SelectInputTrigger(TIMx_2,TIM_TS_ITR1);
+    816            }
+    817            if (TIMx_2 == TIM5)
+    818            {
+    819              TIM_SelectInputTrigger(TIMx_2,TIM_TS_ITR0);
+    820            }
+    821          
+    822            /* Prepare timer for synchronization */
+    823            TIM_GenerateEvent(TIMx,TIM_EventSource_Update);
+    824            TIM_GenerateEvent(TIMx_2,TIM_EventSource_Update);
+    825                
+    826            if (pDParams_str->bFreqRatio == 2u) 
+    827            {
+    828              if (pDParams_str->bIsHigherFreqTim == HIGHER_FREQ)
+    829              {
+    830                if (pDParams_str->bRepetitionCounter == 3u)
+    831                {
+    832                  /* Set TIM1 repetition counter to 1 */
+    833                  TIMx->RCR =0x01u; 
+    834                  TIM_GenerateEvent(TIMx, TIM_EventSource_Update);
+    835                  /* Repetition counter will be set to 3 at next Update */
+    836                  TIMx->RCR =0x03u; 
+    837                }
+    838              }
+    839              
+    840              TIM_SetCounter(TIMx, PWM_PERIOD-1u);
+    841              TIM_SetCounter(TIMx_2, PWM_PERIOD-1u);         
+    842            }
+    843            else /* bFreqRatio equal to 1 or 3 */
+    844            {
+    845              if (pDParams_str->bInstanceNbr == 1u)
+    846              {
+    847                TIM_SetCounter(pDParams_str ->TIMx, PWM_PERIOD-1u);
+    848                TIM_SetCounter(pDVars_str->TIMx_2, PWM_PERIOD-1u);
+    849              }
+    850            }
+    851          }
+    852          
+    853          /**
+    854          * @brief  It perform the start of all the timers needed by the control. 
+    855                    Each timer must be already prepared to be started by temporary timer.
+    856                    It utilizes TIM2 as temporary timer to achieve synchronization.
+    857                    Each timer must be in frozen state with CNT, ARR, REP RATE and trigger
+    858                    correctly set (these setting are usually performed in the Init method
+    859                    according the configuration)
+    860          * @retval none
+    861          */
+    862          void R1HD2_StartTimers(void)
+    863          {
+    864            TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;   
+    865            
+    866            /* Temporary Enable TIM2 clock */
+    867            RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    868            TIM_DeInit(TIM2);
+    869            TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
+    870            /* Time Base configuration */
+    871            TIM_TimeBaseStructure.TIM_Prescaler = 0x0u;
+    872            TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    873            TIM_TimeBaseStructure.TIM_Period = 1u; /* dummy */ 
+    874            TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    875            TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+    876            
+    877            TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);  
+    878               
+    879            TIM_Cmd(TIM2, ENABLE);
+    880            
+    881            TIM_DeInit(TIM2);
+    882            RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, DISABLE);
+    883          }
+    884          
+    885          /**
+    886          * @brief  It stores into 'this' object variables the voltage present on the  
+    887          *         current feedback analog channel when no current is flowin into the
+    888          *         motor
+    889          * @param  this related object of class CPWMC
+    890          * @retval none
+    891          */
+    892          static void R1HD2_CurrentReadingCalibration(CPWMC this)
+    893          {
+    894            pDVars_t pDVars_str;			
+    895            pDParams_t pDParams_str;	
+    896            TIM_TypeDef*  LocalTIMx;
+    897            uint16_t htempCCER, haux;
+    898            
+    899            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+    900            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+    901          
+    902            LocalTIMx = pDParams_str->TIMx;
+    903            
+    904            pDVars_str->wPhaseOffset = 0u;
+    905            
+    906            pDVars_str->bIndex=0u;
+    907            
+    908            /* Force inactive level on TIMx CHy and TIMx CHyN */ 
+    909            htempCCER =  pDParams_str->TIMx->CCER;
+    910            haux = htempCCER & TIMxCCER_MASK;
+    911            haux |= TIMx_CC4E_BIT;
+    912            LocalTIMx->CCER = haux;
+    913            
+    914            /* Change function to be executed in ADCx_ISR */ 
+    915            ((_CPWMC) this)->Methods_str.pPWMC_GetPhaseCurrents = &R1HD2_HFCurrentsCalibration;
+    916            
+    917            R1HD2_SwitchOnPWM(this);
+    918            
+    919            /* Wait for NB_CONVERSIONS to be executed */
+    920            while (pDVars_str->bIndex < (NB_CONVERSIONS))
+    921            {
+    922              if (LocalTIMx->DIER & TIM_IT_Update)
+    923              {}
+    924              else
+    925              {
+    926                pDVars_str->bIndex = NB_CONVERSIONS;
+    927              }
+    928            }
+    929            
+    930            R1HD2_SwitchOffPWM( this);
+    931            
+    932            pDVars_str->wPhaseOffset = pDVars_str->wPhaseOffset/NB_CONVERSIONS;
+    933            pDVars_str->wPhaseOffset <<= 1;
+    934           
+    935            /* Set back TIMx CCER register */ 
+    936            LocalTIMx->CCER = htempCCER;
+    937            /* Change back function to be executed in ADCx_ISR */ 
+    938            ((_CPWMC) this)->Methods_str.pPWMC_GetPhaseCurrents = &R1HD2_GetPhaseCurrents;  
+    939          }
+    940          
+    941          /**
+    942          * @brief  First initialization of class members
+    943          * @param  this related object of class CPWMC
+    944          * @retval none
+    945          */
+    946          static void R1HD2_1ShuntMotorVarsInit(CPWMC this)
+    947          {
+    948            pDVars_t pDVars_str;
+    949            pDParams_t pDParams_str;
+    950            
+    951            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+    952            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+    953            
+    954            /* Init motor vars */
+    955            pDVars_str->wPhaseOffset=0u;
+    956            pDVars_str->bInverted_pwm=INVERT_NONE;
+    957            pDVars_str->bInverted_pwm_new=INVERT_NONE;
+    958            pDVars_str->hFlags &= (~STBD3);
+    959            pDVars_str->hFlags &= (~DSTEN);
+    960            
+    961            /* After reset value of DMA buffers */
+    962            pDVars_str->hDmaBuff[0] = PWM_PERIOD + 1u;
+    963            pDVars_str->hDmaBuff[1] = PWM_PERIOD >> 1;
+    964              
+    965            /* After reset value of dvDutyValues */
+    966            CLASS_VARS.hCntPhA = PWM_PERIOD >> 1;
+    967            CLASS_VARS.hCntPhB = PWM_PERIOD >> 1;
+    968            CLASS_VARS.hCntPhC = PWM_PERIOD >> 1;
+    969            
+    970            /* Default value of DutyValues */
+    971            pDVars_str->hCntSmp1 = (PWM_PERIOD >> 1) - pDParams_str->hTbefore;
+    972            pDVars_str->hCntSmp2 = (PWM_PERIOD >> 1) + pDParams_str->hTafter;
+    973            
+    974            /* Default value of sampling point */
+    975            pDVars_str->hCCDmaBuffCh4[0] = pDVars_str->hCntSmp2; /*  Second point */
+    976            pDVars_str->hCCDmaBuffCh4[1] = (PWM_PERIOD * 2u) - 1u; /* Update */
+    977            pDVars_str->hCCDmaBuffCh4[2] = pDVars_str->hCntSmp1; /* First point */
+    978            
+    979            TIM_DMACmd(pDParams_str->TIMx, TIM_DMA_CC4, DISABLE);
+    980          }
+    981          
+    982          /**
+    983          * @brief  Initialization of class members after each motor start
+    984          * @param  this related object of class CPWMC
+    985          * @retval none
+    986          */
+    987          static void R1HD2_1ShuntMotorVarsRestart(CPWMC this)
+    988          {
+    989            pDVars_t pDVars_str;
+    990            pDParams_t pDParams_str;
+    991            
+    992            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+    993            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+    994            
+    995            /* Default value of DutyValues */
+    996            pDVars_str->hCntSmp1 = (PWM_PERIOD >> 1) - pDParams_str->hTbefore;
+    997            pDVars_str->hCntSmp2 = (PWM_PERIOD >> 1) + pDParams_str->hTafter;
+    998            
+    999            /* Default value of sampling point */
+   1000            pDVars_str->hCCDmaBuffCh4[0] = pDVars_str->hCntSmp2; /*  Second point */
+   1001            pDVars_str->hCCDmaBuffCh4[2] = pDVars_str->hCntSmp1; /* First point */
+   1002            
+   1003            /* After start value of DMA buffers */
+   1004            pDVars_str->hDmaBuff[0] = PWM_PERIOD + 1u;
+   1005            pDVars_str->hDmaBuff[1]= PWM_PERIOD >> 1;
+   1006            
+   1007            /* After start value of dvDutyValues */
+   1008            CLASS_VARS.hCntPhA = PWM_PERIOD >> 1;
+   1009            CLASS_VARS.hCntPhB = PWM_PERIOD >> 1;
+   1010            CLASS_VARS.hCntPhC = PWM_PERIOD >> 1;
+   1011            
+   1012            /* Set the default previous value of Phase A,B,C current */
+   1013            pDVars_str->hCurrAOld=0;
+   1014            pDVars_str->hCurrBOld=0;
+   1015            pDVars_str->hCurrCOld=0;
+   1016              
+   1017            TIM_DMACmd(pDParams_str->TIMx, TIM_DMA_CC4, DISABLE);
+   1018          }
+   1019          
+   1020          /**
+   1021          * @brief  It computes and return latest converted motor phase currents motor
+   1022          * @param  this related object of class CPWMC
+   1023          * @retval Curr_Components Ia and Ib current in Curr_Components format
+   1024          */
+   1025          static void R1HD2_GetPhaseCurrents(CPWMC this,Curr_Components* pStator_Currents)
+   1026          {  
+   1027            int32_t wAux;
+   1028            int16_t hCurrA = 0, hCurrB = 0, hCurrC = 0;
+   1029            uint8_t bCurrASamp = 0u, bCurrBSamp = 0u, bCurrCSamp = 0u;
+   1030            pDVars_t pDVars_str;
+   1031            
+   1032            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+   1033            
+   1034            /* Disabling the Injectec conversion for ADCx after EOC*/
+   1035            /* Stdlib replaced: ADC_ExternalTrigInjectedConvCmd(pDVars_str->ADCx,DISABLE);*/
+   1036            pDVars_str->ADCx->CR2 &= CR2_JEXTTRIG_Reset;
+   1037            
+   1038            /* Reset the bSOFOC flags to indicate the start of FOC algorithm*/
+   1039            pDVars_str->hFlags &= (~SOFOC);
+   1040            
+   1041            /* First sampling point */
+   1042            wAux = (int32_t)(pDVars_str->ADCx->JDR2);
+   1043            wAux *= 2;
+   1044            wAux -= (int32_t)(pDVars_str->wPhaseOffset);
+   1045            
+   1046            /* Check saturation */
+   1047            if (wAux > S16_MIN)
+   1048            {
+   1049              if (wAux < S16_MAX)
+   1050              {
+   1051              }
+   1052              else
+   1053              {
+   1054                wAux = S16_MAX;
+   1055              }
+   1056            }
+   1057            else
+   1058            {
+   1059              wAux = S16_MIN;
+   1060            }  
+   1061            
+   1062            switch (pDVars_str->sampCur1)
+   1063            {
+   1064            case SAMP_IA:
+   1065              hCurrA = (int16_t)(wAux);
+   1066              bCurrASamp = 1u;
+   1067              break;
+   1068            case SAMP_IB:
+   1069              hCurrB = (int16_t)(wAux);
+   1070              bCurrBSamp = 1u;
+   1071              break;
+   1072            case SAMP_IC:
+   1073              hCurrC = (int16_t)(wAux);
+   1074              bCurrCSamp = 1u;
+   1075              break;
+   1076            case SAMP_NIA:
+   1077              wAux = -wAux;
+   1078              hCurrA = (int16_t)(wAux);
+   1079              bCurrASamp = 1u;
+   1080              break;
+   1081            case SAMP_NIB:
+   1082              wAux = -wAux;
+   1083              hCurrB = (int16_t)(wAux);
+   1084              bCurrBSamp = 1u;
+   1085              break;
+   1086            case SAMP_NIC:
+   1087              wAux = -wAux;
+   1088              hCurrC = (int16_t)(wAux);
+   1089              bCurrCSamp = 1u;
+   1090              break;
+   1091            case SAMP_OLDA:
+   1092              hCurrA = pDVars_str->hCurrAOld;
+   1093              bCurrASamp = 1u;
+   1094              break;
+   1095            case SAMP_OLDB:
+   1096              hCurrB = pDVars_str->hCurrBOld;
+   1097              bCurrBSamp = 1u;
+   1098              break;
+   1099            default:
+   1100              break;
+   1101            }
+   1102            
+   1103            /* Second sampling point */
+   1104            wAux = (int32_t)(pDVars_str->ADCx->JDR1);
+   1105            wAux *= 2;
+   1106            wAux -= (int32_t)(pDVars_str->wPhaseOffset);
+   1107            
+   1108            /* Check saturation */
+   1109            if (wAux > S16_MIN)
+   1110            {
+   1111              if (wAux < S16_MAX)
+   1112              {
+   1113              }
+   1114              else
+   1115              {
+   1116                wAux = S16_MAX;
+   1117              }
+   1118            }
+   1119            else
+   1120            {
+   1121              wAux = S16_MIN;
+   1122            }
+   1123            
+   1124            switch (pDVars_str->sampCur2)
+   1125            {
+   1126            case SAMP_IA:
+   1127              hCurrA = (int16_t)(wAux);
+   1128              bCurrASamp = 1u;
+   1129              break;
+   1130            case SAMP_IB:
+   1131              hCurrB = (int16_t)(wAux);
+   1132              bCurrBSamp = 1u;
+   1133              break;
+   1134            case SAMP_IC:
+   1135              hCurrC = (int16_t)(wAux);
+   1136              bCurrCSamp = 1u;
+   1137              break;
+   1138            case SAMP_NIA:
+   1139              wAux = -wAux; 
+   1140              hCurrA = (int16_t)(wAux);
+   1141              bCurrASamp = 1u;
+   1142              break;
+   1143            case SAMP_NIB:
+   1144              wAux = -wAux; 
+   1145              hCurrB = (int16_t)(wAux);
+   1146              bCurrBSamp = 1u;
+   1147              break;
+   1148            case SAMP_NIC:
+   1149              wAux = -wAux; 
+   1150              hCurrC = (int16_t)(wAux);
+   1151              bCurrCSamp = 1u;
+   1152              break;
+   1153            default:
+   1154              break;
+   1155            }
+   1156              
+   1157            /* Computation of the third value */
+   1158            if (bCurrASamp == 0u)
+   1159            {
+   1160              wAux = -((int32_t)(hCurrB)) -((int32_t)(hCurrC));
+   1161              
+   1162              /* Check saturation */
+   1163              if (wAux > S16_MIN)
+   1164              {
+   1165                if (wAux < S16_MAX)
+   1166                {
+   1167                }
+   1168                else
+   1169                {
+   1170                  wAux = S16_MAX;
+   1171                }
+   1172              }
+   1173              else
+   1174              {
+   1175                wAux = S16_MIN;
+   1176              }  
+   1177              
+   1178              hCurrA = (int16_t)wAux;
+   1179            }
+   1180            if (bCurrBSamp == 0u)
+   1181            {
+   1182              wAux = -((int32_t)(hCurrA)) -((int32_t)(hCurrC));
+   1183              
+   1184              /* Check saturation */
+   1185              if (wAux > S16_MIN)
+   1186              {
+   1187                if (wAux < S16_MAX)
+   1188                {
+   1189                }
+   1190                else
+   1191                {
+   1192                  wAux = S16_MAX;
+   1193                }
+   1194              }
+   1195              else
+   1196              {
+   1197                wAux = S16_MIN;
+   1198              }  
+   1199              
+   1200              hCurrB = (int16_t)wAux;
+   1201            }
+   1202            if (bCurrCSamp == 0u)
+   1203            {
+   1204              wAux = -((int32_t)(hCurrA)) -((int32_t)(hCurrB));
+   1205              
+   1206              /* Check saturation */
+   1207              if (wAux > S16_MIN)
+   1208              {
+   1209                if (wAux < S16_MAX)
+   1210                {
+   1211                }
+   1212                else
+   1213                {
+   1214                  wAux = S16_MAX;
+   1215                }
+   1216              }
+   1217              else
+   1218              {
+   1219                wAux = S16_MIN;
+   1220              }  
+   1221              
+   1222              hCurrC = (int16_t)wAux;
+   1223            }
+   1224            
+   1225            /* hCurrA, hCurrB, hCurrC values are the sampled values */
+   1226              
+   1227            pDVars_str->hCurrAOld = hCurrA;
+   1228            pDVars_str->hCurrBOld = hCurrB;
+   1229            pDVars_str->hCurrCOld = hCurrC;
+   1230            
+   1231            pStator_Currents->qI_Component1 = hCurrA;
+   1232            pStator_Currents->qI_Component2 = hCurrB;
+   1233          }
+   1234          
+   1235          /**
+   1236          * @brief  It sum up injected conversion data into wPhaseOffset. It is called 
+   1237          *         only during current calibration 
+   1238          * @param  this related object
+   1239          * @retval Curr_Components It always returns {0,0} in Curr_Components format
+   1240          */
+   1241          static void R1HD2_HFCurrentsCalibration(CPWMC this,Curr_Components* pStator_Currents)
+   1242          {
+   1243            pDVars_t pDVars_str;
+   1244            
+   1245            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+   1246            
+   1247            /* Disabling the Injectec conversion for ADCx after EOC*/
+   1248            /* Stdlib replaced: ADC_ExternalTrigInjectedConvCmd(pDVars_str->ADCx,DISABLE);*/
+   1249            pDVars_str->ADCx->CR2 &= CR2_JEXTTRIG_Reset;
+   1250            
+   1251            /* Reset the SOFOC flag to indicate the start of FOC algorithm*/
+   1252            pDVars_str->hFlags &= (~SOFOC); 
+   1253              
+   1254            if (pDVars_str->bIndex < NB_CONVERSIONS)
+   1255            {
+   1256              pDVars_str->wPhaseOffset += pDVars_str->ADCx->JDR1;
+   1257              pDVars_str->bIndex++;
+   1258            }
+   1259          }
+   1260          
+   1261          /**
+   1262          * @brief  It turns on low sides switches. This function is intended to be 
+   1263          *         used for charging boot capacitors of driving section. It has to be 
+   1264          *         called each motor start-up when using high voltage drivers
+   1265          * @param  this related object of class CPWMC
+   1266          * @retval none
+   1267          */
+   1268          static void R1HD2_TurnOnLowSides(CPWMC this)
+   1269          {
+   1270            pDParams_t pDParams_str;
+   1271            
+   1272            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+   1273          
+   1274            pDParams_str->TIMx->CCR1 = 0u;
+   1275            pDParams_str->TIMx->CCR2 = 0u;
+   1276            pDParams_str->TIMx->CCR3 = 0u;
+   1277            
+   1278            TIM_ClearFlag(pDParams_str->TIMx,TIM_FLAG_Update);
+   1279            while (TIM_GetFlagStatus(pDParams_str->TIMx,TIM_FLAG_Update) == RESET)
+   1280            {}
+   1281            
+   1282            /* Main PWM Output Enable */
+   1283            TIM_CtrlPWMOutputs(pDParams_str->TIMx, ENABLE);
+   1284            if ((pDParams_str->LowSideOutputs)== ES_GPIO)
+   1285            {
+   1286              GPIO_WriteBit(pDParams_str->hCh1NPort, pDParams_str->hCh1NPin, Bit_SET);
+   1287              GPIO_WriteBit(pDParams_str->hCh2NPort, pDParams_str->hCh2NPin, Bit_SET);
+   1288              GPIO_WriteBit(pDParams_str->hCh3NPort, pDParams_str->hCh3NPin, Bit_SET);
+   1289            }
+   1290            return; 
+   1291          }
+   1292          
+   1293          /**
+   1294          * @brief  This function enables the update event and the single shunt distortion
+   1295          * @param  this related object of class CPWMC
+   1296          * @retval none
+   1297          */
+   1298          static void R1HD2_SwitchOnPWM(CPWMC this)
+   1299          {
+   1300            pDVars_t pDVars_str;
+   1301            pDParams_t pDParams_str;
+   1302            
+   1303            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+   1304            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+   1305            
+   1306            /* Set all duty to 50% */
+   1307            pDParams_str->TIMx->CCR1 = PWM_PERIOD >> 1;
+   1308            pDParams_str->TIMx->CCR2 = PWM_PERIOD >> 1;
+   1309            pDParams_str->TIMx->CCR3 = PWM_PERIOD >> 1;
+   1310            
+   1311            TIM_ClearFlag(pDParams_str->TIMx, TIM_FLAG_Update);
+   1312            while (TIM_GetFlagStatus(pDParams_str->TIMx,TIM_FLAG_Update) == RESET)
+   1313            {}
+   1314            
+   1315            /* Enable UPDATE ISR */
+   1316            TIM_ClearFlag(pDParams_str->TIMx, TIM_FLAG_Update);
+   1317            TIM_ITConfig(pDParams_str->TIMx, TIM_IT_Update, ENABLE);
+   1318            
+   1319            /* Enabling distortion for single shunt */
+   1320            pDVars_str->hFlags |= DSTEN;
+   1321            
+   1322            /* Main PWM Output Enable */
+   1323            TIM_CtrlPWMOutputs(pDParams_str->TIMx, ENABLE);
+   1324            if ((pDParams_str->LowSideOutputs)== ES_GPIO)
+   1325            {
+   1326              GPIO_WriteBit(pDParams_str->hCh1NPort, pDParams_str->hCh1NPin, Bit_SET);
+   1327              GPIO_WriteBit(pDParams_str->hCh2NPort, pDParams_str->hCh2NPin, Bit_SET);
+   1328              GPIO_WriteBit(pDParams_str->hCh3NPort, pDParams_str->hCh3NPin, Bit_SET);
+   1329            }
+   1330            return; 
+   1331          }
+   1332          
+   1333          /**
+   1334          * @brief  It disables PWM generation on the proper Timer peripheral acting on 
+   1335          *         MOE bit, disables the single shunt distortion and reset the TIM status
+   1336          * @param  this related object of class CPWMC
+   1337          * @retval none
+   1338          */
+   1339          static void R1HD2_SwitchOffPWM(CPWMC this)
+   1340          {
+   1341            pDVars_t pDVars_str;
+   1342            pDParams_t pDParams_str;
+   1343            
+   1344            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+   1345            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+   1346            
+   1347            /* Main PWM Output Disable */
+   1348            TIM_CtrlPWMOutputs(pDParams_str->TIMx, DISABLE);
+   1349            if ((pDParams_str->LowSideOutputs)== ES_GPIO)
+   1350            {
+   1351              GPIO_WriteBit(pDParams_str->hCh1NPort, pDParams_str->hCh1NPin, Bit_RESET);
+   1352              GPIO_WriteBit(pDParams_str->hCh2NPort, pDParams_str->hCh2NPin, Bit_RESET);
+   1353              GPIO_WriteBit(pDParams_str->hCh3NPort, pDParams_str->hCh3NPin, Bit_RESET);
+   1354            }
+   1355            
+   1356            /* Disable UPDATE ISR */
+   1357            TIM_ITConfig(pDParams_str->TIMx, TIM_IT_Update, DISABLE);
+   1358              
+   1359            /* Disabling distortion for single */
+   1360            pDVars_str->hFlags &= (~DSTEN);
+   1361            
+   1362            while (TIM_GetFlagStatus(pDParams_str->TIMx,TIM_FLAG_Update)==RESET)
+   1363            {
+   1364              if (pDParams_str->TIMx->DIER & TIM_IT_Update)
+   1365              { break;}
+   1366            }
+   1367              
+   1368              
+   1369            /* Disabling all DMA previous setting */
+   1370            TIM_DMACmd(pDParams_str->TIMx, TIM_DMA_CC4, DISABLE);  
+   1371            
+   1372            /* Set all duty to 50% */
+   1373            pDParams_str->TIMx->CCR1 = PWM_PERIOD >> 1;
+   1374            pDParams_str->TIMx->CCR2 = PWM_PERIOD >> 1;
+   1375            pDParams_str->TIMx->CCR3 = PWM_PERIOD >> 1;    
+   1376              
+   1377            return; 
+   1378          }
+   1379          
+   1380          /**
+   1381          * @brief  Implementation of the single shunt algorithm to setup the 
+   1382          *         TIM1 register and DMA buffers values for the next PWM period.
+   1383          * @param  this related object of class CPWMC
+   1384          * @retval uint16_t It returns MC_FOC_DURATION if the TIMx update occurs 
+   1385                    before the end of FOC algorithm else returns MC_NO_ERROR
+   1386          */
+   1387          static uint16_t R1HD2_CalcDutyCycles(CPWMC this)
+   1388          {
+   1389            int16_t hDeltaDuty_0;
+   1390            int16_t hDeltaDuty_1;
+   1391            uint16_t hDutyV_0 = 0u;
+   1392            uint16_t hDutyV_1 = 0u;
+   1393            uint16_t hDutyV_2 = 0u;
+   1394            uint8_t bSector;
+   1395            uint8_t bStatorFluxPos;
+   1396            TIM_TypeDef* TIMx;
+   1397            uint16_t hAux;
+   1398            pDVars_t pDVars_str;
+   1399            pDParams_t pDParams_str;
+   1400              
+   1401            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+   1402            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+   1403            
+   1404            bSector = (uint8_t)(((_CPWMC)this)->Vars_str.hSector);
+   1405            
+   1406            if ((pDVars_str->hFlags & DSTEN) != 0u)
+   1407            { 
+   1408              switch (bSector)
+   1409              {
+   1410              case SECTOR_1:
+   1411                hDutyV_2 = CLASS_VARS.hCntPhA;
+   1412                hDutyV_1 = CLASS_VARS.hCntPhB;
+   1413                hDutyV_0 = CLASS_VARS.hCntPhC;
+   1414                break;
+   1415              case SECTOR_2:
+   1416                hDutyV_2 = CLASS_VARS.hCntPhB;
+   1417                hDutyV_1 = CLASS_VARS.hCntPhA;
+   1418                hDutyV_0 = CLASS_VARS.hCntPhC;
+   1419                break;
+   1420              case SECTOR_3:
+   1421                hDutyV_2 = CLASS_VARS.hCntPhB;
+   1422                hDutyV_1 = CLASS_VARS.hCntPhC;
+   1423                hDutyV_0 = CLASS_VARS.hCntPhA;
+   1424                break;
+   1425              case SECTOR_4:
+   1426                hDutyV_2 = CLASS_VARS.hCntPhC;
+   1427                hDutyV_1 = CLASS_VARS.hCntPhB;
+   1428                hDutyV_0 = CLASS_VARS.hCntPhA;
+   1429                break;
+   1430              case SECTOR_5:
+   1431                hDutyV_2 = CLASS_VARS.hCntPhC;
+   1432                hDutyV_1 = CLASS_VARS.hCntPhA;
+   1433                hDutyV_0 = CLASS_VARS.hCntPhB;
+   1434                break;
+   1435              case SECTOR_6:
+   1436                hDutyV_2 = CLASS_VARS.hCntPhA;
+   1437                hDutyV_1 = CLASS_VARS.hCntPhC;
+   1438                hDutyV_0 = CLASS_VARS.hCntPhB;
+   1439                break;
+   1440              default:
+   1441                break;
+   1442              }
+   1443              
+   1444              /* Compute delta duty */
+   1445              hDeltaDuty_0 = (int16_t)(hDutyV_1) - (int16_t)(hDutyV_0);
+   1446              hDeltaDuty_1 = (int16_t)(hDutyV_2) - (int16_t)(hDutyV_1);
+   1447              
+   1448              /* Check region */
+   1449              if ((uint16_t)hDeltaDuty_0<=pDParams_str->hTMin)
+   1450              {
+   1451                if ((uint16_t)hDeltaDuty_1<=pDParams_str->hTMin)
+   1452                {
+   1453                  bStatorFluxPos = BOUNDARY_3;
+   1454                }
+   1455                else
+   1456                {
+   1457                  bStatorFluxPos = BOUNDARY_2;
+   1458                }
+   1459              } 
+   1460              else 
+   1461              {
+   1462                if ((uint16_t)hDeltaDuty_1>pDParams_str->hTMin)
+   1463                {
+   1464                  bStatorFluxPos = REGULAR;
+   1465                }
+   1466                else
+   1467                {
+   1468                  bStatorFluxPos = BOUNDARY_1;
+   1469                }
+   1470              }
+   1471                  
+   1472              if (bStatorFluxPos == REGULAR)
+   1473              {
+   1474                pDVars_str->bInverted_pwm_new = INVERT_NONE;
+   1475              }
+   1476              else if (bStatorFluxPos == BOUNDARY_1) /* Adjust the lower */
+   1477              {
+   1478                switch (bSector)
+   1479                {
+   1480                case SECTOR_5:
+   1481                case SECTOR_6:
+   1482                  if (CLASS_VARS.hCntPhA - pDParams_str->hHTMin - hDutyV_0 > pDParams_str->hTMin)
+   1483                  {
+   1484                    pDVars_str->bInverted_pwm_new = INVERT_A;
+   1485                    CLASS_VARS.hCntPhA -=pDParams_str->hHTMin;
+   1486                    if (CLASS_VARS.hCntPhA < hDutyV_1)
+   1487                    {
+   1488                      hDutyV_1 = CLASS_VARS.hCntPhA;
+   1489                    }
+   1490                  }
+   1491                  else
+   1492                  {
+   1493                    bStatorFluxPos = BOUNDARY_3;
+   1494                    if ((pDVars_str->hFlags & STBD3) == 0u)
+   1495                    {
+   1496                      pDVars_str->bInverted_pwm_new = INVERT_A;
+   1497                      CLASS_VARS.hCntPhA -=pDParams_str->hHTMin;
+   1498                      pDVars_str->hFlags |= STBD3;
+   1499                    } 
+   1500                    else
+   1501                    {
+   1502                      pDVars_str->bInverted_pwm_new = INVERT_B;
+   1503                      CLASS_VARS.hCntPhB -=pDParams_str->hHTMin;
+   1504                      pDVars_str->hFlags &= (~STBD3);
+   1505                    }
+   1506                  }
+   1507                  break;
+   1508                case SECTOR_2:
+   1509                case SECTOR_1:
+   1510                  if (CLASS_VARS.hCntPhB - pDParams_str->hHTMin - hDutyV_0 > pDParams_str->hTMin)
+   1511                  {
+   1512                    pDVars_str->bInverted_pwm_new = INVERT_B;
+   1513                    CLASS_VARS.hCntPhB -=pDParams_str->hHTMin;
+   1514                    if (CLASS_VARS.hCntPhB < hDutyV_1)
+   1515                    {
+   1516                      hDutyV_1 = CLASS_VARS.hCntPhB;
+   1517                    }
+   1518                  }
+   1519                  else
+   1520                  {
+   1521                    bStatorFluxPos = BOUNDARY_3;
+   1522                    if ((pDVars_str->hFlags & STBD3) == 0u)
+   1523                    {
+   1524                      pDVars_str->bInverted_pwm_new = INVERT_A;
+   1525                      CLASS_VARS.hCntPhA -=pDParams_str->hHTMin;
+   1526                      pDVars_str->hFlags |= STBD3;
+   1527                    } 
+   1528                    else
+   1529                    {
+   1530                      pDVars_str->bInverted_pwm_new = INVERT_B;
+   1531                      CLASS_VARS.hCntPhB -=pDParams_str->hHTMin;
+   1532                      pDVars_str->hFlags &= (~STBD3);
+   1533                    }
+   1534                  }
+   1535                  break;
+   1536                case SECTOR_4:
+   1537                case SECTOR_3:
+   1538                  if (CLASS_VARS.hCntPhC - pDParams_str->hHTMin - hDutyV_0 > pDParams_str->hTMin)
+   1539                  {
+   1540                    pDVars_str->bInverted_pwm_new = INVERT_C;
+   1541                    CLASS_VARS.hCntPhC -=pDParams_str->hHTMin;
+   1542                    if (CLASS_VARS.hCntPhC < hDutyV_1)
+   1543                    {
+   1544                      hDutyV_1 = CLASS_VARS.hCntPhC;
+   1545                    }
+   1546                  }
+   1547                  else
+   1548                  {
+   1549                    bStatorFluxPos = BOUNDARY_3;
+   1550                    if ((pDVars_str->hFlags & STBD3) == 0u)
+   1551                    {
+   1552                      pDVars_str->bInverted_pwm_new = INVERT_A;
+   1553                      CLASS_VARS.hCntPhA -=pDParams_str->hHTMin;
+   1554                      pDVars_str->hFlags |= STBD3;
+   1555                    } 
+   1556                    else
+   1557                    {
+   1558                      pDVars_str->bInverted_pwm_new = INVERT_B;
+   1559                      CLASS_VARS.hCntPhB -=pDParams_str->hHTMin;
+   1560                      pDVars_str->hFlags &= (~STBD3);
+   1561                    }
+   1562                  }
+   1563                  break;
+   1564                default:
+   1565                  break;
+   1566                }
+   1567              }
+   1568              else if (bStatorFluxPos == BOUNDARY_2) /* Adjust the middler */
+   1569              {
+   1570                switch (bSector)
+   1571                {
+   1572                case SECTOR_4:
+   1573                case SECTOR_5: /* Invert B */
+   1574                  pDVars_str->bInverted_pwm_new = INVERT_B;
+   1575                  CLASS_VARS.hCntPhB -=pDParams_str->hHTMin;
+   1576                  if (CLASS_VARS.hCntPhB > 0xEFFFu)
+   1577                  {
+   1578                    CLASS_VARS.hCntPhB = 0u;
+   1579                  }
+   1580                  break;
+   1581                case SECTOR_2:
+   1582                case SECTOR_3: /* Invert A */
+   1583                  pDVars_str->bInverted_pwm_new = INVERT_A;
+   1584                  CLASS_VARS.hCntPhA -=pDParams_str->hHTMin;
+   1585                  if (CLASS_VARS.hCntPhA > 0xEFFFu)
+   1586                  {
+   1587                    CLASS_VARS.hCntPhA = 0u;
+   1588                  }
+   1589                  break;
+   1590                case SECTOR_6:
+   1591                case SECTOR_1: /* Invert C */
+   1592                  pDVars_str->bInverted_pwm_new = INVERT_C;
+   1593                  CLASS_VARS.hCntPhC -=pDParams_str->hHTMin;
+   1594                  if (CLASS_VARS.hCntPhC > 0xEFFFu)
+   1595                  {
+   1596                    CLASS_VARS.hCntPhC = 0u;
+   1597                  }
+   1598                  break;
+   1599                default:
+   1600                  break;
+   1601                }
+   1602              }
+   1603              else
+   1604              {
+   1605                if ((pDVars_str->hFlags & STBD3) == 0u)
+   1606                {
+   1607                  pDVars_str->bInverted_pwm_new = INVERT_A;
+   1608                  CLASS_VARS.hCntPhA -=pDParams_str->hHTMin;
+   1609                  pDVars_str->hFlags |= STBD3;
+   1610                } 
+   1611                else
+   1612                {
+   1613                  pDVars_str->bInverted_pwm_new = INVERT_B;
+   1614                  CLASS_VARS.hCntPhB -=pDParams_str->hHTMin;
+   1615                  pDVars_str->hFlags &= (~STBD3);
+   1616                }
+   1617              }
+   1618                  
+   1619              if (bStatorFluxPos == REGULAR) /* Regular zone */
+   1620              {
+   1621                /* First point */
+   1622                if ((hDutyV_1 - hDutyV_0 - pDParams_str->hDeadTime)> pDParams_str->hMaxTrTs)
+   1623                {
+   1624                  pDVars_str->hCntSmp1 = hDutyV_0 + hDutyV_1 + pDParams_str->hDeadTime;
+   1625                  pDVars_str->hCntSmp1 >>= 1;
+   1626                }
+   1627                else
+   1628                {
+   1629                  pDVars_str->hCntSmp1 = hDutyV_1 - pDParams_str->hTbefore;
+   1630                }
+   1631                /* Second point */
+   1632                if ((hDutyV_2 - hDutyV_1 - pDParams_str->hDeadTime)> pDParams_str->hMaxTrTs)
+   1633                {
+   1634                  pDVars_str->hCntSmp2 = hDutyV_1 + hDutyV_2 + pDParams_str->hDeadTime;
+   1635                  pDVars_str->hCntSmp2 >>= 1;
+   1636                }
+   1637                else
+   1638                {
+   1639                  pDVars_str->hCntSmp2 = hDutyV_2 - pDParams_str->hTbefore;
+   1640                }
+   1641              }
+   1642              
+   1643              if (bStatorFluxPos == BOUNDARY_1) /* Two small, one big */
+   1644              {      
+   1645                /* First point */
+   1646                if ((hDutyV_1 - hDutyV_0 - pDParams_str->hDeadTime)> pDParams_str->hMaxTrTs)
+   1647                {
+   1648                  pDVars_str->hCntSmp1 = hDutyV_0 + hDutyV_1 + pDParams_str->hDeadTime;
+   1649                  pDVars_str->hCntSmp1 >>= 1;
+   1650                }
+   1651                else
+   1652                {
+   1653                  pDVars_str->hCntSmp1 = hDutyV_1 - pDParams_str->hTbefore;
+   1654                }
+   1655                /* Second point */
+   1656                pDVars_str->hCntSmp2 = PWM_PERIOD + pDParams_str->hHTMin - pDParams_str->hTSample;
+   1657              }
+   1658              
+   1659              if (bStatorFluxPos == BOUNDARY_2) /* Two big, one small */
+   1660              {
+   1661                /* First point */
+   1662                if ((hDutyV_2 - hDutyV_1 - pDParams_str->hDeadTime)>= pDParams_str->hMaxTrTs)
+   1663                {
+   1664                  pDVars_str->hCntSmp1 = hDutyV_1 + hDutyV_2 + pDParams_str->hDeadTime;
+   1665                  pDVars_str->hCntSmp1 >>= 1;
+   1666                }
+   1667                else
+   1668                {
+   1669                  pDVars_str->hCntSmp1 = hDutyV_2 - pDParams_str->hTbefore;
+   1670                }
+   1671                /* Second point */
+   1672                pDVars_str->hCntSmp2 = PWM_PERIOD + pDParams_str->hHTMin - pDParams_str->hTSample;
+   1673              }
+   1674              
+   1675              if (bStatorFluxPos == BOUNDARY_3)  
+   1676              {
+   1677                /* First point */
+   1678                pDVars_str->hCntSmp1 = hDutyV_0-pDParams_str->hTbefore; /* Dummy trigger */
+   1679                /* Second point */
+   1680                pDVars_str->hCntSmp2 = PWM_PERIOD + pDParams_str->hHTMin - pDParams_str->hTSample;
+   1681              }
+   1682            }
+   1683            else
+   1684            {
+   1685              pDVars_str->bInverted_pwm_new = INVERT_NONE;
+   1686              bStatorFluxPos = REGULAR;
+   1687            }
+   1688              
+   1689            /* Update Timer Ch 1,2,3 (These value are required before update event) */
+   1690              
+   1691            pDVars_str->hFlags |= EOFOC;
+   1692            /* Check if DMA transition has been completed */
+   1693            if (pDVars_str->bDMACur == 0u)
+   1694            { 
+   1695              TIMx = pDParams_str->TIMx;
+   1696              
+   1697              /* Preload Enable */
+   1698              TIMx->CCMR1 |= CCMR1_PRELOAD_ENABLE_MASK;
+   1699              TIMx->CCMR2 |= CCMR2_PRELOAD_ENABLE_MASK;
+   1700              
+   1701              TIMx->CCR1 = CLASS_VARS.hCntPhA;
+   1702              TIMx->CCR2 = CLASS_VARS.hCntPhB;
+   1703              TIMx->CCR3 = CLASS_VARS.hCntPhC;
+   1704              
+   1705              /* Update ADC Trigger DMA buffer */    
+   1706              pDVars_str->hCCDmaBuffCh4[0] = pDVars_str->hCntSmp2; /* Second point */
+   1707              pDVars_str->hCCDmaBuffCh4[2] = pDVars_str->hCntSmp1; /* First point */
+   1708            }
+   1709            
+   1710            /* Limit for update event */
+   1711            
+   1712            /* Check the status of bSOFOC flags if is set the next update event has been 
+   1713            occurred so an error will be reported*/
+   1714            if ((pDVars_str->hFlags & SOFOC) != 0u)
+   1715            {
+   1716              hAux = MC_FOC_DURATION;
+   1717            }
+   1718            else
+   1719            {
+   1720              hAux = MC_NO_ERROR;
+   1721            }
+   1722            
+   1723            /* The following instruction can be executed after Update handler 
+   1724               before the get phase current (Second EOC) */
+   1725                
+   1726            /* Set the current sampled */
+   1727             if (bStatorFluxPos == REGULAR) /* Regual zone */
+   1728            {
+   1729              pDVars_str->sampCur1 = REGULAR_SAMP_CUR1[bSector];
+   1730              pDVars_str->sampCur2 = REGULAR_SAMP_CUR2[bSector];
+   1731            }
+   1732            
+   1733            if (bStatorFluxPos == BOUNDARY_1) /* Two small, one big */
+   1734            {
+   1735              pDVars_str->sampCur1 = REGULAR_SAMP_CUR1[bSector];
+   1736              pDVars_str->sampCur2 = BOUNDR1_SAMP_CUR2[bSector];
+   1737            }
+   1738            
+   1739            if (bStatorFluxPos == BOUNDARY_2) /* Two big, one small */
+   1740            {
+   1741              pDVars_str->sampCur1 = BOUNDR2_SAMP_CUR1[bSector];
+   1742              pDVars_str->sampCur2 = BOUNDR2_SAMP_CUR2[bSector];
+   1743            }
+   1744            
+   1745            if (bStatorFluxPos == BOUNDARY_3)  
+   1746            {
+   1747              if (pDVars_str->bInverted_pwm_new == INVERT_A)
+   1748              {
+   1749                pDVars_str->sampCur1 = SAMP_OLDB;
+   1750                pDVars_str->sampCur2 = SAMP_IA;
+   1751              }
+   1752              if (pDVars_str->bInverted_pwm_new == INVERT_B)
+   1753              {
+   1754                pDVars_str->sampCur1 = SAMP_OLDA;
+   1755                pDVars_str->sampCur2 = SAMP_IB;
+   1756              }
+   1757            }
+   1758              
+   1759            /* Limit for the Get Phase current (Second EOC Handler) */
+   1760            
+   1761            return (hAux);
+   1762          }
+   1763          
+   1764          /**
+   1765            * @brief  R1_HD2 implement MC IRQ function TIMER Update and DMA TC
+   1766            * @param  this related object
+   1767            * @param  flag used to indicate which IRQ has been occurred
+   1768            *			0 Means TIM1 Update IRQ occurred
+   1769            *			1 Means TIM8 Update IRQ occurred
+   1770            *			2 Means DAC TC IRQ occurred
+   1771            * @retval void* Pointer to drive object related to PWMnCurr object. 
+   1772                      It is set in the init function and returned by the MC TIMx update 
+   1773                      IRQ handler
+   1774            */
+   1775          static void* R1HD2_IRQHandler(void *this, unsigned char flag)
+   1776          {   
+   1777            uint8_t bInverted_pwm_new;
+   1778            pVars_t pVars_str = &CLASS_VARS;
+   1779            pDVars_t pDVars_str;
+   1780            pDParams_t pDParams_str;
+   1781            
+   1782            pDVars_str =   &(((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->DVars_str);
+   1783            pDParams_str =  ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->pDParams_str;
+   1784            
+   1785            switch (flag)
+   1786            {
+   1787            case 0: /* TIM1 Update IRQ */
+   1788              {      
+   1789                /* Critical point start */
+   1790                
+   1791                /* Enabling the Injectec conversion for ADCx*/
+   1792                /* Stdlib replaced: ADC_ExternalTrigInjectedConvCmd(pDVars_str->ADCx,ENABLE); */
+   1793                pDVars_str->ADCx->CR2 |= CR2_JEXTTRIG_Set;
+   1794                
+   1795                /* Critical point stop */
+   1796                
+   1797                /* TMP var to speedup the execution */
+   1798                bInverted_pwm_new = pDVars_str->bInverted_pwm_new;
+   1799                
+   1800                if (bInverted_pwm_new != pDVars_str->bInverted_pwm)  
+   1801                {                      
+   1802                  /* Set the DMA destination */
+   1803                  switch (bInverted_pwm_new)
+   1804                  {
+   1805                  case INVERT_A:
+   1806                    DMA1_Channel4->CPAR = TIM1_CCR1_Address;
+   1807                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, ENABLE);*/
+   1808                    pDParams_str->TIMx->DIER |= TIM_DMA_CC4;          
+   1809                    break;
+   1810                    
+   1811                  case INVERT_B:
+   1812                    DMA1_Channel4->CPAR = TIM1_CCR2_Address;
+   1813                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, ENABLE);*/
+   1814                    pDParams_str->TIMx->DIER |= TIM_DMA_CC4;
+   1815                    break;
+   1816                    
+   1817                  case INVERT_C:
+   1818                    DMA1_Channel4->CPAR = TIM1_CCR3_Address;
+   1819                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, ENABLE);*/
+   1820                    pDParams_str->TIMx->DIER |= TIM_DMA_CC4;
+   1821                    break;
+   1822                    
+   1823                  default:
+   1824                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, DISABLE);*/
+   1825                    pDParams_str->TIMx->DIER &= (u16)~TIM_DMA_CC4;
+   1826                    
+   1827                    break;
+   1828                  }
+   1829                }
+   1830                      
+   1831                /* Clear of End of FOC Flags */
+   1832                pDVars_str->hFlags &= (~EOFOC);
+   1833                
+   1834                /* Preload Disable */
+   1835                TIM1->CCMR1 &= CCMR1_PRELOAD_DISABLE_MASK;
+   1836                TIM1->CCMR2 &= CCMR2_PRELOAD_DISABLE_MASK;
+   1837                
+   1838                switch (bInverted_pwm_new)
+   1839                {
+   1840                case INVERT_A:
+   1841                  pDVars_str->hDmaBuff[1] = CLASS_VARS.hCntPhA;
+   1842                  pDVars_str->bDMACur = pDVars_str->bDMATot;
+   1843                  break;
+   1844                  
+   1845                case INVERT_B:
+   1846                  pDVars_str->hDmaBuff[1] = CLASS_VARS.hCntPhB;
+   1847                  pDVars_str->bDMACur = pDVars_str->bDMATot;
+   1848                  break;
+   1849                  
+   1850                case INVERT_C:
+   1851                  pDVars_str->hDmaBuff[1] = CLASS_VARS.hCntPhC;
+   1852                  pDVars_str->bDMACur = pDVars_str->bDMATot;
+   1853                  break;
+   1854                  
+   1855                default:
+   1856                  pDVars_str->bDMACur = 0u;
+   1857                  break;
+   1858                }
+   1859                
+   1860                pDVars_str->bInverted_pwm = bInverted_pwm_new;      
+   1861              
+   1862                /* Set the bSOFOC flags to indicate the execution of Update IRQ*/
+   1863                pDVars_str->hFlags |= SOFOC;
+   1864              }
+   1865              break;
+   1866            case 1: /* TIM8 Update IRQ */
+   1867              {      
+   1868                /* Critical point start */
+   1869                
+   1870                /* Enabling the Injectec conversion for ADCx*/
+   1871                /* Stdlib replaced: ADC_ExternalTrigInjectedConvCmd(pDVars_str->ADCx,ENABLE); */
+   1872                pDVars_str->ADCx->CR2 |= CR2_JEXTTRIG_Set;
+   1873                
+   1874                /* Critical point stop */
+   1875                
+   1876                /* TMP var to speedup the execution */
+   1877                bInverted_pwm_new = pDVars_str->bInverted_pwm_new;
+   1878                
+   1879                if (bInverted_pwm_new != pDVars_str->bInverted_pwm)  
+   1880                {                      
+   1881                  /* Set the DMA destination */
+   1882                  switch (bInverted_pwm_new)
+   1883                  {
+   1884                  case INVERT_A:
+   1885                    DMA2_Channel2->CPAR = TIM8_CCR1_Address;
+   1886                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, ENABLE);*/
+   1887                    pDParams_str->TIMx->DIER |= TIM_DMA_CC4;          
+   1888                    break;
+   1889                    
+   1890                  case INVERT_B:
+   1891                    DMA2_Channel2->CPAR = TIM8_CCR2_Address;
+   1892                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, ENABLE);*/
+   1893                    pDParams_str->TIMx->DIER |= TIM_DMA_CC4;
+   1894                    break;
+   1895                    
+   1896                  case INVERT_C:
+   1897                    DMA2_Channel2->CPAR = TIM8_CCR3_Address;
+   1898                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, ENABLE);*/
+   1899                    pDParams_str->TIMx->DIER |= TIM_DMA_CC4;
+   1900                    break;
+   1901                    
+   1902                  default:
+   1903                    /* Stdlib replaced: TIM_DMACmd(pDVars_str->TIMx, TIM_DMA_CC4, DISABLE);*/
+   1904                    pDParams_str->TIMx->DIER &= (u16)~TIM_DMA_CC4;
+   1905                    break;
+   1906                  }  
+   1907                }
+   1908                      
+   1909                /* Clear of End of FOC Flags */
+   1910                pDVars_str->hFlags &= (~EOFOC);
+   1911                
+   1912                /* Preload Disable */
+   1913                TIM8->CCMR1 &= CCMR1_PRELOAD_DISABLE_MASK;
+   1914                TIM8->CCMR2 &= CCMR2_PRELOAD_DISABLE_MASK;
+   1915                      
+   1916                switch (bInverted_pwm_new)
+   1917                {
+   1918                case INVERT_A:
+   1919                  pDVars_str->hDmaBuff[1] = CLASS_VARS.hCntPhA;
+   1920                  pDVars_str->bDMACur = pDVars_str->bDMATot;
+   1921                  break;
+   1922                  
+   1923                case INVERT_B:
+   1924                  pDVars_str->hDmaBuff[1] = CLASS_VARS.hCntPhB;
+   1925                  pDVars_str->bDMACur = pDVars_str->bDMATot;
+   1926                  break;
+   1927                  
+   1928                case INVERT_C:
+   1929                  pDVars_str->hDmaBuff[1] = CLASS_VARS.hCntPhC;
+   1930                  pDVars_str->bDMACur = pDVars_str->bDMATot;
+   1931                  break;
+   1932                  
+   1933                default:
+   1934                  pDVars_str->bDMACur = 0u;
+   1935                  break;
+   1936                }
+   1937                
+   1938                pDVars_str->bInverted_pwm = bInverted_pwm_new;      
+   1939              
+   1940                /* Set the bSOFOC flags to indicate the execution of Update IRQ*/
+   1941                pDVars_str->hFlags |= SOFOC;
+   1942              }
+   1943              break;
+   1944            case 2: /* DAC TC IRQ */
+   1945              {
+   1946                pDVars_str->bDMACur--;
+   1947                if (pDVars_str->bDMACur == 0u)
+   1948                {
+   1949                  if ((pDVars_str->hFlags & EOFOC) != 0u)
+   1950                  {
+   1951                    /* Preload Enable */
+   1952                    pDParams_str->TIMx->CCMR1 |= CCMR1_PRELOAD_ENABLE_MASK;
+   1953                    pDParams_str->TIMx->CCMR2 |= CCMR2_PRELOAD_ENABLE_MASK;
+   1954                    
+   1955                    /* Compare register update */
+   1956                    pDParams_str->TIMx->CCR1 = CLASS_VARS.hCntPhA;
+   1957                    pDParams_str->TIMx->CCR2 = CLASS_VARS.hCntPhB;
+   1958                    pDParams_str->TIMx->CCR3 = CLASS_VARS.hCntPhC;
+   1959                    
+   1960                    /* Update ADC Trigger DMA buffer */    
+   1961                    pDVars_str->hCCDmaBuffCh4[0] = pDVars_str->hCntSmp2; /* Second point */
+   1962                    pDVars_str->hCCDmaBuffCh4[2] = pDVars_str->hCntSmp1; /* First point */        
+   1963                  }
+   1964                }
+   1965              }
+   1966              break;
+   1967            default:
+   1968              break;
+   1969            }
+   1970            
+   1971            return &(pVars_str->bMotor);
+   1972          }
+   1973          
+   1974          /**
+   1975          * @brief  Execute a regular conversion. 
+   1976          *         The function is not re-entrant (can't executed twice at the same time)
+   1977          *         It returns 0xFFFF in case of conversion error.
+   1978          * @param  this related object of class CPWMC
+   1979          * @param  bChannel ADC channel used for the regular conversion
+   1980          * @retval uint16_t It returns converted value or oxFFFF for conversion error */
+   1981          static uint16_t R1HD2_ExecRegularConv(CPWMC this, uint8_t bChannel)
+   1982          {
+   1983            pDVars_t pDVars_str = &DCLASS_VARS;
+   1984            uint32_t tmpflag = 0u;
+   1985          
+   1986            ADC1->SQR3 = bChannel;
+   1987            
+   1988            DMA1_Channel1->CMAR=(uint32_t)(&(pDVars_str->hRegConv));
+   1989            
+   1990            /* Reset DMA1_CH1 TC Flag */
+   1991            DMA1->IFCR = DMA1_FLAG_TC1;
+   1992            
+   1993            /* It starts software triggered regular conversion
+   1994            through bit banding access. It is equivalent to 
+   1995            ADC1->CR2 |= EXTTRIG_SWSTART_Set; */
+   1996            *(uint32_t *)(ADC1_CR2_EXTTRIG_SWSTART_BB)=(uint32_t)(0x1u);
+   1997            
+   1998            /* Wait until end of regular conversion */
+   1999            while (tmpflag == 0u)
+   2000            {
+   2001              tmpflag = (DMA1->ISR & DMA1_FLAG_TC1);
+   2002            }
+   2003           
+   2004            return (pDVars_str->hRegConv);
+   2005          }
+   2006          
+   2007          /**
+   2008          * @brief  It sets the specified sampling time for the specified ADC channel
+   2009          *         on ADC1. It must be called once for each channel utilized by user
+   2010          * @param  this related object of class CPWMC
+   2011          * @param  ADConv_struct struct containing ADC channel and sampling time
+   2012          * @retval none
+   2013          */
+   2014          static void R1HD2_ADC_SetSamplingTime(CPWMC this, ADConv_t ADConv_struct)
+   2015          { 
+   2016            uint32_t tmpreg1 = 0u, tmpreg2 = 0u, tmpreg3=0u, tmpreg4 = SMPR1_SMP_Set;
+   2017            
+   2018            /* if ADC_Channel_10 ... ADC_Channel_17 is selected */
+   2019            if (ADConv_struct.Channel> ADC_Channel_9)
+   2020            {
+   2021              /* Get the old register value */
+   2022              tmpreg1 = ADC1->SMPR1;
+   2023              /* Calculate the mask to clear */
+   2024              tmpreg3 = (uint32_t) (ADConv_struct.Channel) - 10u;
+   2025              tmpreg3 = tmpreg3 *3u;
+   2026              tmpreg2 =  tmpreg4 << (tmpreg3);
+   2027              /* Clear the old discontinuous mode channel count */
+   2028              tmpreg1 &= ~tmpreg2;
+   2029              /* Calculate the mask to set */
+   2030              tmpreg2 = (uint32_t)(ADConv_struct.SamplTime) << (tmpreg3);
+   2031              /* Set the discontinuous mode channel count */
+   2032              tmpreg1 |= tmpreg2;
+   2033              /* Store the new register value */
+   2034              ADC1->SMPR1 = tmpreg1;
+   2035            }
+   2036            else /* ADC_Channel include in ADC_Channel_[0..9] */
+   2037            {
+   2038              /* Get the old register value */
+   2039              tmpreg1 = ADC1->SMPR2;
+   2040              tmpreg3 = (uint32_t) (ADConv_struct.Channel) * 3u;
+   2041              /* Calculate the mask to clear */
+   2042              tmpreg4 = SMPR2_SMP_Set;
+   2043              tmpreg2 =  tmpreg4 << (tmpreg3);
+   2044              /* Clear the old discontinuous mode channel count */
+   2045              tmpreg1 &= ~tmpreg2;
+   2046              /* Calculate the mask to set */
+   2047              tmpreg2 = (uint32_t)(ADConv_struct.SamplTime) << (tmpreg3);
+   2048              /* Set the discontinuous mode channel count */
+   2049              tmpreg1 |= tmpreg2;
+   2050              /* Store the new register value */
+   2051              ADC1->SMPR2 = tmpreg1;
+   2052            }
+   2053          }
+   2054          
+   2055          /**
+   2056          * @brief  It is used to check if an overcurrent occurred since last call.
+   2057          * @param  this related object of class CPWMC
+   2058          * @retval uint16_t It returns MC_BREAK_IN whether an overcurrent has been 
+   2059          *                  detected since last method call, MC_NO_FAULTS otherwise.
+   2060          */
+   2061          static uint16_t R1HD2_IsOverCurrentOccurred(CPWMC this)
+   2062          {
+   2063            TIM_TypeDef*  LocalTIMx = ((_DCR1HD2_PWMC)(((_CPWMC) this)->DerivedClass))->
+   2064              pDParams_str->TIMx;
+   2065            uint16_t retVal = MC_NO_FAULTS;
+   2066            if ((LocalTIMx->SR & TIM_FLAG_Break) != 0u)
+   2067            {
+   2068              retVal = MC_BREAK_IN;
+   2069              LocalTIMx->SR = (u16)~TIM_FLAG_Break;
+   2070            }
+   2071            return retVal;
+   2072          }
+   2073          
+   2074          /**
+   2075            * @}
+   2076            */
+   2077            
+   2078          /**
+   2079            * @}
+   2080            */
+   2081          
+   2082          /**
+   2083            * @}
+   2084            */
+   2085          
+   2086          #endif
+   2087          
+   2088          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+
+ 
+
+ 
+
+
+Errors: none
+Warnings: none

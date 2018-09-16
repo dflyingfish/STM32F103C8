@@ -1,0 +1,392 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:39
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\RampExtMngrClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\RampExtMngrClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\RampExtMngrClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\RampExtMngrClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\RampExtMngrClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    RampExtMngr.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of RampMngr class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "RampExtMngrClass.h"
+     30          #include "RampExtMngrPrivate.h"
+     31          #include "MC_type.h"
+     32          #ifdef STM32F0XX
+     33          #include "FastDivClass.h"
+     34          #endif
+     35          
+     36          #ifdef MC_CLASS_DYNAMIC
+     37            #include "stdlib.h" /* Used for dynamic allocation */
+     38          #else
+     39            #define MAX_REMNG_NUM 4u
+     40          
+     41            _CREMNG_t REMNGpool[MAX_REMNG_NUM];
+     42            unsigned char REMNG_Allocated = 0u;
+     43          #endif
+     44          
+     45          #define CLASS_VARS   &((_CREMNG)this)->Vars_str
+     46          #define CLASS_PARAMS  ((_CREMNG)this)->pParams_str
+     47            
+     48          static uint32_t getScalingFactor(int32_t wTarget);
+     49          
+     50          /**
+     51            * @brief  Creates an object of the class RampMngr
+     52            * @param  pRampMngrParams pointer to an RampMngr parameters structure
+     53            * @retval CREMNG new instance of RampMngr object
+     54            */
+     55          CREMNG REMNG_NewObject(pRampExtMngrParams_t pRampExtMngrParams)
+     56          {
+     57            _CREMNG _oREMNG;
+     58            
+     59            #ifdef MC_CLASS_DYNAMIC
+     60              _oREMNG = (_CREMNG)calloc(1u,sizeof(_CREMNG_t));
+     61            #else
+     62              if (REMNG_Allocated  < MAX_REMNG_NUM)
+     63              {
+     64                _oREMNG = &REMNGpool[REMNG_Allocated++];
+     65              }
+     66              else
+     67              {
+     68                _oREMNG = MC_NULL;
+     69              }
+     70            #endif
+     71            
+     72            _oREMNG->pParams_str = (pParams_t)pRampExtMngrParams;
+     73            
+     74            REMNG_Init((CREMNG)_oREMNG);
+     75            
+     76          #ifdef STM32F0XX
+     77            _oREMNG->Vars_str.fd = FD_NewObject();
+     78          #endif
+     79            
+     80            return ((CREMNG)_oREMNG);
+     81          }
+     82          
+     83          /**
+     84            * @brief  It reset the state variable to zero.
+     85            * @param  this related object of class CREMNG
+     86            * @retval none.
+     87            */
+     88          void REMNG_Init(CREMNG this)
+     89          {
+     90            pVars_t pVars = CLASS_VARS;
+     91            pVars->wExt = 0;
+     92            pVars->wTargetFinal = 0;
+     93            pVars->wRampRemainingStep = 0u;
+     94            pVars->wIncDecAmount = 0;
+     95            pVars->wScalingFactor = 1u;
+     96          }
+     97          
+     98          /**
+     99            * @brief  Exec the ramp calculations and returns the current value of the 
+    100                      state variable. 
+    101                      It must be called at fixed interval defined in the hExecFreq.
+    102            * @param  this related object of class CREMNG
+    103            * @retval int32_t value of the state variable
+    104            */
+    105          int32_t REMNG_Calc(CREMNG this)
+    106          {
+    107            int32_t wRetVal;
+    108            pVars_t pVars = CLASS_VARS;
+    109            int32_t wCurrentReference;
+    110            
+    111            wCurrentReference = pVars->wExt;
+    112            
+    113            /* Update the variable and terminates the ramp if needed. */
+    114            if (pVars->wRampRemainingStep > 1u)
+    115            {
+    116              /* Increment/decrement the reference value. */
+    117              wCurrentReference += pVars->wIncDecAmount;
+    118              
+    119              /* Decrement the number of remaining steps */
+    120              pVars->wRampRemainingStep--;
+    121            }
+    122            else if (pVars->wRampRemainingStep == 1u)
+    123            {
+    124              /* Set the backup value of wTargetFinal. */
+    125              wCurrentReference = pVars->wTargetFinal * (int32_t)(pVars->wScalingFactor);
+    126              pVars->wRampRemainingStep = 0u;
+    127            }
+    128            else
+    129            {
+    130              /* Do nothing. */
+    131            }
+    132            
+    133            pVars->wExt = wCurrentReference;
+    134            
+    135          #ifdef STM32F0XX
+    136            wRetVal = FD_FastDiv(pVars->fd, pVars->wExt, (int32_t)(pVars->wScalingFactor));
+    137          #else
+    138            wRetVal = pVars->wExt / (int32_t)(pVars->wScalingFactor);
+    139          #endif
+    140            
+    141            return wRetVal;
+    142          }
+    143          
+    144          /**
+    145            * @brief  Setup the ramp to be executed
+    146            * @param  this related object of class CREMNG
+    147            * @param  hTargetFinal (signed 32bit) final value of state variable at the end
+    148            *         of the ramp.
+    149            * @param  hDurationms (unsigned 32bit) the duration of the ramp expressed in 
+    150            *         milliseconds. It is possible to set 0 to perform an instantaneous 
+    151            *         change in the value.
+    152            * @retval bool It returns TRUE is command is valid, FALSE otherwise
+    153            */
+    154          bool REMNG_ExecRamp(CREMNG this, int32_t wTargetFinal, uint32_t wDurationms)
+    155          {
+    156            pVars_t pVars = CLASS_VARS;
+    157            pParams_t pParams = CLASS_PARAMS;
+    158            uint32_t wAux;
+    159            int32_t wAux1;
+    160            int32_t wCurrentReference;
+    161            bool retVal = TRUE;
+    162            
+    163            /* Get current state */
+    164          #ifdef STM32F0XX
+    165            wCurrentReference = FD_FastDiv(pVars->fd, pVars->wExt, (int32_t)(pVars->wScalingFactor));
+    166          #else
+    167            wCurrentReference = pVars->wExt / (int32_t)(pVars->wScalingFactor);
+    168          #endif
+    169            
+    170            if (wDurationms == 0u)
+    171            {
+    172              pVars->wScalingFactor = getScalingFactor(wTargetFinal);
+    173              pVars->wExt = wTargetFinal * (int32_t)(pVars->wScalingFactor);
+    174              pVars->wRampRemainingStep = 0u;
+    175              pVars->wIncDecAmount = 0;
+    176            }
+    177            else
+    178            {
+    179              uint32_t wScalingFactor = getScalingFactor(wTargetFinal - wCurrentReference);
+    180              uint32_t wScalingFactor2 = getScalingFactor(wCurrentReference);
+    181              uint32_t wScalingFactor3 = getScalingFactor(wTargetFinal);
+    182              uint32_t wScalingFactorMin;
+    183              
+    184              if (wScalingFactor <  wScalingFactor2)
+    185              {
+    186                if (wScalingFactor < wScalingFactor3)
+    187                {
+    188                  wScalingFactorMin = wScalingFactor;
+    189                }
+    190                else
+    191                {
+    192                   wScalingFactorMin = wScalingFactor3;
+    193                }
+    194              }
+    195              else
+    196              {
+    197                if (wScalingFactor2 < wScalingFactor3)
+    198                {
+    199                  wScalingFactorMin = wScalingFactor2;
+    200                }
+    201                else
+    202                {
+    203                   wScalingFactorMin = wScalingFactor3;
+    204                } 
+    205              }
+    206              
+    207              pVars->wScalingFactor = wScalingFactorMin;
+    208              pVars->wExt = wCurrentReference * (int32_t)(pVars->wScalingFactor);
+    209              
+    210              /* Store the wTargetFinal to be applied in the last step */
+    211              pVars->wTargetFinal = wTargetFinal;
+    212              
+    213              /* Compute the (wRampRemainingStep) number of steps remaining to complete 
+    214              the ramp. */
+    215              wAux = wDurationms * (uint32_t)pParams->hFrequencyHz; /* Check for overflow and use prescaler */
+    216              wAux /= 1000u;
+    217              pVars->wRampRemainingStep = wAux;
+    218              pVars->wRampRemainingStep++;
+    219              
+    220              /* Compute the increment/decrement amount (wIncDecAmount) to be applied to 
+    221              the reference value at each CalcTorqueReference. */
+    222              wAux1 = (wTargetFinal - wCurrentReference) * (int32_t)(pVars->wScalingFactor);
+    223              wAux1 /= (int32_t)(pVars->wRampRemainingStep);
+    224              pVars->wIncDecAmount = wAux1;
+    225            }
+    226            
+    227            return retVal;
+    228          }
+    229          
+    230          /**
+    231            * @brief  Returns the current value of the state variable.
+    232            * @param  this related object of class CREMNG
+    233            * @retval int32_t value of the state variable
+    234            */
+    235          int32_t REMNG_GetValue(CREMNG this)
+    236          {
+    237            int32_t wRetVal;
+    238            pVars_t pVars = CLASS_VARS;
+    239            wRetVal = pVars->wExt / (int32_t)(pVars->wScalingFactor);
+    240            return wRetVal;
+    241          }
+    242          
+    243          /**
+    244            * @brief  Check if the settled ramp has been completed.
+    245            * @param  this related object of class CREMNG.
+    246            * @retval bool It returns TRUE if the ramp is completed, FALSE otherwise.
+    247            */
+    248          bool REMNG_RampCompleted(CREMNG this)
+    249          {
+    250            pVars_t pVars = CLASS_VARS;
+    251            bool retVal = FALSE;
+    252            if (pVars->wRampRemainingStep == 0u)
+    253            {
+    254              retVal = TRUE;
+    255            }
+    256            return retVal;
+    257          }
+    258          
+    259          /**
+    260            * @brief  Stop the execution of the ramp keeping the last reached value.
+    261            * @param  this related object of class CREMNG.
+    262            * @retval none
+    263            */
+    264          void REMNG_StopRamp(CREMNG this)
+    265          {
+    266            pVars_t pVars = CLASS_VARS;
+    267            pVars->wRampRemainingStep = 0u;
+    268            pVars->wIncDecAmount = 0;
+    269          }
+    270          
+    271          /**
+    272            * @brief  Calculating the scaling factor to maximixe the resolution. It
+    273            *         perform the 2^int(31-log2(wTarget)) with an iterative approach.
+    274            *         It allows to keep wTarget * Scaling factor inside s32 type.
+    275            * @param  wTarget Input data.
+    276            * @retval uint32_t It returns the optimized scaling factor.
+    277            */
+    278          static uint32_t getScalingFactor(int32_t wTarget)
+    279          {
+    280            uint8_t i;
+    281            uint32_t wTargetAbs;
+    282            if (wTarget < 0)
+    283            {
+    284              int32_t wAux;
+    285              wAux = -wTarget;
+    286              wTargetAbs = (uint32_t)(wAux);
+    287            }
+    288            else
+    289            {
+    290              wTargetAbs = (uint32_t)(wTarget);
+    291            }
+    292            for (i = 1u; i < 32u; i++)
+    293            {
+    294              uint32_t limit = ((uint32_t)(1) << (31u-i));
+    295              if (wTargetAbs > limit)
+    296              {
+    297                break;
+    298              }
+    299            }
+    300            return ((uint32_t)(1u) << (i-1u));
+    301          }
+    302          
+    303          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   REMNG_Calc
+      40   REMNG_ExecRamp
+        40   -> getScalingFactor
+       0   REMNG_GetValue
+       0   REMNG_Init
+       0   REMNG_NewObject
+       0   REMNG_RampCompleted
+       0   REMNG_StopRamp
+       0   getScalingFactor
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       8  ?Subroutine0
+     116  REMNG_Allocated
+          REMNGpool
+      34  REMNG_Calc
+     128  REMNG_ExecRamp
+       2  REMNG_GetValue
+      16  REMNG_Init
+      46  REMNG_NewObject
+      12  REMNG_RampCompleted
+       8  REMNG_StopRamp
+      38  getScalingFactor
+
+ 
+ 116 bytes in section .bss
+ 300 bytes in section .text
+ 
+ 300 bytes of CODE memory
+ 116 bytes of DATA memory
+
+Errors: none
+Warnings: none

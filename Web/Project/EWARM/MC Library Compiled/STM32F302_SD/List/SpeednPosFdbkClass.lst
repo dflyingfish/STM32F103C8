@@ -1,0 +1,457 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:55:40
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\SpeednPosFdbkClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\SpeednPosFdbkClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\List\SpeednPosFdbkClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302_SD\Obj\SpeednPosFdbkClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\SpeednPosFdbkClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    SpeednPosFdbkClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains source code of SpeednPosFdbk class      
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "SpeednPosFdbkClass.h"
+     30          #include "SpeednPosFdbkPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _CSPD_t SPDpool[MAX_SPD_NUM];
+     38            unsigned char SPD_Allocated = 0u;
+     39          #endif
+     40          
+     41          /**
+     42            * @brief  Creates an object of the class SpeednPosFdbk
+     43            * @param  pSpeednPosFdbkParams pointer to an SpeednPosFdbk parameters structure
+     44            * @retval CSPD new instance of SpeednPosFdbk object
+     45            */
+     46          CSPD SPD_NewObject(pSpeednPosFdbkParams_t pSpeednPosFdbkParams)
+     47          {
+     48            _CSPD _oSPD;
+     49            
+     50            #ifdef MC_CLASS_DYNAMIC
+     51              _oSPD = (_CSPD)calloc(1u,sizeof(_CSPD_t));
+     52            #else
+     53              if (SPD_Allocated  < MAX_SPD_NUM)
+     54              {
+     55                _oSPD = &SPDpool[SPD_Allocated++];
+     56              }
+     57              else
+     58              {
+     59                _oSPD = MC_NULL;
+     60              }
+     61            #endif
+     62            
+     63            _oSPD->pParams_str = (pParams_t)pSpeednPosFdbkParams;
+     64            
+     65            return ((CSPD)_oSPD);
+     66          }
+     67          
+     68          /**
+     69            * @brief  Initiliazes all the object variables and MCU peripherals, usually
+     70            *         it has to be called once right after object creation
+     71            * @param  this related object of class CSPD
+     72            * @retval none
+     73            */
+     74          void SPD_Init(CSPD this)
+     75          {
+     76            ((_CSPD)this)->Vars_str.bElToMecRatio = ((_CSPD)this)->pParams_str->bElToMecRatio;
+     77            ((_CSPD)this)->Methods_str.pSPD_Init(this);
+     78          }
+     79          
+     80          #if defined (CCMRAM)
+     81          #if defined (__ICCARM__)
+     82          #pragma location = ".ccmram"
+     83          #elif defined (__CC_ARM)
+     84          __attribute__((section ("ccmram")))
+     85          #endif
+     86          #endif
+     87          /**
+     88            * @brief  It returns the last computed rotor electrical angle, expressed in
+     89            *         s16degrees. 1 s16degree = 360°/65536
+     90            * @param  this related object of class CSPD
+     91            * @retval int16_t rotor electrical angle (s16degrees)
+     92            */
+     93          int16_t SPD_GetElAngle(CSPD this)
+     94          {
+     95            return(((_CSPD)this)->Vars_str.hElAngle);
+     96          }
+     97          
+     98          /**
+     99            * @brief  It returns the last computed rotor mechanical angle, expressed in
+    100            *         s16degrees. Mechanical angle frame is based on parameter bElToMecRatio
+    101            *         and, if occasionally provided - through function SPD_SetMecAngle -
+    102            *         of a measured mechanical angle, on information computed thereof.
+    103            *         Note: both Hall sensor and Sensor-less do not implement either 
+    104            *         mechanical angle computation or acceleration computation. 
+    105            * @param  this related object of class CSPD
+    106            * @retval int16_t rotor mechanical angle (s16degrees)
+    107            */
+    108          int16_t SPD_GetMecAngle(CSPD this)
+    109          {
+    110            return(((_CSPD)this)->Vars_str.hMecAngle);
+    111          }
+    112          
+    113          /**
+    114            * @brief  It returns the last computed average mechanical speed, expressed in
+    115            *         01Hz (tenth of Hertz).
+    116            * @param  this related object of class CSPD
+    117            * @retval int16_t rotor average mechanical speed (01Hz)
+    118            */
+    119          int16_t SPD_GetAvrgMecSpeed01Hz(CSPD this)
+    120          {
+    121            return(((_CSPD)this)->Vars_str.hAvrMecSpeed01Hz);
+    122          }
+    123          
+    124          /**
+    125            * @brief  It returns the last computed electrical speed, expressed in Dpp.
+    126            *         1 Dpp = 1 s16Degree/control Period. The control period is the period
+    127            *         on which the rotor electrical angle is computed (through function
+    128            *         SPD_CalcElectricalAngle).
+    129            * @param  this related object of class CSPD
+    130            * @retval int16_t rotor electrical speed (Dpp)
+    131            */
+    132          int16_t SPD_GetElSpeedDpp(CSPD this)
+    133          {
+    134            return(((_CSPD)this)->Vars_str.hElSpeedDpp);
+    135          }
+    136          
+    137          /**
+    138            * @brief  It could be used to set istantaneous information on rotor mechanical
+    139            *         angle. As a consequence, the offset relationship between electrical
+    140            *         angle and mechanical angle is computed.
+    141            *         Note: both Hall sensor and Sensor-less do not implement either 
+    142            *         mechanical angle computation or acceleration computation.
+    143            * @param  this related object of class CSPD
+    144            * @param  hMecAngle istantaneous measure of rotor mechanical angle (s16degrees)
+    145            * @retval none
+    146            */
+    147          void SPD_SetMecAngle(CSPD this, int16_t hMecAngle)
+    148          {
+    149            ((_CSPD)this)->Methods_str.pSPD_SetMecAngle(this,hMecAngle);  
+    150          }
+    151          
+    152          /**
+    153            * @brief  It restore all the functional variables to initial values.
+    154            * @param  this related object of class CSPD
+    155            * @retval none
+    156            */
+    157          void SPD_Clear(CSPD this)
+    158          {  
+    159            /* Clear previous speed error conditions */
+    160            ((_CSPD)this)->Vars_str.bSpeedErrorNumber = 0u;
+    161            
+    162            ((_CSPD)this)->Methods_str.pSPD_Clear(this);
+    163          }
+    164          
+    165          /**
+    166            * @brief  It returns the result of the last reliability check performed.
+    167            *         Reliability is measured with reference to parameters
+    168            *         hMaxReliableElSpeed01Hz, hMinReliableElSpeed01Hz,
+    169            *         bMaximumSpeedErrorsNumber and/or specific parameters of the derived
+    170            *         TRUE = sensor information is reliable
+    171            *         FALSE = sensor information is not reliable
+    172            * @param  this related object of class CSPD
+    173            * @retval bool sensor reliability state
+    174            */
+    175          bool SPD_Check(CSPD this)
+    176          {
+    177            bool SpeedSensorReliability = TRUE;
+    178            if (((_CSPD)this)->Vars_str.bSpeedErrorNumber ==
+    179                ((_CSPD)this)->pParams_str->bMaximumSpeedErrorsNumber)
+    180            {
+    181              SpeedSensorReliability = FALSE;
+    182            }
+    183            return(SpeedSensorReliability);
+    184          }
+    185          
+    186          #if defined (CCMRAM)
+    187          #if defined (__ICCARM__)
+    188          #pragma location = ".ccmram"
+    189          #elif defined (__CC_ARM)
+    190          __attribute__((section ("ccmram")))
+    191          #endif
+    192          #endif
+    193          /**
+    194            * @brief  This method must be called with the same periodicity on which FOC
+    195            *         is executed. It computes and returns the rotor electrical angle,
+    196            *         expressed in s16Degrees. 1 s16Degree = 360°/65536
+    197            * @param  this related object of class CSPD
+    198            * @param  pInputVars_str pointer to input structure. For derived 
+    199          			class STO input structure type is Observer_Inputs_t, for HALL and 
+    200          			ENCODER this parameter will not be used (thus it can be equal to 
+    201          			MC_NULL).
+    202            * @retval int16_t rotor electrical angle (s16Degrees)
+    203            */
+    204          int16_t SPD_CalcAngle(CSPD this, void *pInputVars_str)
+    205          {
+    206            return(((_CSPD)this)->Methods_str.pSPD_CalcAngle(this, pInputVars_str));
+    207          }
+    208          
+    209          /**
+    210            * @brief  This method must be called - at least - with the same periodicity
+    211            *         on which speed control is executed. It computes and returns - through
+    212            *         parameter pMecSpeed01Hz - the rotor average mechanical speed,
+    213            *         expressed in 01Hz. It computes and returns the reliability state of
+    214            *         the sensor; reliability is measured with reference to parameters
+    215            *         hMaxReliableElSpeed01Hz, hMinReliableElSpeed01Hz,
+    216            *         bMaximumSpeedErrorsNumber and/or specific parameters of the derived
+    217            *         TRUE = sensor information is reliable
+    218            *         FALSE = sensor information is not reliable
+    219            * @param  this related object of class CSPD
+    220            * @param  pMecSpeed01Hz pointer to int16_t, used to return the rotor average
+    221            *         mechanical speed (01Hz)
+    222            * @retval none
+    223            */
+    224          bool SPD_CalcAvrgMecSpeed01Hz(CSPD this, int16_t *pMecSpeed01Hz)
+    225          {
+    226            bool SpeedSensorReliability = TRUE;
+    227            uint8_t bSpeedErrorNumber;
+    228            uint8_t bMaximumSpeedErrorsNumber = ((_CSPD)this)->pParams_str->bMaximumSpeedErrorsNumber;
+    229            
+    230            if (((_CSPD)this)->Methods_str.pSPD_CalcAvrgMecSpeed01Hz(this,pMecSpeed01Hz) 
+    231                == FALSE)
+    232            {
+    233              /* If derived class speed error check is false the reliabilty of the base
+    234                 class is assert */
+    235              bSpeedErrorNumber = bMaximumSpeedErrorsNumber;
+    236              SpeedSensorReliability = FALSE;
+    237            }
+    238            else
+    239            {
+    240              bool SpeedError = FALSE;
+    241              uint16_t hAbsMecSpeed01Hz, hAbsMecAccel01HzP;
+    242              int16_t hAux;
+    243              
+    244              bSpeedErrorNumber = ((_CSPD)this)->Vars_str.bSpeedErrorNumber;
+    245              
+    246              /* Compute absoulte value of mechanical speed */
+    247              if (*pMecSpeed01Hz < 0)
+    248              {
+    249                hAux = -(*pMecSpeed01Hz);
+    250                hAbsMecSpeed01Hz = (uint16_t)(hAux);
+    251              }
+    252              else
+    253              {
+    254                hAbsMecSpeed01Hz = (uint16_t)(*pMecSpeed01Hz);
+    255              }
+    256              
+    257              if (hAbsMecSpeed01Hz > ((_CSPD)this)->pParams_str->hMaxReliableMecSpeed01Hz)
+    258              {
+    259                SpeedError = TRUE;
+    260              }
+    261              
+    262              if (hAbsMecSpeed01Hz < ((_CSPD)this)->pParams_str->hMinReliableMecSpeed01Hz)
+    263              {
+    264                SpeedError = TRUE;
+    265              }
+    266              
+    267              /* Compute absoulte value of mechanical acceleration */
+    268              if (((_CSPD)this)->Vars_str.hMecAccel01HzP < 0)
+    269              {
+    270                hAux = -(((_CSPD)this)->Vars_str.hMecAccel01HzP);
+    271                hAbsMecAccel01HzP = (uint16_t)(hAux);
+    272              }
+    273              else
+    274              {
+    275                hAbsMecAccel01HzP = (uint16_t)(((_CSPD)this)->Vars_str.hMecAccel01HzP);
+    276              }
+    277              
+    278              if ( hAbsMecAccel01HzP >
+    279                  ((_CSPD)this)->pParams_str->hMaxReliableMecAccel01HzP)
+    280              {
+    281                SpeedError = TRUE;
+    282              }
+    283              
+    284              if (SpeedError == TRUE)
+    285              {
+    286                if (bSpeedErrorNumber < bMaximumSpeedErrorsNumber)
+    287                {
+    288                  bSpeedErrorNumber++;
+    289                }
+    290              }
+    291              else
+    292              {
+    293                if (bSpeedErrorNumber < bMaximumSpeedErrorsNumber)
+    294                {
+    295                  bSpeedErrorNumber = 0u;
+    296                }
+    297              }
+    298              
+    299              if (bSpeedErrorNumber == bMaximumSpeedErrorsNumber)
+    300              { 
+    301                SpeedSensorReliability = FALSE; 
+    302              }
+    303            }
+    304            
+    305            ((_CSPD)this)->Vars_str.bSpeedErrorNumber = bSpeedErrorNumber;
+    306            
+    307            return(SpeedSensorReliability);
+    308          }
+    309          
+    310          /**
+    311            * @brief  This method returns the average mechanical rotor speed expressed in
+    312            *         "S16Speed". It means that:\n
+    313            *         - it is zero for zero speed,\n
+    314            *         - it become S16_MAX when the average mechanical speed is equal to 
+    315            *           hMaxReliableMecSpeed01Hz,\n
+    316            *         - it becomes -S16_MAX when the average mechanical speed is equal to
+    317            *         -hMaxReliableMecSpeed01Hz.
+    318            * @param  this related object of class CSPD
+    319            * @retval int16_t The average mechanical rotor speed expressed in
+    320            *         "S16Speed".
+    321            */
+    322          int16_t SPD_GetS16Speed(CSPD this)
+    323          {
+    324            int32_t wAux = (int32_t)((_CSPD)this)->Vars_str.hAvrMecSpeed01Hz;
+    325            wAux *= S16_MAX;
+    326            wAux /= (int16_t)((_CSPD)this)->pParams_str->hMaxReliableMecSpeed01Hz;
+    327            return (int16_t)wAux;
+    328          }
+    329          
+    330          /**
+    331            * @brief  This method returns the coefficient used to transform electrical to
+    332            *         mechanical quantities and viceversa. It usually coincides with motor
+    333            *         pole pairs number.
+    334            * @param  this related object of class CSPD
+    335            * @retval uint8_t The motor pole pairs number.
+    336            */
+    337          uint8_t SPD_GetElToMecRatio(CSPD this)
+    338          {
+    339            return (((_CSPD)this)->Vars_str.bElToMecRatio);
+    340          }
+    341          
+    342          /**
+    343            * @brief  This method sets the coefficient used to transform electrical to
+    344            *         mechanical quantities and viceversa. It usually coincides with motor
+    345            *         pole pairs number.
+    346            * @param  this related object of class CSPD
+    347            * @param  bPP The motor pole pairs number to be set.
+    348            */
+    349          void SPD_SetElToMecRatio(CSPD this, uint8_t bPP)
+    350          {
+    351            ((_CSPD)this)->Vars_str.bElToMecRatio = bPP;
+    352          }
+    353          
+    354          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   SPD_CalcAngle
+         0   -- Indirect call
+      24   SPD_CalcAvrgMecSpeed01Hz
+        24   -- Indirect call
+       0   SPD_Check
+       0   SPD_Clear
+         0   -- Indirect call
+       0   SPD_GetAvrgMecSpeed01Hz
+       0   SPD_GetElAngle
+       0   SPD_GetElSpeedDpp
+       0   SPD_GetElToMecRatio
+       0   SPD_GetMecAngle
+       0   SPD_GetS16Speed
+       0   SPD_Init
+         0   -- Indirect call
+       0   SPD_NewObject
+       0   SPD_SetElToMecRatio
+       0   SPD_SetMecAngle
+         0   -- Indirect call
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+     136  SPD_Allocated
+          SPDpool
+       4  SPD_CalcAngle
+     110  SPD_CalcAvrgMecSpeed01Hz
+      20  SPD_Check
+      12  SPD_Clear
+       6  SPD_GetAvrgMecSpeed01Hz
+       6  SPD_GetElAngle
+       6  SPD_GetElSpeedDpp
+       6  SPD_GetElToMecRatio
+       6  SPD_GetMecAngle
+      22  SPD_GetS16Speed
+      12  SPD_Init
+      32  SPD_NewObject
+       6  SPD_SetElToMecRatio
+       4  SPD_SetMecAngle
+
+ 
+ 136 bytes in section .bss
+ 256 bytes in section .text
+ 
+ 256 bytes of CODE memory
+ 136 bytes of DATA memory
+
+Errors: none
+Warnings: none

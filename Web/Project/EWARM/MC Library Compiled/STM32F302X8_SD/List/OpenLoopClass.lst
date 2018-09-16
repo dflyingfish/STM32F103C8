@@ -1,0 +1,228 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       24/Mar/2017  23:52:31
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\OpenLoopClass.c
+#    Command line =  
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\MCLibrary\src\OpenLoopClass.c" -D USE_STDPERIPH_DRIVER -D
+#        STM32F30X -D STM32F302x8 -D MC_LIBRARY_SINGLE -D ARM_MATH_CM4 -lcN
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List" -o "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\MC Library Compiled\STM32F302X8_SD\Obj" --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\INC\c\DLib_Config_Normal.h" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM
+#        FOC LIB\Web\Project\EWARM\..\" -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\" -I "F:\FOC 4.3\v4.3.0\STM32
+#        PMSM FOC LIB\Web\Project\EWARM\..\..\MCLibrary\inc\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\protected_sources\inc\" -I
+#        "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\MCLibrary\interface\common\" -I "F:\FOC
+#        4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\CMSIS\CMSIS_2_x\Device\ST\STM32F30x\Include\"
+#        -I "F:\FOC 4.3\v4.3.0\STM32 PMSM FOC
+#        LIB\Web\Project\EWARM\..\..\..\Common\Libraries\STM32F30x_StdPeriph_Driver\inc\"
+#        -Oh --use_c++_inline -I "D:\Program Files (x86)\IAR Systems\Embedded
+#        Workbench 7.4\arm\CMSIS\Include\"
+#    Locale       =  C
+#    List file    =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\List\OpenLoopClass.lst
+#    Object file  =  
+#        F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\MC Library
+#        Compiled\STM32F302X8_SD\Obj\OpenLoopClass.o
+#
+###############################################################################
+
+F:\FOC 4.3\v4.3.0\STM32 PMSM FOC LIB\Web\MCLibrary\src\OpenLoopClass.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    OpenLoopClass.c
+      4            * @author  STMicroelectronics - System Lab - MC Team
+      5            * @version 4.3.0
+      6            * @date    22-Sep-2016 15:29
+      7            * @brief   This file contains interface of OpenLoop class
+      8            ******************************************************************************
+      9            * @attention
+     10            *
+     11            * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
+     12            *
+     13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     14            * You may not use this file except in compliance with the License.
+     15            * You may obtain a copy of the License at:
+     16            *
+     17            *        http://www.st.com/software_license_agreement_liberty_v2
+     18            *
+     19            * Unless required by applicable law or agreed to in writing, software 
+     20            * distributed under the License is distributed on an "AS IS" BASIS, 
+     21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     22            * See the License for the specific language governing permissions and
+     23            * limitations under the License.
+     24            *
+     25            ******************************************************************************
+     26            */
+     27          
+     28          /* Includes ------------------------------------------------------------------*/
+     29          #include "OpenLoopClass.h"
+     30          #include "OpenLoopPrivate.h"
+     31          #include "MCLibraryConf.h"
+     32          #include "MC_type.h"
+     33          
+     34          #ifdef MC_CLASS_DYNAMIC
+     35            #include "stdlib.h" /* Used for dynamic allocation */
+     36          #else
+     37            _COL_t OLpool[MAX_OL_NUM];
+     38            unsigned char OL_Allocated = 0u;
+     39          #endif
+     40          
+     41          #define CLASS_VARS   &((_COL)this)->Vars_str
+     42          #define CLASS_PARAMS  ((_COL)this)->pParams_str
+     43          
+     44          /**
+     45            * @brief  Creates an object of the class OpenLoop.
+     46            * @param  pOpenLoopParams pointer to an OpenLoop parameters structure.
+     47            * @retval COL new instance of OpenLoop object.
+     48            */
+     49          COL OL_NewObject(pOpenLoopParams_t pOpenLoopParams)
+     50          {
+     51            _COL _oOL;
+     52            
+     53            #ifdef MC_CLASS_DYNAMIC
+     54              _oOL = (_COL)calloc(1u,sizeof(_COL_t));
+     55            #else
+     56              if (OL_Allocated  < MAX_OL_NUM)
+     57              {
+     58                _oOL = &OLpool[OL_Allocated++];
+     59              }
+     60              else
+     61              {
+     62                _oOL = MC_NULL;
+     63              }
+     64            #endif
+     65            
+     66            _oOL->pParams_str = (pParams_t)pOpenLoopParams;
+     67            
+     68            return ((COL)_oOL);
+     69          }
+     70          
+     71          /**
+     72            * @brief  Initializes all the object variables, usually it has to be called 
+     73            *         once right after object creation.
+     74            * @param  this related object of class COL.
+     75            * @param  oVSS Related VSS object used.
+     76            * @retval none
+     77            */
+     78          void OL_Init(COL this, CSPD oVSS)
+     79          {
+     80            pParams_t pParams = CLASS_PARAMS;
+     81            pVars_t pVars = CLASS_VARS;
+     82            pVars->hVoltage = pParams->hDefaultVoltage;
+     83            pVars->oVSS = oVSS;
+     84            pVars->VFMode = pParams->VFMode;
+     85          }
+     86          
+     87          /**
+     88            * @brief  It return the open loop Vqd.
+     89            * @param  this related object of class COL.
+     90            * @retval Volt_Components Vqd conditioned values.
+     91            */
+     92          Volt_Components OL_VqdConditioning(COL this)
+     93          {
+     94            pVars_t pVars = CLASS_VARS;
+     95            Volt_Components Vqd;
+     96            
+     97            Vqd.qV_Component1 = pVars->hVoltage;
+     98            Vqd.qV_Component2 = 0;
+     99            
+    100           return(Vqd); 
+    101          }
+    102          
+    103          /**
+    104            * @brief  It allows changing applied open loop phase voltage.
+    105            * @param  this related object of class COL
+    106            * @param  hNewVoltage New voltage value to be applied by the open loop.
+    107            * @retval None
+    108            */
+    109          void OL_UpdateVoltage(COL this, int16_t hNewVoltage)
+    110          {
+    111            pVars_t pVars = CLASS_VARS;
+    112            pVars->hVoltage = hNewVoltage;
+    113          }
+    114          
+    115          /**
+    116            * @brief  It have to be called regularly to update the applied voltage in case
+    117            *         V/F is enabled. If V/F is disabled nothing is done.
+    118            * @param  this related object of class COL
+    119            * @retval None
+    120            */
+    121          void OL_Calc(COL this)
+    122          {
+    123            pParams_t pParams = CLASS_PARAMS;
+    124            pVars_t pVars = CLASS_VARS;
+    125            if (pVars->VFMode == TRUE) 
+    126            {
+    127              /* V/F mode TRUE means enabled */
+    128              int16_t hMecSpeed01Hz = SPD_GetAvrgMecSpeed01Hz(pVars->oVSS);
+    129              int16_t hOLVoltage = pParams->hVFOffset + (pParams->hVFSlope*hMecSpeed01Hz);
+    130              pVars->hVoltage = hOLVoltage;
+    131            }
+    132          }
+    133          
+    134          /**
+    135            * @brief  It is used to enable or disable the V/F mode.
+    136            * @param  this related object of class COL
+    137            * @param  VFEnabling TRUE to enable V/F mode, FALSE to disable. 
+    138            * @retval None
+    139            */
+    140          void OL_VF(COL this, bool VFEnabling)
+    141          {
+    142            pVars_t pVars = CLASS_VARS;
+    143            pVars->VFMode = VFEnabling;
+    144          }
+    145          
+    146          /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   OL_Calc
+        16   -> SPD_GetAvrgMecSpeed01Hz
+       0   OL_Init
+       0   OL_NewObject
+       0   OL_UpdateVoltage
+       0   OL_VF
+       4   OL_VqdConditioning
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      20  OL_Allocated
+          OLpool
+      36  OL_Calc
+      14  OL_Init
+      22  OL_NewObject
+       4  OL_UpdateVoltage
+       4  OL_VF
+      22  OL_VqdConditioning
+
+ 
+  20 bytes in section .bss
+ 106 bytes in section .text
+ 
+ 106 bytes of CODE memory
+  20 bytes of DATA memory
+
+Errors: none
+Warnings: none

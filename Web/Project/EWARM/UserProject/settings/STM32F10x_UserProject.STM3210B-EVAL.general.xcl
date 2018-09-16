@@ -1,0 +1,15 @@
+"D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\bin\armproc.dll" 
+
+"D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\bin\armstlink2.dll" 
+
+"F:\STM32F103 FOC v4.3.0\STM32 PMSM FOC LIB\Web\Project\EWARM\UserProject\STM3210B-EVAL\Exe\Project.out" 
+
+--plugin "D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\bin\armbat.dll" 
+
+--device_macro "D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\config\debugger\ST\STM32F1xx_XL.dmac" 
+
+--flash_loader "D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4\arm\config\flashloader\ST\FlashSTM32F10xxB.board" 
+
+
+
+
