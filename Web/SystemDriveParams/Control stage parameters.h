@@ -3,9 +3,9 @@
   * @file    Control stage parameters.h
   * @author  STMCWB ver.4.3.0.16508
   * @version 4.3.0
-  * @date    2017-10-06 21:34:02
-  * @project 4.3V_24V  2对极 白色电机 STM32F103    三电阻带霍尔UART调试配置 OK20170403 .stmcx
-  * @path    F:\STM32F103 FOC v4.3.0
+  * @date    2018-16-09 13:28:06
+  * @project 4.3V_24V  2对极 白色电机 STM32F103C8  三电阻带霍尔电位计调试配置.stmcx
+  * @path    D:\STM32\IAR_projects\STM32F103C8
   * @brief   This file contains motor parameters needed by STM32 PMSM MC FW  
   *                 library v4.3.0
   ******************************************************************************
