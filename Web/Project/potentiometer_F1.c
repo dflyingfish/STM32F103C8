@@ -125,7 +125,6 @@ void potentiometer_start()
         if(ref_speed <= MOTOR_MIN_SPEED_RPM) 
         { 
           user_state = US_STOP;
-          user_cnt = 0;
         }
         else
         { 
