@@ -1,0 +1,325 @@
+###############################################################################
+#
+# IAR ELF Linker V7.60.1.11101/W32 for ARM                07/Oct/2018  12:19:58
+# Copyright 2007-2016 IAR Systems AB.
+#
+#    Output file  =  
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Exe\stm32f103c8_test.out
+#    Map file     =  
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\List\stm32f103c8_test.map
+#    Command line =  
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\core_cm3.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\delay.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\misc.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\spwm.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\startup_stm32f10x_md.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_adc.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_bkp.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_can.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_cec.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_crc.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_dac.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_dbgmcu.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_dma.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_exti.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_flash.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_fsmc.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_gpio.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_i2c.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_iwdg.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_pwr.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_rcc.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_rtc.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_sdio.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_spi.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_tim.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_usart.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\stm32f10x_wwdg.o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj\system_stm32f10x.o -o
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Exe\stm32f103c8_test.out
+#        --redirect _Printf=_PrintfFull --redirect _Scanf=_ScanfFull --map
+#        D:\STM32\IAR_projects\STM32F103C8\Test\Debug\List\stm32f103c8_test.map
+#        --config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.4\arm\config\linker\ST\stm32f103x8.icf" --semihosting --entry
+#        __iar_program_start --vfe
+#
+###############################################################################
+
+*******************************************************************************
+*** RUNTIME MODEL ATTRIBUTES
+***
+
+CppFlavor       = *
+__SystemLibrary = DLib
+
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"A1":  place at 0x08000000 { ro section .intvec };
+"P1":  place in [from 0x08000000 to 0x0800ffff] { ro };
+"P2":  place in [from 0x20000000 to 0x20004fff] { rw, block CSTACK, block HEAP };
+initialize by copy { rw };
+
+  Section            Kind        Address    Size  Object
+  -------            ----        -------    ----  ------
+"A1":                                       0xec
+  .intvec            ro code  0x08000000    0xec  startup_stm32f10x_md.o [1]
+                            - 0x080000ec    0xec
+
+"P1":                                     0x1020
+  .text              ro code  0x080000ec   0x2ec  spwm.o [1]
+  .text              ro code  0x080003d8    0x48  stm32f10x_rcc.o [1]
+  .text              ro code  0x08000420    0xc0  stm32f10x_gpio.o [1]
+  .text              ro code  0x080004e0   0x2a0  stm32f10x_tim.o [1]
+  .text              ro code  0x08000780    0x84  misc.o [1]
+  .text              ro code  0x08000804    0x1e  I32ToFlt.o [4]
+  .text              ro code  0x08000824    0xd8  FltMul.o [4]
+  .text              ro code  0x080008fc    0x44  FltToS32.o [4]
+  .text              ro code  0x08000940    0x38  delay.o [1]
+  .text              ro code  0x08000978    0x1c  I32ToDbl.o [4]
+  .text              ro code  0x08000994   0x256  DblDiv.o [4]
+  .text              ro code  0x08000bec    0x90  DblToFlt.o [4]
+  .rodata            const    0x08000c7c   0x190  spwm.o [1]
+  .text              ro code  0x08000e0c   0x158  system_stm32f10x.o [1]
+  .text              ro code  0x08000f64    0x38  packbits_init_single.o [5]
+  .text              ro code  0x08000f9c    0x28  data_init.o [5]
+  .iar.init_table    const    0x08000fc4    0x10  - Linker created -
+  .text              ro code  0x08000fd4    0x1a  cmain.o [5]
+  .text              ro code  0x08000fee     0x4  low_level_init.o [3]
+  .text              ro code  0x08000ff2     0x4  exit.o [3]
+  .text              ro code  0x08000ff8     0xa  cexit.o [5]
+  .text              ro code  0x08001004    0x14  exit.o [6]
+  .text              ro code  0x08001018    0x10  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001028     0xc  cstartup_M.o [5]
+  .text              ro code  0x08001034     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001038     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800103c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001040     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001044     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001048     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800104c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001050     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001054     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001058     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800105c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001060     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001064     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001068     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800106c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001070     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001074     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001078     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800107c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001080     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001084     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001088     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800108c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001090     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001094     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x08001098     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x0800109c     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010a0     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010a4     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010a8     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010ac     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010b0     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010b4     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010b8     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010bc     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010c0     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010c4     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010c8     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010cc     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010d0     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010d4     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010d8     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010dc     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010e0     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010e4     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010e8     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010ec     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010f0     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010f4     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010f8     0x4  startup_stm32f10x_md.o [1]
+  .text              ro code  0x080010fc     0x4  startup_stm32f10x_md.o [1]
+  .rodata            const    0x08001100     0x0  packbits_init_single.o [5]
+  Initializer bytes  const    0x08001100     0xc  <for P2-1>
+                            - 0x0800110c  0x1020
+
+"P2", part 1 of 2:                          0x15
+  P2-1                        0x20000000    0x15  <Init block>
+    .data            inited   0x20000000     0x4  system_stm32f10x.o [1]
+    .bss             inited   0x20000004     0x4  spwm.o [1]
+    .data            inited   0x20000008     0x2  spwm.o [1]
+    .bss             inited   0x2000000a     0x2  delay.o [1]
+    .bss             inited   0x2000000c     0x2  spwm.o [1]
+    .bss             inited   0x2000000e     0x2  spwm.o [1]
+    .bss             inited   0x20000010     0x2  spwm.o [1]
+    .bss             inited   0x20000012     0x2  spwm.o [1]
+    .bss             inited   0x20000014     0x1  delay.o [1]
+                            - 0x20000015    0x15
+
+"P2", part 2 of 2:                         0x800
+  CSTACK                      0x20000018   0x800  <Block>
+    CSTACK           uninit   0x20000018   0x800  <Block tail>
+                            - 0x20000818   0x800
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address     Size
+          -------     ----
+Copy/packbits (__iar_packbits_init_single3)
+    1 source range, total size 0xc (57% of destination):
+          0x08001100   0xc
+    1 destination range, total size 0x15:
+          0x20000000  0x15
+
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module                  ro code  ro data  rw data
+    ------                  -------  -------  -------
+D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj: [1]
+    delay.o                      56        2        3
+    misc.o                      132
+    spwm.o                      748      408       14
+    startup_stm32f10x_md.o      456
+    stm32f10x_gpio.o            192
+    stm32f10x_rcc.o              72
+    stm32f10x_tim.o             672
+    system_stm32f10x.o          344        2        4
+    -------------------------------------------------
+    Total:                    2 672      412       21
+
+command line: [2]
+    -------------------------------------------------
+    Total:
+
+dl7M_tln.a: [3]
+    exit.o                        4
+    low_level_init.o              4
+    -------------------------------------------------
+    Total:                        8
+
+m7M_tl.a: [4]
+    DblDiv.o                    598
+    DblToFlt.o                  144
+    FltMul.o                    216
+    FltToS32.o                   68
+    I32ToDbl.o                   28
+    I32ToFlt.o                   30
+    -------------------------------------------------
+    Total:                    1 084
+
+rt7M_tl.a: [5]
+    cexit.o                      10
+    cmain.o                      26
+    cstartup_M.o                 12
+    data_init.o                  40
+    packbits_init_single.o       56
+    -------------------------------------------------
+    Total:                      144
+
+shb_l.a: [6]
+    exit.o                       20
+    -------------------------------------------------
+    Total:                       20
+
+    Gaps                          8
+    Linker created                        16    2 048
+-----------------------------------------------------
+    Grand Total:              3 936      428    2 069
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                      Address   Size  Type      Object
+-----                      -------   ----  ----      ------
+.iar.init_table$$Base   0x08000fc4          --   Gb  - Linker created -
+.iar.init_table$$Limit  0x08000fd4          --   Gb  - Linker created -
+?main                   0x08000fd5         Code  Gb  cmain.o [5]
+CSTACK$$Base            0x20000018          --   Gb  - Linker created -
+CSTACK$$Limit           0x20000818          --   Gb  - Linker created -
+Channel1Pulse           0x20000010    0x2  Data  Gb  spwm.o [1]
+Channel2Pulse           0x20000012    0x2  Data  Gb  spwm.o [1]
+GPIO_Init               0x08000421   0xc0  Code  Gb  stm32f10x_gpio.o [1]
+NVIC_Init               0x08000781   0x5e  Code  Gb  misc.o [1]
+NVIC_SetVectorTable     0x080007df    0xc  Code  Gb  misc.o [1]
+Period_percent          0x20000004    0x4  Data  Gb  spwm.o [1]
+RCC_APB1PeriphClockCmd  0x080003f9   0x20  Code  Gb  stm32f10x_rcc.o [1]
+RCC_APB2PeriphClockCmd  0x080003d9   0x20  Code  Gb  stm32f10x_rcc.o [1]
+Region$$Table$$Base     0x08000fc4          --   Gb  - Linker created -
+Region$$Table$$Limit    0x08000fd4          --   Gb  - Linker created -
+SetSysClock             0x08000e61    0x8  Code  Lc  system_stm32f10x.o [1]
+SetSysClockTo72         0x08000e69   0xe0  Code  Lc  system_stm32f10x.o [1]
+SystemCoreClock         0x20000000    0x4  Data  Gb  system_stm32f10x.o [1]
+SystemInit              0x08000e0d   0x54  Code  Gb  system_stm32f10x.o [1]
+TIM1_PWM_Init           0x080000ed  0x17a  Code  Gb  spwm.o [1]
+TIM2_IRQHandler         0x080002e1   0x7e  Code  Gb  spwm.o [1]
+TIM2_Int_Init           0x08000267   0x7a  Code  Gb  spwm.o [1]
+TIM_BDTRConfig          0x08000685   0x20  Code  Gb  stm32f10x_tim.o [1]
+TIM_ClearITPendingBit   0x0800074d    0x8  Code  Gb  stm32f10x_tim.o [1]
+TIM_Cmd                 0x080006a5   0x1c  Code  Gb  stm32f10x_tim.o [1]
+TIM_CtrlPWMOutputs      0x080006c1   0x22  Code  Gb  stm32f10x_tim.o [1]
+TIM_GetITStatus         0x08000725   0x28  Code  Gb  stm32f10x_tim.o [1]
+TIM_ITConfig            0x080006e3   0x18  Code  Gb  stm32f10x_tim.o [1]
+TIM_OC2Init             0x08000573   0x8a  Code  Gb  stm32f10x_tim.o [1]
+TIM_OC2PreloadConfig    0x080006fb   0x12  Code  Gb  stm32f10x_tim.o [1]
+TIM_OC3Init             0x080005fd   0x88  Code  Gb  stm32f10x_tim.o [1]
+TIM_OC3PreloadConfig    0x0800070d   0x10  Code  Gb  stm32f10x_tim.o [1]
+TIM_SetCompare2         0x0800071d    0x4  Code  Gb  stm32f10x_tim.o [1]
+TIM_SetCompare3         0x08000721    0x4  Code  Gb  stm32f10x_tim.o [1]
+TIM_TimeBaseInit        0x080004e1   0x92  Code  Gb  stm32f10x_tim.o [1]
+TimerPeriod             0x2000000e    0x2  Data  Gb  spwm.o [1]
+__aeabi_d2f             0x08000bed         Code  Gb  DblToFlt.o [4]
+__aeabi_ddiv            0x08000995         Code  Gb  DblDiv.o [4]
+__aeabi_f2iz            0x080008fd         Code  Gb  FltToS32.o [4]
+__aeabi_fmul            0x08000825         Code  Gb  FltMul.o [4]
+__aeabi_ui2d            0x08000979         Code  Gb  I32ToDbl.o [4]
+__aeabi_ui2f            0x08000805         Code  Gb  I32ToFlt.o [4]
+__cmain                 0x08000fd5         Code  Gb  cmain.o [5]
+__exit                  0x08001005   0x14  Code  Gb  exit.o [6]
+__iar_data_init3        0x08000f9d   0x28  Code  Gb  data_init.o [5]
+__iar_packbits_init_single3
+                        0x08000f65   0x38  Code  Gb  packbits_init_single.o [5]
+__iar_program_start     0x08001029         Code  Gb  cstartup_M.o [5]
+__iar_ui2d              0x0800097d         Code  Gb  I32ToDbl.o [4]
+__iar_ui2f              0x08000809         Code  Gb  I32ToFlt.o [4]
+__low_level_init        0x08000fef    0x4  Code  Gb  low_level_init.o [3]
+__vector_table          0x08000000         Data  Gb  startup_stm32f10x_md.o [1]
+_call_main              0x08000fe1         Code  Gb  cmain.o [5]
+_exit                   0x08000ff9         Code  Gb  cexit.o [5]
+_main                   0x08000feb         Code  Gb  cmain.o [5]
+delay_init              0x08000941   0x2a  Code  Gb  delay.o [1]
+exit                    0x08000ff3    0x4  Code  Gb  exit.o [3]
+fac_ms                  0x2000000a    0x2  Data  Lc  delay.o [1]
+fac_us                  0x20000014    0x1  Data  Lc  delay.o [1]
+freq                    0x20000008    0x2  Data  Gb  spwm.o [1]
+i                       0x2000000c    0x2  Data  Lc  spwm.o [1]
+main                    0x0800035f   0x4a  Code  Gb  spwm.o [1]
+spwm                    0x08000c7c  0x190  Data  Gb  spwm.o [1]
+
+
+[1] = D:\STM32\IAR_projects\STM32F103C8\Test\Debug\Obj
+[2] = command line
+[3] = dl7M_tln.a
+[4] = m7M_tl.a
+[5] = rt7M_tl.a
+[6] = shb_l.a
+
+  3 936 bytes of readonly  code memory
+    428 bytes of readonly  data memory
+  2 069 bytes of readwrite data memory
+
+Errors: none
+Warnings: none
